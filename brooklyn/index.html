@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Brooklyn PC Club</title>
+<title>Brooklyn Cyber Arena</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -61,7 +61,7 @@ nav a:hover{color:var(--text)}
 @media (max-width:820px){
   #rail{top:auto;bottom:16px;right:16px;left:16px;transform:none;flex-direction:row}
   #rail button{flex:1;padding:10px;justify-content:center}#rail span{display:none}
-  #hero{bottom:96px}#hero p{display:none}
+  #hero{bottom:96px}#hero p,#hero .addr{display:none}#hero .promo{font-size:11px}
 }
 
 /* ---------- 3D labels ---------- */
@@ -165,29 +165,46 @@ input.f.err{border-color:#ff4d6d;animation:shake .35s}
 .ticket dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;text-align:left;font-size:13px;margin:16px 0 22px;padding:16px;border-radius:14px;background:rgba(255,255,255,.04)}
 .ticket dt{color:var(--muted)}.ticket dd{text-align:right;font-weight:700}
 .ticket p{font-size:12px;color:var(--muted)}
+#hero .addr{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:14px;font-size:13px;color:var(--text)}
+#hero .promo{display:inline-block;margin-top:14px;padding:8px 12px;border-radius:10px;font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--amber);border:1px solid rgba(255,176,32,.4);background:rgba(255,176,32,.08)}
+.cta.wa{display:block;text-decoration:none;margin-bottom:10px;background:linear-gradient(90deg,#25d366,#7dffb0);box-shadow:0 0 30px -8px #25d366;color:#05250f}
 .foot{position:fixed;left:50%;transform:translateX(-50%);top:70px;z-index:5;font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.25);pointer-events:none;white-space:nowrap}
 @media (max-width:820px){.foot{display:none}}
 @media (max-width:600px){:root{--s:26px}.seats{gap:4px}.seat{border-radius:7px}.seat svg{display:none}.seat em{position:static;font-size:10px;color:var(--text)}.screen{font-size:8px;letter-spacing:.25em}.card{padding:16px}.stat{gap:18px}.brand span{display:none}.screen{width:92%}}
 </style>
+<script>
+/* ===== Данные клуба — правьте здесь ===== */
+window.CLUB = {
+  name: 'BROOKLYN',
+  sub: 'CYBER ARENA · ОШ',
+  city: 'ОШ',
+  address: 'Курманжан Датка 278А, Ош',
+  phone: '0555 020 206',
+  wa: '996555020206',          // номер для WhatsApp, пусто = кнопки нет
+  insta: 'brooklyn_kgz',
+};
+</script>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
 </script>
 </head>
 <body>
-<div id="loader"><div><div class="logo">BROOKLYN</div><small>ЗАГРУЗКА · ОШ</small></div></div>
+<div id="loader"><div><div class="logo" data-club="name"></div><small>ЗАГРУЗКА…</small></div></div>
 <canvas id="scene"></canvas>
 
 <header id="top">
-  <div class="brand">BROOKLYN<span>PC CLUB · ОШ</span></div>
-  <nav><a href="#">Этажи</a><a href="#">Цены</a><a href="#">Турниры</a><a href="#">Контакты</a></nav>
+  <div class="brand"><b data-club="name" style="font-weight:800"></b><span data-club="sub"></span></div>
+  <nav><a href="#" id="navFloors">Этажи</a><a href="#" id="navPrice">Цены</a><a href="#" id="navPromo">Акции</a><a href="#" id="navContact" target="_blank" rel="noopener">Контакты</a></nav>
   <button class="btn" data-open="0">Забронировать</button>
 </header>
 <div class="foot">КОНЦЕПТ-МАКЕТ · ДАННЫЕ УСЛОВНЫЕ</div>
 
 <section id="hero">
-  <div class="kicker">ОТКРЫТО 24/7 · ОШ</div>
+  <div class="kicker">ОТКРЫТО 24/7 · БЕЗ ВЫХОДНЫХ · <span data-club="city"></span></div>
   <h1>Три этажа.<br><em>Одна ночь.</em></h1>
-  <p>Standard-зал, VIP-зона и Bootcamp с PS5. Выбери этаж, место и время — бронь за 30 секунд.</p>
+  <p>Три этажа — одна цель: Top Gaming. Выбери этаж, место и время — бронь за 30 секунд.</p>
+  <div class="addr"><span>📍 <span data-club="address"></span></span><span>📱 <span data-club="phone"></span></span></div>
+  <div class="promo">🎁 АКЦИЯ: 3 часа +1 в подарок · 5 часов +1 в подарок</div>
   <div class="hint"><i></i>Нажми на светящуюся точку этажа</div>
 </section>
 
@@ -239,6 +256,7 @@ input.f.err{border-color:#ff4d6d;animation:shake .35s}
   <div class="code" id="tCode"></div>
   <canvas id="qr" width="25" height="25"></canvas>
   <dl id="tInfo"></dl>
+  <a class="cta wa" id="waBtn" target="_blank" rel="noopener">Отправить бронь в WhatsApp</a>
   <button class="cta" id="done">Готово</button>
 </div></div>
 
@@ -250,6 +268,12 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { Reflector } from 'three/addons/objects/Reflector.js';
+
+/* =================== CLUB CONFIG =================== */
+document.querySelectorAll('[data-club]').forEach(el => el.textContent = CLUB[el.dataset.club] || '');
+document.title = CLUB.name.charAt(0) + CLUB.name.slice(1).toLowerCase() + ' · ' + CLUB.sub;
+if (CLUB.wa) document.getElementById('navContact').href = 'https://wa.me/' + CLUB.wa; else document.getElementById('navContact').style.display = 'none';
+if (!CLUB.address) document.querySelector('#hero .addr').style.display = 'none';
 
 /* =================== DATA =================== */
 const TYPES = {
@@ -388,9 +412,9 @@ function signTexture() {
   const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 640; const g = cv.getContext('2d');
   g.textAlign = 'center'; g.textBaseline = 'middle';
   g.font = '800 290px Unbounded, Arial Black, sans-serif';
-  for (const [blur, col] of [[40,'#ff2bd6'],[12,'#ff7ae6']]) { g.shadowColor = col; g.shadowBlur = blur; g.fillStyle = '#ffb8f1'; g.fillText('BROOKLYN', 1024, 260); }
+  for (const [blur, col] of [[40,'#ff2bd6'],[12,'#ff7ae6']]) { g.shadowColor = col; g.shadowBlur = blur; g.fillStyle = '#ffb8f1'; g.fillText(CLUB.name, 1024, 260); }
   g.font = '600 92px Unbounded, Arial, sans-serif'; g.letterSpacing = '30px';
-  for (const blur of [30, 10]) { g.shadowColor = '#22e6ff'; g.shadowBlur = blur; g.fillStyle = '#d9fbff'; g.fillText('PC CLUB · ОШ', 1024, 510); }
+  for (const blur of [30, 10]) { g.shadowColor = '#22e6ff'; g.shadowBlur = blur; g.fillStyle = '#d9fbff'; g.fillText(CLUB.sub, 1024, 510); }
   return srgb(new THREE.CanvasTexture(cv));
 }
 const signMat = new THREE.MeshBasicMaterial({map:signTexture(), color:0xb0b0b0, transparent:true, toneMapped:false, depthWrite:false});
@@ -526,6 +550,9 @@ function exitFloor() {
 }
 document.getElementById('back').onclick = exitFloor;
 document.querySelector('[data-open]').onclick = () => enterFloor(0);
+document.getElementById('navFloors').onclick = (e) => { e.preventDefault(); if (mode==='booking') exitFloor(); };
+document.getElementById('navPrice').onclick = (e) => { e.preventDefault(); enterFloor(0); };
+document.getElementById('navPromo').onclick = (e) => { e.preventDefault(); const p = document.querySelector('#hero .promo'); p.animate([{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}], {duration:500, iterations:2}); };
 addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (modal.classList.contains('show')) closeModal(); else if (mode==='booking') exitFloor(); } });
 
 addEventListener('resize', () => {
@@ -584,6 +611,7 @@ const rng = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = M
 const now = new Date();
 const TIMES = [...Array(14)].map((_,k) => `${String(10+k).padStart(2,'0')}:00`).concat(['Ночь']);
 const DURS = [1,2,3,5];
+const BONUS = {3:1, 5:1}; // акция: 3+1, 5+1
 const S = { floor:0, date:0, time:null, dur:2, sel:new Set(), mine:new Set() };
 
 function busyMap(fi) {
@@ -629,11 +657,12 @@ function renderPickers() {
   });
   $('durs').innerHTML = '';
   if (S.time === 'Ночь') { $('durs').innerHTML = '<button class="chip on">Ночной пакет · 8 ч · −50%</button>'; }
-  else DURS.forEach(d => { const b = document.createElement('button'); b.className = 'chip' + (d===S.dur ? ' on' : ''); b.textContent = `${d} ч`;
+  else DURS.forEach(d => { const b = document.createElement('button'); b.className = 'chip' + (d===S.dur ? ' on' : ''); b.innerHTML = BONUS[d] ? `${d} ч <span style="color:var(--amber)">+${BONUS[d]} 🎁</span>` : `${d} ч`;
     b.onclick = () => { S.dur = d; render(); }; $('durs').appendChild(b); });
 }
 const timeDisabled = (tm) => S.date === 0 && tm !== 'Ночь' && parseInt(tm) <= now.getHours();
 function fixTime() { if (!S.time || timeDisabled(S.time)) S.time = TIMES.find(t => !timeDisabled(t)); }
+const durTxt = () => BONUS[S.dur] ? `${S.dur}+${BONUS[S.dur]} ч 🎁` : `${S.dur} ч`;
 const seatPrice = (s) => TYPES[s.t].price * (S.time === 'Ночь' ? 4 : S.dur);
 
 function renderSeats() {
@@ -664,7 +693,7 @@ function renderSummary() {
     : '<div class="empty">Выберите место на схеме зала</div>';
   const total = list.reduce((a, s) => a + seatPrice(s), 0);
   $('total').textContent = `${total} сом`;
-  $('totalLbl').textContent = list.length ? `Итого · ${list.length} ${plural(list.length)} · ${S.time === 'Ночь' ? 'ночь' : S.dur + ' ч'}` : 'Итого';
+  $('totalLbl').textContent = list.length ? `Итого · ${list.length} ${plural(list.length)} · ${S.time === 'Ночь' ? 'ночь' : durTxt()}` : 'Итого';
   $('cta').disabled = !list.length;
   $('cta').textContent = list.length ? `Забронировать · ${total} сом` : 'Выберите место';
 }
@@ -686,9 +715,14 @@ $('cta').onclick = () => {
   $('tCode').textContent = code;
   const d = new Date(now); d.setDate(d.getDate()+S.date);
   $('tInfo').innerHTML = `<dt>Гость</dt><dd>${nm.value.replace(/[<>&]/g,'')}</dd><dt>Этаж</dt><dd>${FLOORS[S.floor].tag.replace(/^\d+ · /,'0'+(S.floor+1)+' · ')}</dd>
-    <dt>Места</dt><dd>${list.map(s=>'№'+s.n).join(', ')}</dd><dt>Когда</dt><dd>${d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}, ${S.time==='Ночь'?'00:00–08:00':S.time+' · '+S.dur+' ч'}</dd>
+    <dt>Места</dt><dd>${list.map(s=>'№'+s.n).join(', ')}</dd><dt>Когда</dt><dd>${d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}, ${S.time==='Ночь'?'00:00–08:00':S.time+' · '+durTxt()}</dd>
     <dt>К оплате</dt><dd>${list.reduce((a,s)=>a+seatPrice(s),0)} сом</dd>`;
   drawQR(code);
+  const waBtn = $('waBtn');
+  if (CLUB.wa) {
+    const txt = `Здравствуйте! Бронь ${code}\nИмя: ${nm.value}\nТелефон: ${ph.value}\nЭтаж: ${S.floor+1} (${FLOORS[S.floor].name})\nМеста: ${list.map(s=>'№'+s.n).join(', ')}\nКогда: ${d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}, ${S.time==='Ночь'?'ночь 00:00–08:00':S.time+', '+durTxt()}`;
+    waBtn.href = 'https://wa.me/' + CLUB.wa + '?text=' + encodeURIComponent(txt); waBtn.style.display = '';
+  } else waBtn.style.display = 'none';
   list.forEach(s => S.mine.add(`${S.date}|${S.time}#${s.id}`));
   modal.classList.add('show');
 };
