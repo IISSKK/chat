@@ -10,18 +10,37 @@
 /* =====================================================================
    ВСЕ ДАННЫЕ КЛУБА — ПРАВЬТЕ ТОЛЬКО ЭТОТ БЛОК
    ===================================================================== */
-window.CLUB = {
-  name: 'BROOKLYN',
-  full: 'Brooklyn Cyber Arena',
-  sub: 'CYBER ARENA',
-  city: 'Ош',
-  address: 'Курманжан Датка 278А, Ош',
-  hours: 'Круглосуточно · без выходных',
-  phone: '0555 020 206',
-  wa: '996555020206',            // номер WhatsApp без +. Пусто — вместо WhatsApp покажется текст брони
-  insta: 'brooklyn_kgz',
-  map: 'https://2gis.kg/osh/search/%D0%9A%D1%83%D1%80%D0%BC%D0%B0%D0%BD%D0%B6%D0%B0%D0%BD%20%D0%94%D0%B0%D1%82%D0%BA%D0%B0%20278%D0%90',
+const DEFAULT_BRAND = 'brooklyn';   // 'brooklyn' или 'template'. В адресе можно ?brand=template
+const BRANDS = {
+/*BRAND:brooklyn*/
+  brooklyn: {
+    name: 'BROOKLYN',
+    full: 'Brooklyn Cyber Arena',
+    sub: 'CYBER ARENA',
+    city: 'Ош',
+    address: 'Курманжан Датка 278А, Ош',
+    hours: 'Круглосуточно · без выходных',
+    phone: '0555 020 206',
+    wa: '996555020206',            // номер WhatsApp без +
+    insta: 'brooklyn_kgz',
+    map: 'https://2gis.kg/osh/search/%D0%9A%D1%83%D1%80%D0%BC%D0%B0%D0%BD%D0%B6%D0%B0%D0%BD%20%D0%94%D0%B0%D1%82%D0%BA%D0%B0%20278%D0%90',
+  },
+/*END:brooklyn*/
+  template: {                      // нейтральный вариант: можно показать любому клубу
+    name: 'ВАШ КЛУБ',
+    full: 'Cyber Arena',
+    sub: 'CYBER ARENA',
+    city: 'Ваш город',
+    address: '',
+    hours: 'Круглосуточно · без выходных',
+    phone: '',
+    wa: '',                        // пусто: вместо WhatsApp покажется текст брони
+    insta: '',
+    map: '',
+  },
 };
+const _q = new URLSearchParams(location.search).get('brand');
+window.CLUB = Object.prototype.hasOwnProperty.call(BRANDS, _q) ? BRANDS[_q] : BRANDS[DEFAULT_BRAND];
 /* Зоны и цены (сом). ЗАМЕНИТЕ на прайс клуба */
 window.ZONES = {
   S: { name:'Standard',   hour:60,  night:300, color:'#22d3ee', icon:'pc',  specs:['RTX 4060','165 Гц','Игровые кресла'] },
@@ -190,6 +209,7 @@ h1,h2,h3{font-family:var(--display);text-wrap:balance;letter-spacing:-.01em}
 .c-item{display:flex;gap:16px;align-items:center;padding:18px 20px;border-radius:18px;background:var(--card);border:1px solid var(--line);text-decoration:none}
 a.c-item:hover{border-color:var(--line2)}
 .c-item i{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(76,111,255,.14);font-style:normal;font-size:18px}
+.c-item i svg{width:20px;height:20px;stroke:var(--text);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .c-item span{font-size:12px;color:var(--muted);display:block}.c-item b{font-size:15px}
 footer{border-top:1px solid var(--line);padding-block:28px calc(28px + env(safe-area-inset-bottom,0px));font-size:13px;color:var(--muted)}
 footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
@@ -270,7 +290,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 <body>
 
 <header class="nav"><div class="wrap">
-  <a class="logo" href="#top"><i>B</i><div><b data-club="name"></b><small data-club="sub"></small></div></a>
+  <a class="logo" href="#top"><i data-club="initial"></i><div><b data-club="name"></b><small data-club="sub"></small></div></a>
   <nav><a href="#floors">Этажи</a><a href="#prices">Цены</a><a href="#promo">Акции</a><a href="#contacts">Контакты</a></nav>
   <button class="btn btn-main btn-book" data-book="0">Забронировать</button>
 </div></header>
@@ -301,12 +321,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 <section class="floors sec" id="floors"><div class="wrap">
   <div class="sec-head">
     <div><div class="eyebrow">Этажи</div><h2>Выберите этаж</h2></div>
-    <p>Покрутите здание и нажмите на светящуюся точку — откроется схема зала со свободными местами.</p>
+    <p>Здание вращается при прокрутке, его можно повернуть рукой. Нажмите на светящуюся точку этажа, чтобы выбрать место.</p>
   </div>
   <div class="stage" id="stage">
     <canvas id="scene" aria-label="3D-модель здания клуба"></canvas>
     <div id="labels"></div>
-    <div class="hint"><i></i>Потяните, чтобы повернуть</div>
+    <div class="hint"><i></i>Потяните вбок, чтобы повернуть</div>
     <div class="nogl" id="nogl">3D-модель не поддерживается этим браузером — выберите этаж в списке.</div>
   </div>
   <div class="flist" id="flist"></div>
@@ -345,10 +365,10 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     </div>
   </div>
   <div class="c-list">
-    <a class="c-item" id="mapLink" target="_blank" rel="noopener"><i>📍</i><div><span>Адрес</span><b data-club="address"></b></div></a>
-    <div class="c-item"><i>🕐</i><div><span>Режим работы</span><b data-club="hours"></b></div></div>
-    <div class="c-item" id="phoneItem"><i>📱</i><div><span>Телефон</span><b data-club="phone"></b></div></div>
-    <a class="c-item" id="instaLink" target="_blank" rel="noopener"><i>📷</i><div><span>Instagram</span><b id="instaTxt"></b></div></a>
+    <a class="c-item" id="mapLink" target="_blank" rel="noopener"><i><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></i><div><span>Адрес</span><b data-club="address"></b></div></a>
+    <div class="c-item"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></i><div><span>Режим работы</span><b data-club="hours"></b></div></div>
+    <div class="c-item" id="phoneItem"><i><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></i><div><span>Телефон</span><b data-club="phone"></b></div></div>
+    <a class="c-item" id="instaLink" target="_blank" rel="noopener"><i><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></i><div><span>Instagram</span><b id="instaTxt"></b></div></a>
   </div>
 </div></section>
 
@@ -356,7 +376,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
 <!-- booking -->
 <section id="booking" role="dialog" aria-modal="true" aria-labelledby="fTitle"><div class="bk">
-  <div class="bk-top"><button class="x" id="close" aria-label="Закрыть">✕</button><div class="tabs" id="tabs"></div></div>
+  <div class="bk-top"><button class="x" id="close" aria-label="Закрыть"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="tabs" id="tabs"></div></div>
   <div class="bk-title"><h2 id="fTitle"></h2>
     <div class="stat"><div><b class="acc" id="sFree">0</b>свободно</div><div><b id="sAll">0</b>мест</div><div><b id="sPrice">0</b>сом/час</div></div></div>
   <div class="bk-grid">
@@ -383,6 +403,7 @@ const WA_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 
 const waLink = (txt) => 'https://wa.me/' + CLUB.wa + (txt ? '?text=' + encodeURIComponent(txt) : '');
 
 /* ---------- static content ---------- */
+CLUB.initial = [...CLUB.name][0]; document.title = CLUB.full;
 document.querySelectorAll('[data-club]').forEach(el => el.textContent = CLUB[el.dataset.club] || '');
 document.querySelectorAll('[data-club-night]').forEach(el => el.textContent = NIGHT);
 if (CLUB.wa) $('waTop').href = waLink('Здравствуйте! Хочу узнать про бронь в ' + CLUB.full); else $('waTop').style.display = 'none';
@@ -440,19 +461,27 @@ $('plans').innerHTML = Object.entries(ZONES).map(([k, z]) => {
   <button class="btn" data-book="${fi}">Выбрать место</button></div>`; }).join('');
 document.querySelectorAll('#plans [data-book]').forEach(b => b.addEventListener('click', () => openBooking(+b.dataset.book)));
 
-/* =================== 3D BUILDING (лёгкая версия) =================== */
+/* =================== 3D BUILDING =================== */
 let hovered = null, setHover = () => {}, pauseScene = () => {}, resumeScene = () => {};
-initScene().catch((e) => { console.warn(e); $('nogl').style.display = 'grid'; $('scene').style.display = 'none'; $('labels').innerHTML = ''; });
+{ // сцена грузится только когда блок почти на экране
+  let started = false;
+  const start = () => { if (started) return; started = true;
+    initScene().catch((e) => { console.warn(e); $('nogl').style.display = 'grid'; $('scene').style.display = 'none'; $('labels').innerHTML = ''; }); };
+  if ('IntersectionObserver' in window) { const io = new IntersectionObserver(([en]) => { if (en.isIntersecting) { io.disconnect(); start(); } }, { rootMargin:'700px' }); io.observe($('stage')); }
+  else start();
+}
 
 async function initScene() {
   const THREE = await import('three');
-  const stage = $('stage'), canvas = $('scene');
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: devicePixelRatio < 2, powerPreference:'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  const stage = $('stage'), canvas = $('scene'), mobile = innerWidth < 860;
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !mobile, powerPreference:'high-performance' });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.25 : 1.5));
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x04050b);
   scene.fog = new THREE.Fog(0x04050b, 70, 190);
   const camera = new THREE.PerspectiveCamera(36, 1, .5, 400);
+  scene.add(new THREE.AmbientLight(0x7782c8, 1.15));
+  const sun = new THREE.DirectionalLight(0xb4beff, 1.5); sun.position.set(-18, 30, 26); scene.add(sun);
   const world = new THREE.Group(); scene.add(world);
 
   const basic = (c, o = {}) => new THREE.MeshBasicMaterial({ color:c, ...o });
@@ -464,52 +493,52 @@ async function initScene() {
   const softT = radial([[0, 'rgba(255,255,255,.55)'], [1, 'rgba(255,255,255,0)']]);
   const glowSprite = (map, color, s, op) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map, color, transparent:true, opacity:op, blending:THREE.AdditiveBlending, depthWrite:false, fog:false })); sp.scale.setScalar(s); return sp; };
 
-  // ground
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(500, 500), basic(0x06070f)); ground.rotation.x = -Math.PI / 2; scene.add(ground);
   const grid = new THREE.GridHelper(260, 104, 0x27306a, 0x111633); grid.position.y = .02; grid.material.transparent = true; grid.material.opacity = .5; scene.add(grid);
 
-  // building
-  const W = 16, D = 10, H = 3.4, SL = .35;
-  const slabM = basic(0x0c0e1a), frameM = basic(0x141728), deskM = basic(0x0a0b14);
-  const floorFx = [];
-  FLOORS.forEach((f, i) => {
-    const y0 = i * H, c = new THREE.Color(f.color), gh = H - SL;
-    box(W + .6, SL, D + .6, slabM, 0, y0 + SL / 2, 0);
-    const nm = basic(c.clone().multiplyScalar(.85));
-    box(W + .64, .07, .07, nm, 0, y0 + SL - .05, (D + .6) / 2); box(W + .64, .07, .07, nm, 0, y0 + SL - .05, -(D + .6) / 2);
-    box(.07, .07, D + .64, nm, (W + .6) / 2, y0 + SL - .05, 0); box(.07, .07, D + .64, nm, -(W + .6) / 2, y0 + SL - .05, 0);
-    box(W, gh, .05, basic(c.clone().multiplyScalar(.16)), 0, y0 + SL + gh / 2, -D / 2 + .05);
-    const floorM = basic(c.clone().multiplyScalar(.1)); box(W - .2, .02, D - .2, floorM, 0, y0 + SL + .01, 0);
-    box(W, gh, D, basic(c, { transparent:true, opacity:.05, depthWrite:false, side:THREE.DoubleSide }), 0, y0 + SL + gh / 2, 0);
-    for (let x = -W / 2; x <= W / 2 + .01; x += 2) box(.08, gh, .08, frameM, x, y0 + SL + gh / 2, D / 2);
-    for (const z of [-D / 2 + 2, 0, D / 2 - 2]) { box(.08, gh, .08, frameM, W / 2, y0 + SL + gh / 2, z); box(.08, gh, .08, frameM, -W / 2, y0 + SL + gh / 2, z); }
-    box(W - 2, .04, .12, basic(c.clone().lerp(new THREE.Color(0xffffff), .4).multiplyScalar(.7)), 0, y0 + H - .1, 0);
-    const cols = i === 1 ? [-6, -4.4, -2.8, 2.8, 4.4, 6] : [-6.4, -5.1, -3.8, -2.5, 2.5, 3.8, 5.1, 6.4];
-    const rows = i === 1 ? [-2.4, 1.6] : [-3, -.6, 2];
-    const n = cols.length * rows.length;
-    const desks = new THREE.InstancedMesh(new THREE.BoxGeometry(1.1, .5, .55), deskM, n);
-    const mons = new THREE.InstancedMesh(new THREE.BoxGeometry(.62, .36, .03), basic(0xffffff), n);
-    const m4 = new THREE.Matrix4(); let k = 0; const r = rng(i + 7);
-    for (const z of rows) for (const x of cols) {
-      desks.setMatrixAt(k, m4.makeTranslation(x, y0 + SL + .5, z));
-      mons.setMatrixAt(k, m4.makeTranslation(x, y0 + SL + 1.05, z - .15));
-      mons.setColorAt(k, r() < .3 ? new THREE.Color(0x1a1c2c) : c.clone().multiplyScalar(.6 + r() * .5)); k++;
-    }
-    world.add(desks, mons);
-    const halo = glowSprite(softT, c, 14, .22); halo.position.set(0, y0 + H / 2, -1); world.add(halo);
-    floorFx.push({ floorM, halo, c });
-  });
-  const roofY = FLOORS.length * H;
-  box(W + .6, SL, D + .6, slabM, 0, roofY + SL / 2, 0);
-  box(3, 1.1, 2.4, frameM, -4.5, roofY + .9, -2); box(2, .9, 2, frameM, 4, roofY + .8, -2.5);
-  box(.12, roofY + .6, .12, basic(0x4c6fff), (W + .6) / 2 + .06, (roofY + .6) / 2, (D + .6) / 2 + .06);
-  box(.12, roofY + .6, .12, basic(0x8b5cf6), -(W + .6) / 2 - .06, (roofY + .6) / 2, (D + .6) / 2 + .06);
-  const dx = -5.2;
-  box(3.6, .14, 1.6, slabM, dx, 2.75, D / 2 + .8); box(3.6, .05, .05, basic(0x22d3ee), dx, 2.68, D / 2 + 1.6);
-  box(2.1, 2.2, .04, basic(0x22d3ee, { transparent:true, opacity:.25 }), dx, 1.45, D / 2 + .03);
-  const doorGlow = glowSprite(softT, 0x22d3ee, 5, .35); doorGlow.position.set(dx, 1.4, D / 2 + .5); world.add(doorGlow);
+  /* --- здание: три чёрных яруса с «носом», сдвинутые друг относительно друга --- */
+  const H = 3.4, HD = 5, PROW = 1.5, C = 2.4, TIP = HD + PROW;
+  const STEP = [{ w:16, dx:0 }, { w:14, dx:1.5 }, { w:12, dx:-1.3 }];
+  const bodyM = new THREE.MeshLambertMaterial({ color:0x1a1d29 });
+  const trimM = new THREE.MeshLambertMaterial({ color:0x0c0d15 });
+  const foot = (w, dx, grow = 0) => { const hw = w / 2 + grow, hd = HD + grow;
+    return [[-hw + C, -hd], [hw - C, -hd], [hw, -hd + C], [hw, hd - C - 1], [hw - C, hd], [0, hd + PROW + grow], [-hw + C, hd], [-hw, hd - C - 1], [-hw, -hd + C]].map(([x, z]) => [x + dx, z]); };
+  const slab = (pts, y, h, mat) => {
+    const sh = new THREE.Shape(pts.map(([x, z]) => new THREE.Vector2(x, -z)));
+    const g = new THREE.ExtrudeGeometry(sh, { depth:h, bevelEnabled:false }); g.rotateX(-Math.PI / 2);
+    const m = new THREE.Mesh(g, mat); m.position.y = y; world.add(m); return m; };
 
-  // sign
+  const floorFx = [], m4 = new THREE.Matrix4(), qt = new THREE.Quaternion(), eu = new THREE.Euler(), sc = new THREE.Vector3(), ps = new THREE.Vector3();
+  FLOORS.forEach((f, i) => {
+    const { w, dx } = STEP[i], y0 = i * H, c = new THREE.Color(f.color), pts = foot(w, dx);
+    const body = slab(pts, y0, H - .02, bodyM);
+    body.add(new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry, 25), new THREE.LineBasicMaterial({ color:c.clone().multiplyScalar(.5) })));
+    slab(foot(w, dx, .12), y0, .22, trimM);
+    const bandM = basic(c.clone().multiplyScalar(.85)); slab(foot(w, dx, .1), y0 + H - .22, .13, bandM);
+    box(.08, H - .5, .08, basic(c.clone().multiplyScalar(.9)), dx, y0 + H / 2, TIP + .04);   // гребень носа
+
+    // светящиеся «экраны» вдоль фасада
+    const chain = [...pts, pts[0]], slits = [];
+    for (let k = 0; k < chain.length - 1; k++) {
+      const [ax, az] = chain[k], [bx, bz] = chain[k + 1], L = Math.hypot(bx - ax, bz - az); if (L < 1.4) continue;
+      const ux = (bx - ax) / L, uz = (bz - az) / L; let nx = uz, nz = -ux;
+      if (nx * ((ax + bx) / 2 - dx) + nz * ((az + bz) / 2) < 0) { nx = -nx; nz = -nz; }
+      const n = Math.max(1, Math.floor(L / 1.5));
+      for (let q = 0; q < n; q++) { const t = (q + .5) / n * L; slits.push([ax + ux * t + nx * .03, az + uz * t + nz * .03, Math.atan2(-uz, ux), L / n]); }
+    }
+    const rows = [1.0, 2.1], sm = new THREE.InstancedMesh(new THREE.BoxGeometry(1, .5, .05), basic(0xffffff), slits.length * rows.length), r = rng(i + 11);
+    let k = 0; rows.forEach(ry => slits.forEach(([x, z, ang, len]) => {
+      eu.set(0, ang, 0); qt.setFromEuler(eu); sc.set(len * .62, 1, 1); ps.set(x, y0 + ry + .3, z); m4.compose(ps, qt, sc); sm.setMatrixAt(k, m4);
+      sm.setColorAt(k, r() < .2 ? new THREE.Color(0x1c1e2e) : c.clone().multiplyScalar(.5 + r() * .5)); k++; }));
+    world.add(sm);
+    const halo = glowSprite(softT, c, 10, .2); halo.position.set(dx, y0 + H / 2, TIP + 1.5); world.add(halo);
+    floorFx.push({ bandM, c, halo });
+  });
+  const roofY = FLOORS.length * H, rdx = STEP[2].dx;
+  slab(foot(12.2, rdx, .1), roofY - .02, .26, trimM);
+  box(.1, 2.3, .1, trimM, rdx - 4.3, roofY + 1.3, 2.7); box(.1, 2.3, .1, trimM, rdx + 4.3, roofY + 1.3, 2.7);
+
+  // вывеска
   await document.fonts.load('800 100px Unbounded').catch(() => {});
   const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 600; const g = cv.getContext('2d');
   g.textAlign = 'center'; g.textBaseline = 'middle';
@@ -518,45 +547,40 @@ async function initScene() {
   g.font = '700 84px Unbounded, Arial, sans-serif'; if ('letterSpacing' in g) g.letterSpacing = '28px';
   g.shadowColor = '#22d3ee'; for (const b of [24, 8]) { g.shadowBlur = b; g.fillStyle = '#c9f6ff'; g.fillText(`${CLUB.sub} · ${CLUB.city.toUpperCase()}`, 1024, 490); }
   const signM = new THREE.MeshBasicMaterial({ map:tex(cv), transparent:true, depthWrite:false, fog:false });
-  const sign = new THREE.Mesh(new THREE.PlaneGeometry(13, 3.8), signM); sign.position.set(0, roofY + 2.7, D / 2 - .2); world.add(sign);
-  box(.1, 2.2, .1, frameM, -4.5, roofY + 1.4, D / 2 - .4); box(.1, 2.2, .1, frameM, 4.5, roofY + 1.4, D / 2 - .4);
-  const signGlow = glowSprite(softT, 0x4c6fff, 18, .25); signGlow.position.set(0, roofY + 2.7, D / 2 - .6); world.add(signGlow);
-  for (const [c, x, s] of [[0x22d3ee, -5, 16], [0x8b5cf6, 5, 18]]) {
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(s, s * .6), new THREE.MeshBasicMaterial({ map:softT, color:c, transparent:true, opacity:.5, blending:THREE.AdditiveBlending, depthWrite:false }));
-    p.rotation.x = -Math.PI / 2; p.position.set(x, .05, D / 2 + 3); world.add(p); }
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(10.5, 3.1), signM); sign.position.set(rdx, roofY + 2.5, 2.7); world.add(sign);
+  const signGlow = glowSprite(softT, 0x4c6fff, 16, .22); signGlow.position.set(rdx, roofY + 2.5, 2.4); world.add(signGlow);
+  for (const [c, x, s] of [[0x22d3ee, -4, 15], [0x8b5cf6, 5, 17]]) {
+    const pl = new THREE.Mesh(new THREE.PlaneGeometry(s, s * .6), new THREE.MeshBasicMaterial({ map:softT, color:c, transparent:true, opacity:.45, blending:THREE.AdditiveBlending, depthWrite:false }));
+    pl.rotation.x = -Math.PI / 2; pl.position.set(x, .05, TIP + 3); world.add(pl); }
 
-  // city: one instanced draw call
+  // город вокруг: один instanced-объект
   const wc = document.createElement('canvas'); wc.width = 64; wc.height = 128; const wg = wc.getContext('2d');
   wg.fillStyle = '#07080f'; wg.fillRect(0, 0, 64, 128); const wr = rng(42);
-  for (let y = 0; y < 16; y++) for (let x = 0; x < 8; x++) if (wr() < .26) { wg.fillStyle = wr() < .75 ? `rgba(255,${190 + wr() * 40 | 0},120,${.35 + wr() * .5})` : `rgba(150,190,255,${.3 + wr() * .5})`; wg.fillRect(x * 8 + 2, y * 8 + 2, 4, 5); }
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 8; x++) if (wr() < .24) { wg.fillStyle = wr() < .75 ? `rgba(255,${190 + wr() * 40 | 0},120,${.3 + wr() * .5})` : `rgba(150,190,255,${.3 + wr() * .5})`; wg.fillRect(x * 8 + 2, y * 8 + 2, 4, 5); }
   const wt = tex(wc); wt.wrapS = wt.wrapT = THREE.RepeatWrapping; wt.repeat.set(1, 2); wt.magFilter = THREE.NearestFilter;
-  const N = 80, city = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ map:wt }), N);
-  const cr = rng(9), q = new THREE.Quaternion(), e = new THREE.Euler();
+  const N = mobile ? 48 : 64, city = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ map:wt }), N), cr = rng(9);
   for (let k = 0; k < N; k++) {
-    const a = cr() * Math.PI * 2, rr = 40 + cr() * 95, w = 5 + cr() * 9, h = 5 + cr() * (rr > 85 ? 30 : 16), d = 5 + cr() * 8;
-    e.set(0, cr() * Math.PI, 0); q.setFromEuler(e);
-    city.setMatrixAt(k, new THREE.Matrix4().compose(new THREE.Vector3(Math.cos(a) * rr, h / 2, Math.sin(a) * rr), q, new THREE.Vector3(w, h, d)));
+    const a = cr() * Math.PI * 2, rr = 42 + cr() * 95, w = 5 + cr() * 9, h = 5 + cr() * (rr > 85 ? 30 : 16), d = 5 + cr() * 8;
+    eu.set(0, cr() * Math.PI, 0); qt.setFromEuler(eu); ps.set(Math.cos(a) * rr, h / 2, Math.sin(a) * rr); sc.set(w, h, d); city.setMatrixAt(k, m4.compose(ps, qt, sc));
   }
   scene.add(city);
-  { const n = 1200, p = new Float32Array(n * 3), sr = rng(3);
-    for (let k = 0; k < n; k++) { const th = sr() * Math.PI * 2, ph = sr() * Math.PI * .42, r = 240; p[k * 3] = r * Math.sin(ph) * Math.cos(th); p[k * 3 + 1] = r * Math.cos(ph) + 5; p[k * 3 + 2] = r * Math.sin(ph) * Math.sin(th); }
-    const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(p, 3));
+  { const n = mobile ? 500 : 900, pa = new Float32Array(n * 3), sr = rng(3);
+    for (let k = 0; k < n; k++) { const th = sr() * Math.PI * 2, ph = sr() * Math.PI * .42, R = 240; pa[k * 3] = R * Math.sin(ph) * Math.cos(th); pa[k * 3 + 1] = R * Math.cos(ph) + 5; pa[k * 3 + 2] = R * Math.sin(ph) * Math.sin(th); }
+    const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(pa, 3));
     scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ color:0xc8ccff, size:1.1, sizeAttenuation:false, fog:false, transparent:true, opacity:.7 }))); }
 
-  // hotspots
+  // точки этажей
   const ringCv = document.createElement('canvas'); ringCv.width = ringCv.height = 128; const rg = ringCv.getContext('2d');
   rg.strokeStyle = '#fff'; rg.lineWidth = 6; rg.beginPath(); rg.arc(64, 64, 54, 0, Math.PI * 2); rg.stroke(); const ringT = tex(ringCv);
   const spots = FLOORS.map((f, i) => {
-    const grp = new THREE.Group(); grp.position.set(i === 0 ? 1.5 : 0, i * H + H / 2 + .2, D / 2 + 1); world.add(grp);
+    const grp = new THREE.Group(); grp.position.set(STEP[i].dx, i * H + H / 2 + .3, TIP + 1.1); world.add(grp);
     const core = new THREE.Mesh(new THREE.SphereGeometry(.2, 16, 16), basic(new THREE.Color(f.color).lerp(new THREE.Color(0xffffff), .55)));
-    const halo = glowSprite(glowT, f.color, 1.6, .7);
-    const ring = glowSprite(ringT, f.color, 1, .6);
+    const halo = glowSprite(glowT, f.color, 1.6, .7), ring = glowSprite(ringT, f.color, 1, .6);
     const hit = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8), basic(0, { transparent:true, opacity:0, depthWrite:false })); hit.userData.f = i;
     box(.03, .03, 1, basic(f.color), 0, 0, -.5, grp);
     grp.add(core, halo, ring, hit);
     return { grp, core, halo, ring, hit };
   });
-
   const labels = FLOORS.map((f, i) => { const el = document.createElement('button'); el.className = 'lbl'; el.style.setProperty('--c', f.color);
     el.innerHTML = `0${i + 1} · ${f.short.toUpperCase()} <small>${freeNow(i)[0]} своб.</small>`;
     el.onclick = () => openBooking(i); el.onmouseenter = () => setHover(i); el.onmouseleave = () => setHover(null);
@@ -568,21 +592,22 @@ async function initScene() {
   const resize = () => { Wd = stage.clientWidth; Ht = stage.clientHeight; renderer.setSize(Wd, Ht, false); camera.aspect = Wd / Ht; camera.updateProjectionMatrix(); kick(); };
   new ResizeObserver(resize).observe(stage);
 
-  // horizontal drag rotates; vertical swipe keeps scrolling the page
+  // жест вбок вращает здание; вертикальная прокрутка страницы не блокируется
   let drag = 0, dragV = 0, dragging = false, lastX = 0, downXY = null;
-  const ray = new THREE.Raycaster(), m = new THREE.Vector2();
-  const pick = (e) => { const r = canvas.getBoundingClientRect(); m.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-    ray.setFromCamera(m, camera); const h = ray.intersectObjects(spots.map(s => s.hit)); return h.length ? h[0].object.userData.f : null; };
-  canvas.addEventListener('pointerdown', (e) => { dragging = true; lastX = e.clientX; downXY = [e.clientX, e.clientY]; kick(); });
+  const ray = new THREE.Raycaster(), mv = new THREE.Vector2();
+  const pick = (e) => { const r = canvas.getBoundingClientRect(); mv.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(mv, camera); const h = ray.intersectObjects(spots.map(s => s.hit)); return h.length ? h[0].object.userData.f : null; };
+  canvas.addEventListener('pointerdown', (e) => { dragging = true; lastX = e.clientX; downXY = [e.clientX, e.clientY]; dragV = 0; kick(); });
   addEventListener('pointerup', (e) => { if (dragging && downXY && Math.hypot(e.clientX - downXY[0], e.clientY - downXY[1]) < 8) { const p = pick(e); if (p != null) openBooking(p); } dragging = false; downXY = null; });
   canvas.addEventListener('pointercancel', () => { dragging = false; downXY = null; });
   canvas.addEventListener('pointermove', (e) => {
-    if (dragging) { const dx = e.clientX - lastX; lastX = e.clientX; dragV = dx * .006; drag = Math.max(-1.1, Math.min(1.1, drag + dragV)); kick(); }
+    if (dragging) { const d = (e.clientX - lastX) * .008; lastX = e.clientX; dragV = d; drag += d; kick(); }
     else if (e.pointerType === 'mouse') { const p = pick(e); if (p !== hovered) setHover(p); }
   });
 
-  // render only while the section is on screen
-  let inView = false, paused = false, running = false, last = 0, t = 0;
+  // рисуем только пока блок виден; на телефоне до 45 кадров/с
+  let inView = false, paused = false, running = false, last = 0, t = 0, auto = 0, idle = 0;
+  const minDt = mobile ? 22 : 15;
   new IntersectionObserver(([en]) => { inView = en.isIntersecting; kick(); }, { rootMargin:'80px' }).observe(stage);
   document.addEventListener('visibilitychange', kick);
   pauseScene = () => { paused = true; }; resumeScene = () => { paused = false; kick(); };
@@ -591,22 +616,24 @@ async function initScene() {
   let first = true;
   function loop(nowT) {
     if (!inView || paused || document.hidden) { running = false; return; }
-    const dt = Math.min(.05, (nowT - last) / 1000); last = nowT; t += dt;
-    const r = stage.getBoundingClientRect(), vh = innerHeight;
-    const p = Math.max(0, Math.min(1, (vh - r.top) / (vh + r.height)));   // scroll progress through section
-    if (!dragging) { drag += dragV; dragV *= .92; drag *= .985; }
-    world.rotation.y = -.55 + p * .7 + Math.sin(t * .25) * .12 + drag;
-    const mob = Wd < 860, dist = (mob ? 56 : 40) - p * 6, camY = 4 + (1 - p) * 16 + p * 3, offX = mob ? 0 : 5;
+    const el = nowT - last; if (el < minDt) { requestAnimationFrame(loop); return; }
+    last = nowT; const dt = Math.min(.05, el / 1000); t += dt;
+    const rc = stage.getBoundingClientRect(), vh = innerHeight;
+    const p = Math.max(0, Math.min(1, (vh - rc.top) / (vh + rc.height)));       // прогресс прокрутки блока 0..1
+    if (dragging) idle = 0; else { idle += dt; drag += dragV; dragV *= .93; if (idle > 1.2) auto += dt * .18; }
+    world.rotation.y = -.5 + p * Math.PI * 1.5 + auto + drag;                    // прокрутка + авто + рука
+    const mob = Wd < 860, dist = (mob ? 44 : 40) - p * 6, camY = 4 + (1 - p) * 14 + p * 3, offX = mob ? 0 : 5;
     cam.set(offX, camY, dist); if (first) { camera.position.copy(cam); first = false; } else camera.position.lerp(cam, .12);
     look.set(offX * .9, 5.6, 0); camera.lookAt(look);
     spots.forEach((s, i) => {
       const hv = hovered === i ? 1.4 : 1, pulse = 1 + Math.sin(t * 3 + i) * .15;
       s.core.scale.setScalar(pulse * hv); s.halo.scale.setScalar(1.6 * pulse * hv);
       const rr = (t * .7 + i * .33) % 1; s.ring.scale.setScalar(.6 + rr * 2.4); s.ring.material.opacity = (1 - rr) * .55;
-      const fx = floorFx[i]; fx.halo.material.opacity += ((hovered === i ? .45 : .22) - fx.halo.material.opacity) * .1;
-      fx.floorM.color.copy(fx.c).multiplyScalar(hovered === i ? .22 : .1);
+      const fx = floorFx[i]; fx.halo.material.opacity += ((hovered === i ? .4 : .2) - fx.halo.material.opacity) * .1;
+      fx.bandM.color.copy(fx.c).multiplyScalar(hovered === i ? 1.25 : .85);
       s.grp.getWorldPosition(v); const front = v.z > 0; v.project(camera);
-      const lw = labels[i].offsetWidth || 160; labels[i].style.transform = `translate(${Math.min((v.x * .5 + .5) * Wd + 20, Wd - lw - 10)}px, ${(-v.y * .5 + .5) * Ht - 14}px)`;
+      const lw = labels[i].offsetWidth || 160;
+      labels[i].style.transform = `translate(${Math.min((v.x * .5 + .5) * Wd + 20, Wd - lw - 10)}px, ${(-v.y * .5 + .5) * Ht - 14}px)`;
       labels[i].style.opacity = front ? 1 : 0; labels[i].style.pointerEvents = front ? '' : 'none';
     });
     signM.opacity = (t % 7) < .25 && Math.sin(t * 40) > 0 ? .5 : 1;
@@ -651,7 +678,7 @@ function render() {
   $('times').innerHTML = TIMES.map(tm => `<button class="chip${tm === S.time ? ' on' : ''}" data-t="${tm}" ${timeOff(tm) ? 'disabled' : ''}>${tm === 'Ночь' ? 'Ночь ' + NIGHT : tm}</button>`).join('');
   $('times').querySelectorAll('button').forEach(b => b.onclick = () => { S.time = b.dataset.t; S.sel.clear(); render(); });
   if (S.time === 'Ночь') $('durs').innerHTML = `<button class="chip on">Ночной пакет · ${NIGHT}</button>`;
-  else { $('durs').innerHTML = DURS.map(d => `<button class="chip${d === S.dur ? ' on' : ''}" data-d="${d}">${d} ч${PROMO[d] ? ` <span class="gift">+${PROMO[d]} 🎁</span>` : ''}</button>`).join('');
+  else { $('durs').innerHTML = DURS.map(d => `<button class="chip${d === S.dur ? ' on' : ''}" data-d="${d}">${d} ч${PROMO[d] ? ` <span class="gift">+${PROMO[d]} ч</span>` : ''}</button>`).join('');
     $('durs').querySelectorAll('button').forEach(b => b.onclick = () => { S.dur = +b.dataset.d; render(); }); }
   renderSeats(); renderSummary();
 }
@@ -678,16 +705,16 @@ function message(list, total) {
   list.forEach(s => (byZone[s.t] ||= []).push(s));
   const lines = Object.entries(byZone).map(([t, ss]) => {
     const z = ZONES[t], each = S.time === 'Ночь' ? z.night : z.hour * S.dur;
-    return `• ${z.name}: ${ss.map(s => '№' + s.n).join(', ')} — ${S.time === 'Ночь' ? `ночной пакет ${z.night} сом` : `${z.hour} сом/ч × ${S.dur} ч`}${ss.length > 1 ? ` × ${ss.length}` : ''} = ${each * ss.length} сом`;
+    return `- ${z.name}: ${ss.map(s => '№' + s.n).join(', ')} — ${S.time === 'Ночь' ? `ночной пакет ${z.night} сом` : `${z.hour} сом/ч × ${S.dur} ч`}${ss.length > 1 ? ` × ${ss.length}` : ''} = ${each * ss.length} сом`;
   });
   return [
-    `Здравствуйте! Хочу забронировать в ${CLUB.full} 🎮`, '',
-    `📍 Этаж: ${S.floor + 1} — ${f.short}`,
-    `🖥 Места:`, ...lines,
-    `📅 Дата: ${d.toLocaleDateString('ru-RU', { day:'numeric', month:'long' })} (${WD[d.getDay()]})`,
-    `⏰ Время: ${span()}${S.time === 'Ночь' ? ' (ночь)' : ` (${S.dur} ч${bonus() ? ` + ${bonus()} ч в подарок по акции ${S.dur}+${bonus()}` : ''})`}`,
-    `💰 Итого: ${total} сом`,
-    `👤 Имя: ${$('nm').value.trim() || '—'}`, '',
+    `Здравствуйте! Хочу забронировать в ${CLUB.full}.`, '',
+    `Этаж: ${S.floor + 1} (${f.short})`,
+    'Места:', ...lines,
+    `Дата: ${d.toLocaleDateString('ru-RU', { day:'numeric', month:'long' })} (${WD[d.getDay()]})`,
+    `Время: ${span()}${S.time === 'Ночь' ? ' (ночной пакет)' : ` (${S.dur} ч${bonus() ? ` + ${bonus()} ч в подарок по акции ${S.dur}+${bonus()}` : ''})`}`,
+    `Итого: ${total} сом`,
+    `Имя: ${$('nm').value.trim() || '—'}`, '',
     'Подтвердите, пожалуйста, бронь.'
   ].join('\n');
 }
@@ -695,7 +722,7 @@ function renderSummary() {
   const list = seatList(S.floor).filter(s => S.sel.has(s.id)), total = list.reduce((a, s) => a + seatPrice(s), 0);
   $('sum').innerHTML = list.length ? `<div class="rows">${list.map(s => `<div><span>${ZONES[s.t].name} · место ${s.n}</span><b>${seatPrice(s)} сом</b></div>`).join('')}</div>`
     : '<div class="empty">Нажмите на свободное место на схеме</div>';
-  $('totalLbl').textContent = list.length ? `${list.length} ${plural(list.length, 'место', 'места', 'мест')} · ${span()}${bonus() ? ' 🎁' : ''}` : 'Итого';
+  $('totalLbl').textContent = list.length ? `${list.length} ${plural(list.length, 'место', 'места', 'мест')} · ${span()}${bonus() ? ` (+${bonus()} ч в подарок)` : ''}` : 'Итого';
   $('total').textContent = `${total} сом`;
   const cta = $('cta'), ok = list.length > 0;
   cta.classList.toggle('off', !ok);
