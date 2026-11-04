@@ -273,7 +273,7 @@ const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreferenc
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
+renderer.toneMappingExposure = .85;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x030308);
@@ -308,7 +308,7 @@ const grid = new THREE.GridHelper(240, 120, 0x3a1f7a, 0x16102e);
 grid.position.y = .04; grid.material.transparent = true; grid.material.opacity = .45; scene.add(grid);
 
 /* ---------- helpers ---------- */
-const neon = (c) => new THREE.MeshBasicMaterial({color:c, toneMapped:false});
+const neon = (c) => new THREE.MeshBasicMaterial({color:new THREE.Color(c).multiplyScalar(.6), toneMapped:false});
 const box = (w,h,d,mat,x=0,y=0,z=0,parent=scene) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat); m.position.set(x,y,z); parent.add(m); return m; };
 const srgb = (t) => { t.colorSpace = THREE.SRGBColorSpace; return t; };
 
@@ -339,7 +339,7 @@ FLOORS.forEach((f, i) => {
   // interior floor glow + ceiling strips
   const fl = new THREE.Mesh(new THREE.PlaneGeometry(W-.3, D-.3), new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:.07}));
   fl.rotation.x = -Math.PI/2; fl.position.y = y0+SLAB+.01; g.add(fl);
-  const strip = new THREE.MeshBasicMaterial({color:c.clone().lerp(new THREE.Color(0xffffff), .5), toneMapped:false, transparent:true, opacity:.55});
+  const strip = new THREE.MeshBasicMaterial({color:c.clone().lerp(new THREE.Color(0xffffff), .5), toneMapped:false, transparent:true, opacity:.28});
   for (let z of [-3, 0, 3]) box(W-1.5, .04, .1, strip, 0, y0+H-.08, z, g);
   // desks + monitors (instanced)
   const deskGeo = new THREE.BoxGeometry(1.1, .06, .55), monGeo = new THREE.BoxGeometry(.62, .36, .03), chairGeo = new THREE.BoxGeometry(.45,.7,.45);
@@ -359,7 +359,7 @@ FLOORS.forEach((f, i) => {
   });
   g.add(desks, mons, chairs);
   // light
-  const pl = new THREE.PointLight(c, 40, 22, 1.6); pl.position.set(0, y0+H-.6, 0); g.add(pl);
+  const pl = new THREE.PointLight(c, 20, 22, 1.6); pl.position.set(0, y0+H-.6, 0); g.add(pl);
   floorObjs.push({group:g, light:pl, glass, floorGlow:fl, y0, color:c});
 });
 
@@ -380,7 +380,7 @@ box(3.4, .05, .05, neon(0x22e6ff), doorX, 2.68, D/2+1.6, building);
 box(2.2, .05, .05, neon(0xffffff), doorX, 2.45, D/2+.05, building);
 box(.05, 2.1, .05, neon(0xffffff), doorX-1.1, 1.4, D/2+.05, building);
 box(.05, 2.1, .05, neon(0xffffff), doorX+1.1, 1.4, D/2+.05, building);
-const doorLight = new THREE.PointLight(0x22e6ff, 25, 9, 1.8); doorLight.position.set(doorX, 2.2, D/2+2.2); scene.add(doorLight);
+const doorLight = new THREE.PointLight(0x22e6ff, 12, 9, 1.8); doorLight.position.set(doorX, 2.2, D/2+2.2); scene.add(doorLight);
 
 // neon sign
 await document.fonts.load('800 100px Unbounded').catch(()=>{});
@@ -393,13 +393,13 @@ function signTexture() {
   for (const blur of [30, 10]) { g.shadowColor = '#22e6ff'; g.shadowBlur = blur; g.fillStyle = '#d9fbff'; g.fillText('PC CLUB · ОШ', 1024, 510); }
   return srgb(new THREE.CanvasTexture(cv));
 }
-const signMat = new THREE.MeshBasicMaterial({map:signTexture(), transparent:true, toneMapped:false, depthWrite:false});
+const signMat = new THREE.MeshBasicMaterial({map:signTexture(), color:0xb0b0b0, transparent:true, toneMapped:false, depthWrite:false});
 const sign = new THREE.Mesh(new THREE.PlaneGeometry(13, 4.06), signMat);
 sign.position.set(0, roofY+2.9, D/2-.2); building.add(sign);
 box(.1, 2.4, .1, mullionMat, -4.5, roofY+1.5, D/2-.4, building); box(.1, 2.4, .1, mullionMat, 4.5, roofY+1.5, D/2-.4, building);
-const signLight = new THREE.PointLight(0xff2bd6, 40, 20, 1.6); signLight.position.set(0, roofY+3, D/2+2); scene.add(signLight);
+const signLight = new THREE.PointLight(0xff2bd6, 18, 20, 1.6); signLight.position.set(0, roofY+3, D/2+2); scene.add(signLight);
 // ground glow pools
-for (const [c,x,z] of [[0xff2bd6, 9, 9],[0x22e6ff,-9,9],[0x7c3aed,0,-10]]) { const p = new THREE.PointLight(c, 30, 18, 1.5); p.position.set(x, 1.2, z); scene.add(p); }
+for (const [c,x,z] of [[0xff2bd6, 9, 9],[0x22e6ff,-9,9],[0x7c3aed,0,-10]]) { const p = new THREE.PointLight(c, 12, 18, 1.5); p.position.set(x, 1.2, z); scene.add(p); }
 
 /* ---------- city ---------- */
 function windowsTex() {
@@ -416,7 +416,7 @@ for (let k=0; k<70; k++) {
   const a = Math.random()*Math.PI*2, r = 42 + Math.random()*90;
   const w = 5+Math.random()*9, d = 5+Math.random()*9, h = 4+Math.random()*(r>80?28:16);
   const t = windowsTex(); t.repeat.set(Math.max(1,w/8), Math.max(1,h/16));
-  const side = new THREE.MeshStandardMaterial({color:0x07070c, roughness:.9, emissive:0xffffff, emissiveMap:t, emissiveIntensity:.55});
+  const side = new THREE.MeshStandardMaterial({color:0x07070c, roughness:.9, emissive:0xffffff, emissiveMap:t, emissiveIntensity:.3});
   const b = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), [side,side,roofMat,roofMat,side,side]);
   b.position.set(Math.cos(a)*r, h/2, Math.sin(a)*r); b.rotation.y = Math.random()*Math.PI; scene.add(b);
   if (Math.random() < .15) { const bl = new THREE.Mesh(new THREE.SphereGeometry(.25), neon(0xff3344)); bl.position.set(b.position.x, h+.3, b.position.z); bl.userData.blink = Math.random()*6; scene.add(bl); }
@@ -449,7 +449,7 @@ FLOORS.forEach((f, i) => {
   const g = new THREE.Group(); g.position.set(i===0 ? 1.5 : 0, i*H + H/2 + .2, D/2 + 1.1); scene.add(g);
   const core = new THREE.Mesh(new THREE.SphereGeometry(.2, 24, 24), neon(new THREE.Color(f.color).lerp(new THREE.Color(0xffffff), .6)));
   const halo = new THREE.Sprite(new THREE.SpriteMaterial({map:glowT, color:f.color, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true, toneMapped:false}));
-  halo.scale.setScalar(2.2);
+  halo.scale.setScalar(1.5); halo.material.opacity = .6;
   const ring = new THREE.Sprite(new THREE.SpriteMaterial({map:ringT, color:f.color, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true, toneMapped:false}));
   const hit = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8), new THREE.MeshBasicMaterial({transparent:true, opacity:0, depthWrite:false}));
   hit.userData.floor = i;
@@ -487,7 +487,7 @@ function setHover(i) {
 /* ---------- post ---------- */
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .8, .5, .32);
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .45, .4, .45);
 composer.addPass(bloom); composer.addPass(new OutputPass());
 
 /* ---------- interaction ---------- */
@@ -549,15 +549,15 @@ function frame() {
   // hotspots pulse
   hotspots.forEach((h, i) => {
     const s = 1 + Math.sin(t*3 + h.phase)*.18, hv = hovered===i ? 1.45 : 1;
-    h.core.scale.setScalar(s*hv); h.halo.scale.setScalar(2.2*s*hv);
-    const r = ((t*.7 + h.phase) % 1); h.ring.scale.setScalar(.6 + r*2.6); h.ring.material.opacity = (1-r)*.9;
-    floorObjs[i].light.intensity = THREE.MathUtils.lerp(floorObjs[i].light.intensity, hovered===i ? 90 : 40, .1);
+    h.core.scale.setScalar(s*hv); h.halo.scale.setScalar(1.5*s*hv);
+    const r = ((t*.7 + h.phase) % 1); h.ring.scale.setScalar(.6 + r*2.6); h.ring.material.opacity = (1-r)*.55;
+    floorObjs[i].light.intensity = THREE.MathUtils.lerp(floorObjs[i].light.intensity, hovered===i ? 45 : 20, .1);
     floorObjs[i].floorGlow.material.opacity = THREE.MathUtils.lerp(floorObjs[i].floorGlow.material.opacity, hovered===i ? .2 : .07, .1);
   });
   // sign flicker
   flickerT -= dt;
   if (flickerT < 0) { signMat.opacity = Math.random() < .5 ? .25 : .6; if (flickerT < -.12) { signMat.opacity = 1; flickerT = 2 + Math.random()*5; } }
-  signLight.intensity = 40*signMat.opacity;
+  signLight.intensity = 18*signMat.opacity;
   // labels
   hotspots.forEach((h, i) => {
     h.g.getWorldPosition(v3); v3.project(camera);
