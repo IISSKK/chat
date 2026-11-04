@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Brooklyn PC Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030308; --panel:rgba(12,12,24,.78); --line:rgba(255,255,255,.08); --text:#eef0ff; --muted:#8a8fb3;
+  --cyan:#22e6ff; --pink:#ff2bd6; --violet:#a78bfa; --amber:#ffb020; --busy:#2a2b3d;
+  --accent:var(--cyan); --s:44px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,sans-serif;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+canvas#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+/* ---------- loader ---------- */
+#loader{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:var(--bg);transition:opacity .8s}
+#loader.hide{opacity:0;pointer-events:none}
+#loader .logo{font-family:Unbounded;font-weight:800;font-size:clamp(28px,6vw,56px);letter-spacing:.12em;color:#ffe3fa;
+  text-shadow:0 0 8px var(--pink),0 0 24px var(--pink),0 0 60px var(--pink);animation:flick 2.4s infinite}
+#loader small{display:block;text-align:center;margin-top:14px;color:var(--muted);letter-spacing:.3em;font-size:11px}
+@keyframes flick{0%,18%,22%,62%,64%,100%{opacity:1}20%,63%{opacity:.35}}
+
+/* ---------- top bar ---------- */
+#top{position:fixed;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;
+  padding:18px clamp(16px,4vw,40px);pointer-events:none}
+#top>*{pointer-events:auto}
+.brand{font-family:Unbounded;font-weight:800;letter-spacing:.14em;font-size:18px;color:#ffe3fa;
+  text-shadow:0 0 6px var(--pink),0 0 20px var(--pink)}
+.brand span{color:var(--cyan);text-shadow:0 0 6px var(--cyan),0 0 18px var(--cyan);font-size:11px;letter-spacing:.3em;margin-left:10px;vertical-align:middle}
+nav{display:flex;gap:28px;font-size:13px;color:var(--muted)}
+nav a{color:inherit;text-decoration:none;transition:color .2s}
+nav a:hover{color:var(--text)}
+.btn{padding:11px 20px;border-radius:999px;font-weight:700;font-size:13px;letter-spacing:.04em;
+  background:linear-gradient(90deg,var(--pink),#7c3aed);box-shadow:0 0 24px rgba(255,43,214,.45);transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 0 36px rgba(255,43,214,.7)}
+@media (max-width:820px){nav{display:none}}
+
+/* ---------- hero ---------- */
+#hero{position:fixed;left:clamp(16px,4vw,40px);bottom:clamp(20px,5vh,48px);z-index:5;max-width:460px;pointer-events:none;transition:opacity .5s}
+#hero .kicker{font-size:11px;letter-spacing:.35em;color:var(--cyan);text-shadow:0 0 10px var(--cyan);margin-bottom:14px}
+#hero h1{font-family:Unbounded;font-weight:800;font-size:clamp(28px,4.4vw,52px);line-height:1.05;letter-spacing:-.01em}
+#hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--cyan),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+#hero p{margin-top:16px;color:var(--muted);font-size:15px;line-height:1.55}
+#hero .hint{display:inline-flex;align-items:center;gap:10px;margin-top:20px;font-size:13px;color:var(--text)}
+#hero .hint i{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 0 var(--cyan);animation:ping 1.6s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(34,230,255,.7)}100%{box-shadow:0 0 0 14px rgba(34,230,255,0)}}
+
+/* ---------- floor rail ---------- */
+#rail{position:fixed;right:clamp(16px,4vw,40px);top:50%;transform:translateY(-50%);z-index:5;display:flex;flex-direction:column;gap:10px;transition:opacity .5s}
+#rail button{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:rgba(12,12,24,.55);
+  border:1px solid var(--line);backdrop-filter:blur(8px);text-align:left;transition:border-color .2s,background .2s,transform .2s}
+#rail button:hover,#rail button.on{border-color:var(--c);background:rgba(20,20,40,.75);transform:translateX(-4px)}
+#rail b{font-family:Unbounded;font-size:20px;color:var(--c);text-shadow:0 0 12px var(--c)}
+#rail span{font-size:12px;line-height:1.3}
+#rail span small{display:block;color:var(--muted)}
+@media (max-width:820px){
+  #rail{top:auto;bottom:16px;right:16px;left:16px;transform:none;flex-direction:row}
+  #rail button{flex:1;padding:10px;justify-content:center}#rail span{display:none}
+  #hero{bottom:96px}#hero p{display:none}
+}
+
+/* ---------- 3D labels ---------- */
+.lbl{position:fixed;left:0;top:0;z-index:4;pointer-events:auto;cursor:pointer;white-space:nowrap;
+  font-size:11px;font-weight:800;letter-spacing:.18em;padding:6px 10px 6px 8px;border-radius:8px;
+  background:rgba(5,5,12,.7);border:1px solid var(--c);color:var(--text);box-shadow:0 0 18px -4px var(--c);
+  transition:opacity .4s,background .2s;display:flex;align-items:center;gap:8px}
+.lbl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}
+.lbl:hover,.lbl.on{background:rgba(25,25,50,.9)}
+.lbl small{font-weight:600;letter-spacing:.04em;color:var(--muted)}
+
+/* ---------- booking overlay ---------- */
+#booking{position:fixed;inset:0;z-index:20;display:none;opacity:0;transition:opacity .5s;
+  background:radial-gradient(120% 80% at 50% 0%,rgba(30,10,50,.55),rgba(3,3,8,.88));backdrop-filter:blur(16px) saturate(1.2);overflow-y:auto;overflow-x:hidden}
+#booking.show{opacity:1}
+.bk-wrap{max-width:1240px;margin:0 auto;padding:22px clamp(16px,3vw,32px) 40px}
+.bk-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.back{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid var(--line);font-size:13px;background:rgba(255,255,255,.03)}
+.back:hover{border-color:rgba(255,255,255,.25)}
+.tabs{display:flex;gap:6px;padding:5px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line);margin-left:auto;overflow-x:auto;max-width:100%}
+.tabs button{padding:9px 16px;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;transition:.2s}
+.tabs button.on{color:#05050c;background:var(--c);box-shadow:0 0 20px -2px var(--c)}
+.bk-title{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.bk-title h2{font-family:Unbounded;font-weight:800;font-size:clamp(24px,3.4vw,40px);line-height:1}
+.bk-title h2 small{display:block;font-family:Manrope;font-size:12px;letter-spacing:.3em;color:var(--accent);text-shadow:0 0 10px var(--accent);margin-bottom:10px;font-weight:800}
+.bk-title p{color:var(--muted);font-size:14px;margin-top:10px}
+.stat{display:flex;gap:26px}
+.stat div{font-size:12px;color:var(--muted)}
+.stat b{display:block;font-family:Unbounded;font-size:24px;color:var(--text)}
+.stat b.acc{color:var(--accent);text-shadow:0 0 14px var(--accent)}
+
+.bk-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+@media (max-width:980px){.bk-grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:22px}
+
+/* room */
+.room{position:relative;padding:8px 0 4px;overflow-x:auto}
+.screen{margin:0 auto 34px;width:78%;height:46px;border-radius:50% 50% 0 0/100% 100% 0 0;border-top:3px solid var(--accent);
+  box-shadow:0 -10px 40px -10px var(--accent);position:relative;text-align:center;padding-top:14px;font-size:10px;letter-spacing:.4em;color:var(--muted)}
+.screen::after{content:"";position:absolute;inset:-3px 0 auto;height:40px;border-radius:inherit;background:linear-gradient(var(--accent),transparent);opacity:.12}
+.seats{display:grid;gap:9px;justify-content:safe center;margin:0 auto}
+.seat{width:var(--s);height:var(--s);border-radius:11px;position:relative;display:grid;place-items:center;
+  border:1.5px solid color-mix(in srgb,var(--c) 55%,transparent);background:color-mix(in srgb,var(--c) 8%,transparent);
+  transition:transform .15s,background .2s,box-shadow .2s,border-color .2s}
+.seat svg{width:20px;height:20px;stroke:var(--c);opacity:.9}
+.seat em{position:absolute;bottom:2px;right:4px;font-style:normal;font-size:9px;font-weight:800;color:var(--muted)}
+.seat:hover:not(:disabled){transform:translateY(-2px) scale(1.06);background:color-mix(in srgb,var(--c) 22%,transparent);box-shadow:0 0 18px -4px var(--c)}
+.seat.sel{background:var(--c);border-color:var(--c);box-shadow:0 0 26px -2px var(--c),inset 0 0 12px rgba(255,255,255,.4);animation:pop .3s}
+.seat.sel svg{stroke:#05050c}.seat.sel em{color:#05050c}
+.seat:disabled{cursor:not-allowed;border-color:transparent;
+  background:repeating-linear-gradient(45deg,#1b1c2a 0 5px,#222335 5px 10px)}
+.seat:disabled svg{stroke:#3d3f58}.seat:disabled em{color:#3d3f58}
+.seat.wide{width:auto;grid-column:span 2}
+.gap{width:var(--s);height:var(--s)}
+@keyframes pop{50%{transform:scale(1.15)}}
+.reception{margin:30px auto 0;width:max-content;padding:9px 20px;border-radius:10px;border:1px dashed rgba(255,255,255,.18);font-size:10px;letter-spacing:.35em;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:16px 22px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 15%,transparent)}
+.legend i.busy{border-color:transparent;background:repeating-linear-gradient(45deg,#1b1c2a 0 3px,#2a2b40 3px 6px)}
+.legend i.sel{background:var(--c);box-shadow:0 0 10px var(--c)}
+.legend b{color:var(--text)}
+
+/* sidebar */
+.side{position:sticky;top:20px;display:flex;flex-direction:column;gap:20px}
+.side h4{font-size:11px;letter-spacing:.28em;color:var(--muted);margin-bottom:12px;font-weight:800}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips.wrap{flex-wrap:wrap}
+.chip{flex:none;padding:9px 13px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13px;font-weight:700;transition:.15s;text-align:center}
+.chip small{display:block;font-size:10px;color:var(--muted);font-weight:600;margin-bottom:2px}
+.chip:hover:not(:disabled){border-color:rgba(255,255,255,.3)}
+.chip.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent);box-shadow:0 0 16px -6px var(--accent)}
+.chip:disabled{opacity:.28;cursor:not-allowed}
+.sum-list{display:flex;flex-direction:column;gap:8px;max-height:180px;overflow:auto;margin-bottom:14px}
+.sum-list .row{display:flex;justify-content:space-between;font-size:13px;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.035)}
+.sum-list .row span{color:var(--muted)}
+.empty{font-size:13px;color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:12px;text-align:center;margin-bottom:14px}
+.total{display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;border-top:1px solid var(--line);margin-bottom:16px}
+.total span{color:var(--muted);font-size:13px}
+.total b{font-family:Unbounded;font-size:26px}
+input.f{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--text);font:inherit;font-size:14px;margin-bottom:10px;outline:none;transition:border-color .2s}
+input.f:focus{border-color:var(--accent)}
+input.f.err{border-color:#ff4d6d;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.cta{width:100%;padding:16px;border-radius:14px;font-weight:800;font-size:15px;color:#05050c;
+  background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 50%,#fff));box-shadow:0 0 30px -6px var(--accent);transition:.2s}
+.cta:disabled{background:#1d1e2e;color:#555874;box-shadow:none;cursor:not-allowed}
+.cta:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 0 40px -4px var(--accent)}
+.note{font-size:11px;color:var(--muted);margin-top:10px;text-align:center}
+
+/* modal */
+#modal{position:fixed;inset:0;z-index:40;display:none;place-items:center;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);padding:16px}
+#modal.show{display:grid}
+.ticket{width:min(400px,100%);border-radius:24px;background:linear-gradient(160deg,#141428,#0a0a16);border:1px solid var(--line);
+  padding:28px;text-align:center;box-shadow:0 0 80px -20px var(--accent);animation:rise .45s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes rise{from{transform:translateY(30px) scale(.95);opacity:0}}
+.ok{width:64px;height:64px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;background:var(--accent);box-shadow:0 0 40px var(--accent)}
+.ticket h3{font-family:Unbounded;font-size:22px;margin-bottom:6px}
+.ticket .code{font-family:Unbounded;font-size:28px;letter-spacing:.12em;color:var(--accent);text-shadow:0 0 18px var(--accent);margin:18px 0 6px}
+.ticket canvas{width:132px;height:132px;image-rendering:pixelated;border-radius:10px;background:#fff;padding:8px;margin:14px auto;display:block}
+.ticket dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;text-align:left;font-size:13px;margin:16px 0 22px;padding:16px;border-radius:14px;background:rgba(255,255,255,.04)}
+.ticket dt{color:var(--muted)}.ticket dd{text-align:right;font-weight:700}
+.ticket p{font-size:12px;color:var(--muted)}
+.foot{position:fixed;left:50%;transform:translateX(-50%);top:70px;z-index:5;font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.25);pointer-events:none;white-space:nowrap}
+@media (max-width:820px){.foot{display:none}}
+@media (max-width:600px){:root{--s:26px}.seats{gap:4px}.seat{border-radius:7px}.seat svg{display:none}.seat em{position:static;font-size:10px;color:var(--text)}.screen{font-size:8px;letter-spacing:.25em}.card{padding:16px}.stat{gap:18px}.brand span{display:none}.screen{width:92%}}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<div id="loader"><div><div class="logo">BROOKLYN</div><small>ЗАГРУЗКА · ОШ</small></div></div>
+<canvas id="scene"></canvas>
+
+<header id="top">
+  <div class="brand">BROOKLYN<span>PC CLUB · ОШ</span></div>
+  <nav><a href="#">Этажи</a><a href="#">Цены</a><a href="#">Турниры</a><a href="#">Контакты</a></nav>
+  <button class="btn" data-open="0">Забронировать</button>
+</header>
+<div class="foot">КОНЦЕПТ-МАКЕТ · ДАННЫЕ УСЛОВНЫЕ</div>
+
+<section id="hero">
+  <div class="kicker">ОТКРЫТО 24/7 · ОШ</div>
+  <h1>Три этажа.<br><em>Одна ночь.</em></h1>
+  <p>Standard-зал, VIP-зона и Bootcamp с PS5. Выбери этаж, место и время — бронь за 30 секунд.</p>
+  <div class="hint"><i></i>Нажми на светящуюся точку этажа</div>
+</section>
+
+<aside id="rail"></aside>
+<div id="labels"></div>
+
+<section id="booking">
+  <div class="bk-wrap">
+    <div class="bk-head">
+      <button class="back" id="back">← К зданию</button>
+      <div class="tabs" id="tabs"></div>
+    </div>
+    <div class="bk-title">
+      <div><h2 id="fTitle"></h2><p id="fDesc"></p></div>
+      <div class="stat"><div><b class="acc" id="sFree">0</b>свободно</div><div><b id="sAll">0</b>всего мест</div><div><b id="sPrice">0</b>сом / час</div></div>
+    </div>
+    <div class="bk-grid">
+      <div class="card">
+        <div class="room">
+          <div class="screen" id="screenLbl">СТРИМ-ЭКРАН</div>
+          <div class="seats" id="seats"></div>
+          <div class="reception">РЕСЕПШН · БАР · ВХОД</div>
+        </div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="side">
+        <div class="card">
+          <h4>ДАТА</h4><div class="chips" id="dates"></div>
+          <h4 style="margin-top:20px">НАЧАЛО</h4><div class="chips wrap" id="times"></div>
+          <h4 style="margin-top:20px">ДЛИТЕЛЬНОСТЬ</h4><div class="chips" id="durs"></div>
+        </div>
+        <div class="card">
+          <h4>ВАША БРОНЬ</h4>
+          <div id="sum"></div>
+          <div class="total"><span id="totalLbl">Итого</span><b id="total">0 сом</b></div>
+          <input class="f" id="nm" placeholder="Имя или ник" autocomplete="off">
+          <input class="f" id="ph" placeholder="+996 ___ ___ ___" inputmode="tel" autocomplete="off">
+          <button class="cta" id="cta" disabled>Выберите место</button>
+          <div class="note">Бронь держится 15 минут после начала сеанса</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="modal"><div class="ticket">
+  <div class="ok"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#05050c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
+  <h3>Бронь подтверждена</h3><p>Покажите код администратору на ресепшне</p>
+  <div class="code" id="tCode"></div>
+  <canvas id="qr" width="25" height="25"></canvas>
+  <dl id="tInfo"></dl>
+  <button class="cta" id="done">Готово</button>
+</div></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
+
+/* =================== DATA =================== */
+const TYPES = {
+  S:{name:'Standard',  price:60,  color:'#22e6ff', icon:'pc'},
+  V:{name:'VIP',       price:100, color:'#ff2bd6', icon:'pc'},
+  B:{name:'Bootcamp',  price:120, color:'#a78bfa', icon:'pc'},
+  P:{name:'PS5 Lounge',price:150, color:'#ffb020', icon:'pad'},
+};
+const FLOORS = [
+  {name:'Standard Hall', tag:'01 · STANDARD', color:0x22e6ff, css:'#22e6ff', desc:'40 ПК · RTX 4060 · мониторы 165 Гц · общий зал', screen:'СТРИМ-ЭКРАН · ТУРНИРЫ',
+   layout:['SSSSS.SSSSS','SSSSS.SSSSS','...........','SSSSS.SSSSS','SSSSS.SSSSS']},
+  {name:'VIP Zone', tag:'02 · VIP', color:0xff2bd6, css:'#ff2bd6', desc:'24 ПК · RTX 4070 Super · 240 Гц · кресла премиум-класса', screen:'ПАНОРАМНОЕ ОКНО · ВИД НА ГОРОД',
+   layout:['VVVV..VVVV','VVVV..VVVV','..........','VVVV..VVVV']},
+  {name:'Bootcamp & PS5', tag:'03 · BOOTCAMP', color:0xa78bfa, css:'#a78bfa', desc:'Командные комнаты на 5 человек + PS5-лаунж с диванами', screen:'КОМАНДНЫЕ КОМНАТЫ  ·  PS5 LOUNGE',
+   layout:['BBBBB..P.P','BBBBB.....','..........','BBBBB..P.P','BBBBB.....']},
+];
+
+/* =================== THREE SETUP =================== */
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x030308);
+scene.fog = new THREE.FogExp2(0x05040c, 0.011);
+
+const camera = new THREE.PerspectiveCamera(40, innerWidth/innerHeight, 0.1, 600);
+const HOME = { pos:new THREE.Vector3(26, 13, 31), target:new THREE.Vector3(0, 5.2, 0) };
+if (innerWidth < 820) HOME.pos.set(34, 16, 42);
+camera.position.set(70, 40, 95);
+
+const controls = new OrbitControls(camera, canvas);
+controls.target.copy(HOME.target);
+controls.enableDamping = true; controls.dampingFactor = .06;
+controls.enablePan = false; controls.minDistance = 18; controls.maxDistance = 70;
+controls.maxPolarAngle = Math.PI*0.47; controls.minPolarAngle = Math.PI*0.2;
+controls.autoRotate = true; controls.autoRotateSpeed = 0.35;
+controls.enabled = false;
+
+scene.add(new THREE.AmbientLight(0x30305a, 0.6));
+scene.add(new THREE.HemisphereLight(0x3b4cff, 0x050008, 0.35));
+const moon = new THREE.DirectionalLight(0x9aa8ff, 0.5); moon.position.set(-30, 50, -20); scene.add(moon);
+
+/* ---------- ground: wet asphalt ---------- */
+const mirror = new Reflector(new THREE.PlaneGeometry(400, 400), {
+  textureWidth: innerWidth*0.5*Math.min(devicePixelRatio,2), textureHeight: innerHeight*0.5*Math.min(devicePixelRatio,2), color: 0x777788
+});
+mirror.rotation.x = -Math.PI/2; scene.add(mirror);
+const asphalt = new THREE.Mesh(new THREE.PlaneGeometry(400,400),
+  new THREE.MeshStandardMaterial({color:0x06060b, roughness:.9, metalness:.1, transparent:true, opacity:.86}));
+asphalt.rotation.x = -Math.PI/2; asphalt.position.y = .02; scene.add(asphalt);
+const grid = new THREE.GridHelper(240, 120, 0x3a1f7a, 0x16102e);
+grid.position.y = .04; grid.material.transparent = true; grid.material.opacity = .45; scene.add(grid);
+
+/* ---------- helpers ---------- */
+const neon = (c) => new THREE.MeshBasicMaterial({color:c, toneMapped:false});
+const box = (w,h,d,mat,x=0,y=0,z=0,parent=scene) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat); m.position.set(x,y,z); parent.add(m); return m; };
+const srgb = (t) => { t.colorSpace = THREE.SRGBColorSpace; return t; };
+
+/* ---------- building ---------- */
+const W = 16, D = 10, H = 3.4, SLAB = .35;
+const building = new THREE.Group(); scene.add(building);
+const darkMetal = new THREE.MeshStandardMaterial({color:0x0c0c14, roughness:.45, metalness:.7});
+const mullionMat = new THREE.MeshStandardMaterial({color:0x15151f, roughness:.4, metalness:.8});
+const floorObjs = [];
+
+FLOORS.forEach((f, i) => {
+  const y0 = i*H, g = new THREE.Group(); building.add(g);
+  const c = new THREE.Color(f.color);
+  box(W+.6, SLAB, D+.6, darkMetal, 0, y0+SLAB/2, 0, g);
+  // neon slab edges
+  const nm = neon(c);
+  box(W+.64, .07, .07, nm, 0, y0+SLAB-.05,  (D+.6)/2, g);
+  box(W+.64, .07, .07, nm, 0, y0+SLAB-.05, -(D+.6)/2, g);
+  box(.07, .07, D+.64, nm,  (W+.6)/2, y0+SLAB-.05, 0, g);
+  box(.07, .07, D+.64, nm, -(W+.6)/2, y0+SLAB-.05, 0, g);
+  // glass
+  const gh = H-SLAB;
+  const glass = box(W, gh, D, new THREE.MeshPhysicalMaterial({color:0x0b1328, roughness:.08, metalness:.2, transparent:true, opacity:.32, depthWrite:false, side:THREE.DoubleSide}), 0, y0+SLAB+gh/2, 0, g);
+  glass.renderOrder = 2;
+  // mullions
+  for (let x=-W/2; x<=W/2+.01; x+=2) { box(.08, gh, .08, mullionMat, x, y0+SLAB+gh/2,  D/2, g); box(.08, gh, .08, mullionMat, x, y0+SLAB+gh/2, -D/2, g); }
+  for (let z=-D/2+2; z<D/2; z+=2) { box(.08, gh, .08, mullionMat,  W/2, y0+SLAB+gh/2, z, g); box(.08, gh, .08, mullionMat, -W/2, y0+SLAB+gh/2, z, g); }
+  // interior floor glow + ceiling strips
+  const fl = new THREE.Mesh(new THREE.PlaneGeometry(W-.3, D-.3), new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:.07}));
+  fl.rotation.x = -Math.PI/2; fl.position.y = y0+SLAB+.01; g.add(fl);
+  const strip = new THREE.MeshBasicMaterial({color:c.clone().lerp(new THREE.Color(0xffffff), .5), toneMapped:false, transparent:true, opacity:.55});
+  for (let z of [-3, 0, 3]) box(W-1.5, .04, .1, strip, 0, y0+H-.08, z, g);
+  // desks + monitors (instanced)
+  const deskGeo = new THREE.BoxGeometry(1.1, .06, .55), monGeo = new THREE.BoxGeometry(.62, .36, .03), chairGeo = new THREE.BoxGeometry(.45,.7,.45);
+  const pos = [];
+  const cols = i===1 ? [-6,-4.4,-2.8,2.8,4.4,6] : [-6.4,-5.1,-3.8,-2.5,2.5,3.8,5.1,6.4];
+  const rows = i===1 ? [-2.6, 1.6] : [-3, -.6, 2.2];
+  for (const z of rows) for (const x of cols) pos.push([x, z]);
+  const desks = new THREE.InstancedMesh(deskGeo, darkMetal, pos.length);
+  const mons  = new THREE.InstancedMesh(monGeo, neon(c.clone().multiplyScalar(1.3)), pos.length);
+  const chairs = new THREE.InstancedMesh(chairGeo, new THREE.MeshStandardMaterial({color:0x111118, roughness:.6}), pos.length);
+  const m4 = new THREE.Matrix4();
+  pos.forEach(([x,z], k) => {
+    desks.setMatrixAt(k, m4.makeTranslation(x, y0+SLAB+.75, z));
+    mons.setMatrixAt(k, m4.makeTranslation(x, y0+SLAB+1.05, z-.18));
+    chairs.setMatrixAt(k, m4.makeTranslation(x, y0+SLAB+.45, z+.55));
+    if (Math.random() < .3) mons.setColorAt(k, new THREE.Color(0x222233)); else mons.setColorAt(k, c.clone().multiplyScalar(.8+Math.random()*.8));
+  });
+  g.add(desks, mons, chairs);
+  // light
+  const pl = new THREE.PointLight(c, 40, 22, 1.6); pl.position.set(0, y0+H-.6, 0); g.add(pl);
+  floorObjs.push({group:g, light:pl, glass, floorGlow:fl, y0, color:c});
+});
+
+// roof
+const roofY = FLOORS.length*H;
+box(W+.6, SLAB, D+.6, darkMetal, 0, roofY+SLAB/2, 0, building);
+box(W+.64, .5, .14, darkMetal, 0, roofY+.6,  (D+.6)/2-.07, building);
+box(W+.64, .07, .07, neon(0xff2bd6), 0, roofY+.85, (D+.6)/2-.05, building);
+box(3, 1.2, 2.4, mullionMat, -4.5, roofY+.95, -2, building); // AC units
+box(2, 1, 2, mullionMat, 4, roofY+.85, -2.5, building);
+// vertical corner neon
+box(.12, roofY+.9, .12, neon(0xff2bd6),  (W+.6)/2+.06, (roofY+.9)/2, (D+.6)/2+.06, building);
+box(.12, roofY+.9, .12, neon(0x22e6ff), -(W+.6)/2-.06, (roofY+.9)/2, (D+.6)/2+.06, building);
+// entrance
+const doorX = -5.2;
+box(3.4, .14, 1.6, darkMetal, doorX, 2.75, D/2+.8, building);
+box(3.4, .05, .05, neon(0x22e6ff), doorX, 2.68, D/2+1.6, building);
+box(2.2, .05, .05, neon(0xffffff), doorX, 2.45, D/2+.05, building);
+box(.05, 2.1, .05, neon(0xffffff), doorX-1.1, 1.4, D/2+.05, building);
+box(.05, 2.1, .05, neon(0xffffff), doorX+1.1, 1.4, D/2+.05, building);
+const doorLight = new THREE.PointLight(0x22e6ff, 25, 9, 1.8); doorLight.position.set(doorX, 2.2, D/2+2.2); scene.add(doorLight);
+
+// neon sign
+await document.fonts.load('800 100px Unbounded').catch(()=>{});
+function signTexture() {
+  const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 640; const g = cv.getContext('2d');
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '800 290px Unbounded, Arial Black, sans-serif';
+  for (const [blur, col] of [[40,'#ff2bd6'],[12,'#ff7ae6']]) { g.shadowColor = col; g.shadowBlur = blur; g.fillStyle = '#ffb8f1'; g.fillText('BROOKLYN', 1024, 260); }
+  g.font = '600 92px Unbounded, Arial, sans-serif'; g.letterSpacing = '30px';
+  for (const blur of [30, 10]) { g.shadowColor = '#22e6ff'; g.shadowBlur = blur; g.fillStyle = '#d9fbff'; g.fillText('PC CLUB · ОШ', 1024, 510); }
+  return srgb(new THREE.CanvasTexture(cv));
+}
+const signMat = new THREE.MeshBasicMaterial({map:signTexture(), transparent:true, toneMapped:false, depthWrite:false});
+const sign = new THREE.Mesh(new THREE.PlaneGeometry(13, 4.06), signMat);
+sign.position.set(0, roofY+2.9, D/2-.2); building.add(sign);
+box(.1, 2.4, .1, mullionMat, -4.5, roofY+1.5, D/2-.4, building); box(.1, 2.4, .1, mullionMat, 4.5, roofY+1.5, D/2-.4, building);
+const signLight = new THREE.PointLight(0xff2bd6, 40, 20, 1.6); signLight.position.set(0, roofY+3, D/2+2); scene.add(signLight);
+// ground glow pools
+for (const [c,x,z] of [[0xff2bd6, 9, 9],[0x22e6ff,-9,9],[0x7c3aed,0,-10]]) { const p = new THREE.PointLight(c, 30, 18, 1.5); p.position.set(x, 1.2, z); scene.add(p); }
+
+/* ---------- city ---------- */
+function windowsTex() {
+  const cv = document.createElement('canvas'); cv.width = 64; cv.height = 128; const g = cv.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0,0,64,128);
+  for (let y=0; y<16; y++) for (let x=0; x<8; x++) if (Math.random() < .28) {
+    const warm = Math.random() < .75; g.fillStyle = warm ? `rgba(255,${180+Math.random()*50|0},110,${.4+Math.random()*.6})` : `rgba(140,200,255,${.4+Math.random()*.5})`;
+    g.fillRect(x*8+2, y*8+2, 4, 5);
+  }
+  const t = srgb(new THREE.CanvasTexture(cv)); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.magFilter = THREE.NearestFilter; return t;
+}
+const roofMat = new THREE.MeshStandardMaterial({color:0x07070c, roughness:1});
+for (let k=0; k<70; k++) {
+  const a = Math.random()*Math.PI*2, r = 42 + Math.random()*90;
+  const w = 5+Math.random()*9, d = 5+Math.random()*9, h = 4+Math.random()*(r>80?28:16);
+  const t = windowsTex(); t.repeat.set(Math.max(1,w/8), Math.max(1,h/16));
+  const side = new THREE.MeshStandardMaterial({color:0x07070c, roughness:.9, emissive:0xffffff, emissiveMap:t, emissiveIntensity:.55});
+  const b = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), [side,side,roofMat,roofMat,side,side]);
+  b.position.set(Math.cos(a)*r, h/2, Math.sin(a)*r); b.rotation.y = Math.random()*Math.PI; scene.add(b);
+  if (Math.random() < .15) { const bl = new THREE.Mesh(new THREE.SphereGeometry(.25), neon(0xff3344)); bl.position.set(b.position.x, h+.3, b.position.z); bl.userData.blink = Math.random()*6; scene.add(bl); }
+}
+// mountain silhouette far away
+const mtn = new THREE.Mesh(new THREE.ConeGeometry(60, 34, 7, 1), new THREE.MeshBasicMaterial({color:0x0a0916}));
+mtn.position.set(-60, 14, -190); mtn.scale.set(2.2, 1, 1); scene.add(mtn);
+// stars
+{
+  const n = 1800, p = new Float32Array(n*3);
+  for (let k=0; k<n; k++) { const th = Math.random()*Math.PI*2, ph = Math.random()*Math.PI*.45; const r = 260;
+    p[k*3] = r*Math.sin(ph)*Math.cos(th); p[k*3+1] = r*Math.cos(ph)+10; p[k*3+2] = r*Math.sin(ph)*Math.sin(th); }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(p,3));
+  scene.add(new THREE.Points(geo, new THREE.PointsMaterial({color:0xc8ccff, size:.9, sizeAttenuation:true, fog:false, transparent:true, opacity:.8})));
+}
+
+/* ---------- hotspots ---------- */
+function radial(inner, outer) {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128; const g = cv.getContext('2d');
+  const gr = g.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,inner); gr.addColorStop(.25,inner); gr.addColorStop(1,outer);
+  g.fillStyle = gr; g.fillRect(0,0,128,128); return new THREE.CanvasTexture(cv);
+}
+function ringTex() {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128; const g = cv.getContext('2d');
+  g.strokeStyle = '#fff'; g.lineWidth = 6; g.shadowColor = '#fff'; g.shadowBlur = 10; g.beginPath(); g.arc(64,64,54,0,Math.PI*2); g.stroke(); return new THREE.CanvasTexture(cv);
+}
+const glowT = radial('rgba(255,255,255,1)','rgba(255,255,255,0)'), ringT = ringTex();
+const hotspots = [];
+FLOORS.forEach((f, i) => {
+  const g = new THREE.Group(); g.position.set(i===0 ? 1.5 : 0, i*H + H/2 + .2, D/2 + 1.1); scene.add(g);
+  const core = new THREE.Mesh(new THREE.SphereGeometry(.2, 24, 24), neon(new THREE.Color(f.color).lerp(new THREE.Color(0xffffff), .6)));
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({map:glowT, color:f.color, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true, toneMapped:false}));
+  halo.scale.setScalar(2.2);
+  const ring = new THREE.Sprite(new THREE.SpriteMaterial({map:ringT, color:f.color, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true, toneMapped:false}));
+  const hit = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8), new THREE.MeshBasicMaterial({transparent:true, opacity:0, depthWrite:false}));
+  hit.userData.floor = i;
+  // short beam into facade
+  const beam = box(.03, .03, 1.1, neon(f.color), 0, 0, -.55, g);
+  const l = new THREE.PointLight(f.color, 6, 5, 2);
+  g.add(core, halo, ring, hit, l);
+  hotspots.push({g, core, halo, ring, hit, phase:i*.7});
+});
+
+/* ---------- labels ---------- */
+const labelsEl = document.getElementById('labels'), railEl = document.getElementById('rail');
+const freeCount = (fi) => { const b = busyMap(fi); const all = seatList(fi); return [all.filter(s=>!b.has(s.id)).length, all.length]; };
+const labels = FLOORS.map((f, i) => {
+  const el = document.createElement('div'); el.className = 'lbl'; el.style.setProperty('--c', f.css);
+  el.innerHTML = `${f.tag} <small></small>`; el.onclick = () => enterFloor(i);
+  el.onmouseenter = () => setHover(i); el.onmouseleave = () => setHover(null);
+  labelsEl.appendChild(el); return el;
+});
+FLOORS.slice().reverse().forEach((f) => {
+  const i = FLOORS.indexOf(f), b = document.createElement('button'); b.style.setProperty('--c', f.css);
+  b.innerHTML = `<b>0${i+1}</b><span>${f.name}<small>от ${Math.min(...seatList(i).map(s=>TYPES[s.t].price))} сом/ч</small></span>`;
+  b.onclick = () => enterFloor(i); b.onmouseenter = () => setHover(i); b.onmouseleave = () => setHover(null);
+  railEl.appendChild(b);
+});
+function refreshLabels() { labels.forEach((el,i) => { const [fr, all] = freeCount(i); el.querySelector('small').textContent = `${fr}/${all} свободно`; }); }
+
+let hovered = null;
+function setHover(i) {
+  hovered = i; canvas.style.cursor = i==null ? '' : 'pointer';
+  labels.forEach((el,k) => el.classList.toggle('on', k===i));
+  [...railEl.children].forEach((b) => b.classList.toggle('on', b.querySelector('b').textContent === '0'+(i+1)));
+}
+
+/* ---------- post ---------- */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .8, .5, .32);
+composer.addPass(bloom); composer.addPass(new OutputPass());
+
+/* ---------- interaction ---------- */
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(); let down = null;
+const setMouse = (e) => { mouse.set(e.clientX/innerWidth*2-1, -(e.clientY/innerHeight)*2+1); };
+const pick = () => { ray.setFromCamera(mouse, camera); const h = ray.intersectObjects(hotspots.map(h=>h.hit)); return h.length ? h[0].object.userData.floor : null; };
+canvas.addEventListener('pointermove', (e) => { if (mode!=='city') return; setMouse(e); const p = pick(); if (p !== hovered) setHover(p); controls.autoRotate = false; idleT = 0; });
+canvas.addEventListener('pointerdown', (e) => { down = [e.clientX, e.clientY]; });
+canvas.addEventListener('pointerup', (e) => { if (!down || mode!=='city') return; if (Math.hypot(e.clientX-down[0], e.clientY-down[1]) < 6) { setMouse(e); const p = pick(); if (p != null) enterFloor(p); } down = null; });
+
+let tween = null, mode = 'intro', idleT = 0;
+const ease = (t) => t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+function flyTo(pos, target, dur, done) {
+  tween = {p0:camera.position.clone(), t0:controls.target.clone(), p1:pos, t1:target, start:performance.now(), dur, done};
+}
+function floorView(i) {
+  const y = i*H + H/2;
+  return { pos:new THREE.Vector3(innerWidth<820 ? 0 : 6, y+1.2, D/2 + (innerWidth<820 ? 16 : 10)), target:new THREE.Vector3(0, y, 0) };
+}
+const bookingEl = document.getElementById('booking');
+function enterFloor(i) {
+  if (mode === 'booking') { setFloor(i); return; }
+  mode = 'flying'; controls.enabled = false; controls.autoRotate = false; setHover(null);
+  document.getElementById('hero').style.opacity = 0; railEl.style.opacity = 0; labelsEl.style.opacity = 0;
+  const v = floorView(i);
+  openBooking(i, true);
+  flyTo(v.pos, v.target, 1500, () => { mode = 'booking'; });
+  setTimeout(() => { bookingEl.style.display = 'block'; requestAnimationFrame(() => bookingEl.classList.add('show')); }, 900);
+}
+function exitFloor() {
+  bookingEl.classList.remove('show'); setTimeout(() => bookingEl.style.display = 'none', 500);
+  mode = 'flying';
+  flyTo(HOME.pos.clone(), HOME.target.clone(), 1600, () => { mode = 'city'; controls.enabled = true; idleT = 0; });
+  document.getElementById('hero').style.opacity = 1; railEl.style.opacity = 1; labelsEl.style.opacity = 1;
+  refreshLabels();
+}
+document.getElementById('back').onclick = exitFloor;
+document.querySelector('[data-open]').onclick = () => enterFloor(0);
+addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (modal.classList.contains('show')) closeModal(); else if (mode==='booking') exitFloor(); } });
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
+});
+
+/* ---------- loop ---------- */
+const clock = new THREE.Clock(), v3 = new THREE.Vector3();
+let flickerT = 3;
+flyTo(HOME.pos.clone(), HOME.target.clone(), 2800, () => { mode = 'city'; controls.enabled = true; });
+function frame() {
+  const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
+  if (tween) {
+    const k = Math.min(1, (performance.now()-tween.start)/tween.dur), e = ease(k);
+    camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.t0, tween.t1, e);
+    if (k === 1) { const d = tween.done; tween = null; d && d(); }
+  }
+  if (mode === 'city') { idleT += dt; if (idleT > 4) controls.autoRotate = true; }
+  controls.update();
+  // hotspots pulse
+  hotspots.forEach((h, i) => {
+    const s = 1 + Math.sin(t*3 + h.phase)*.18, hv = hovered===i ? 1.45 : 1;
+    h.core.scale.setScalar(s*hv); h.halo.scale.setScalar(2.2*s*hv);
+    const r = ((t*.7 + h.phase) % 1); h.ring.scale.setScalar(.6 + r*2.6); h.ring.material.opacity = (1-r)*.9;
+    floorObjs[i].light.intensity = THREE.MathUtils.lerp(floorObjs[i].light.intensity, hovered===i ? 90 : 40, .1);
+    floorObjs[i].floorGlow.material.opacity = THREE.MathUtils.lerp(floorObjs[i].floorGlow.material.opacity, hovered===i ? .2 : .07, .1);
+  });
+  // sign flicker
+  flickerT -= dt;
+  if (flickerT < 0) { signMat.opacity = Math.random() < .5 ? .25 : .6; if (flickerT < -.12) { signMat.opacity = 1; flickerT = 2 + Math.random()*5; } }
+  signLight.intensity = 40*signMat.opacity;
+  // labels
+  hotspots.forEach((h, i) => {
+    h.g.getWorldPosition(v3); v3.project(camera);
+    const x = (v3.x*.5+.5)*innerWidth, y = (-v3.y*.5+.5)*innerHeight;
+    labels[i].style.transform = `translate(${x+22}px, ${y-14}px)`;
+    labels[i].style.visibility = v3.z < 1 ? 'visible' : 'hidden';
+  });
+  composer.render();
+  requestAnimationFrame(frame);
+}
+// blinking aviation lights
+const blinkers = []; scene.children.forEach(o => { if (o.userData.blink != null) blinkers.push(o); });
+setInterval(() => { const t = clock.elapsedTime; blinkers.forEach(b => b.visible = ((t + b.userData.blink) % 2) < .25); }, 100);
+
+/* =================== BOOKING =================== */
+function seatList(fi) {
+  const out = []; let n = 1;
+  FLOORS[fi].layout.forEach((row, r) => [...row].forEach((ch, c) => { if (ch !== '.') out.push({id:`${fi}-${n}`, n:n++, t:ch, r, c}); }));
+  return out;
+}
+const hash = (s) => { let h = 2166136261; for (const ch of s) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; };
+const rng = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+
+const now = new Date();
+const TIMES = [...Array(14)].map((_,k) => `${String(10+k).padStart(2,'0')}:00`).concat(['Ночь']);
+const DURS = [1,2,3,5];
+const S = { floor:0, date:0, time:null, dur:2, sel:new Set(), mine:new Set() };
+
+function busyMap(fi) {
+  const key = `${fi}|${S.date}|${S.time}`, r = rng(hash(key));
+  const evening = S.time === 'Ночь' ? .55 : (parseInt(S.time) >= 18 ? .5 : .3);
+  const set = new Set(); seatList(fi).forEach(s => { if (r() < evening) set.add(s.id); });
+  S.mine.forEach(k => { const [mk, id] = k.split('#'); if (mk === `${S.date}|${S.time}` && id.startsWith(fi+'-')) set.add(id); });
+  return set;
+}
+const ICON = {
+  pc:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+  pad:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a4 4 0 0 1 4 4l-.6 4.2a2.5 2.5 0 0 1-4.5 1.1L15 15H9l-1.9 2.3a2.5 2.5 0 0 1-4.5-1.1L2 12a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18 13.5h.01"/></svg>'
+};
+
+const $ = (id) => document.getElementById(id);
+function openBooking(i) { setFloor(i, true); }
+function setFloor(i, silent) {
+  S.floor = i; S.sel.clear();
+  const f = FLOORS[i];
+  document.documentElement.style.setProperty('--accent', f.css);
+  if (!silent && mode === 'booking') { const v = floorView(i); mode = 'flying'; flyTo(v.pos, v.target, 1100, () => mode = 'booking'); }
+  render();
+}
+function renderTabs() {
+  $('tabs').innerHTML = '';
+  FLOORS.forEach((f, i) => { const b = document.createElement('button'); b.textContent = `0${i+1} · ${f.name}`; b.style.setProperty('--c', f.css);
+    b.className = i===S.floor ? 'on' : ''; b.onclick = () => setFloor(i); $('tabs').appendChild(b); });
+}
+function renderPickers() {
+  const wd = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  $('dates').innerHTML = '';
+  for (let k=0; k<7; k++) {
+    const d = new Date(now); d.setDate(d.getDate()+k);
+    const b = document.createElement('button'); b.className = 'chip' + (k===S.date ? ' on' : '');
+    b.innerHTML = `<small>${k===0?'Сегодня':k===1?'Завтра':wd[d.getDay()]}</small>${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`;
+    b.onclick = () => { S.date = k; S.sel.clear(); fixTime(); render(); }; $('dates').appendChild(b);
+  }
+  $('times').innerHTML = '';
+  TIMES.forEach(tm => {
+    const b = document.createElement('button'); b.className = 'chip' + (tm===S.time ? ' on' : '');
+    b.textContent = tm === 'Ночь' ? '🌙 Ночь 00–08' : tm; b.disabled = timeDisabled(tm);
+    b.onclick = () => { S.time = tm; S.sel.clear(); render(); }; $('times').appendChild(b);
+  });
+  $('durs').innerHTML = '';
+  if (S.time === 'Ночь') { $('durs').innerHTML = '<button class="chip on">Ночной пакет · 8 ч · −50%</button>'; }
+  else DURS.forEach(d => { const b = document.createElement('button'); b.className = 'chip' + (d===S.dur ? ' on' : ''); b.textContent = `${d} ч`;
+    b.onclick = () => { S.dur = d; render(); }; $('durs').appendChild(b); });
+}
+const timeDisabled = (tm) => S.date === 0 && tm !== 'Ночь' && parseInt(tm) <= now.getHours();
+function fixTime() { if (!S.time || timeDisabled(S.time)) S.time = TIMES.find(t => !timeDisabled(t)); }
+const seatPrice = (s) => TYPES[s.t].price * (S.time === 'Ночь' ? 4 : S.dur);
+
+function renderSeats() {
+  const f = FLOORS[S.floor], busy = busyMap(S.floor), list = seatList(S.floor);
+  const el = $('seats'); el.innerHTML = '';
+  el.style.gridTemplateColumns = `repeat(${f.layout[0].length}, var(--s))`;
+  f.layout.forEach((row, r) => [...row].forEach((ch, c) => {
+    if (ch === '.') { el.appendChild(Object.assign(document.createElement('div'), {className:'gap'})); return; }
+    const s = list.find(x => x.r===r && x.c===c), ty = TYPES[ch];
+    const b = document.createElement('button'); b.className = 'seat' + (S.sel.has(s.id) ? ' sel' : '');
+    b.style.setProperty('--c', ty.color); b.disabled = busy.has(s.id);
+    b.title = `${ty.name} №${s.n} · ${ty.price} сом/ч` + (b.disabled ? ' — занято' : '');
+    b.innerHTML = ICON[ty.icon] + `<em>${s.n}</em>`;
+    b.onclick = () => { S.sel.has(s.id) ? S.sel.delete(s.id) : S.sel.add(s.id); renderSeats(); renderSummary(); };
+    el.appendChild(b);
+  }));
+  const free = list.filter(s => !busy.has(s.id)).length;
+  $('sFree').textContent = free; $('sAll').textContent = list.length;
+  const prices = [...new Set(list.map(s => TYPES[s.t].price))];
+  $('sPrice').textContent = prices.length > 1 ? `${Math.min(...prices)}–${Math.max(...prices)}` : prices[0];
+  const types = [...new Set(list.map(s => s.t))];
+  $('legend').innerHTML = `<span><i style="--c:#8a8fb3"></i>Свободно</span><span><i class="busy"></i>Занято</span><span><i class="sel" style="--c:${f.css}"></i>Выбрано</span>` +
+    types.map(t => `<span><i style="--c:${TYPES[t].color}"></i>${TYPES[t].name} · <b>${TYPES[t].price} сом/ч</b></span>`).join('');
+}
+function renderSummary() {
+  const list = seatList(S.floor).filter(s => S.sel.has(s.id));
+  $('sum').innerHTML = list.length ? `<div class="sum-list">${list.map(s => `<div class="row"><span>${TYPES[s.t].name} · место ${s.n}</span><b>${seatPrice(s)} сом</b></div>`).join('')}</div>`
+    : '<div class="empty">Выберите место на схеме зала</div>';
+  const total = list.reduce((a, s) => a + seatPrice(s), 0);
+  $('total').textContent = `${total} сом`;
+  $('totalLbl').textContent = list.length ? `Итого · ${list.length} ${plural(list.length)} · ${S.time === 'Ночь' ? 'ночь' : S.dur + ' ч'}` : 'Итого';
+  $('cta').disabled = !list.length;
+  $('cta').textContent = list.length ? `Забронировать · ${total} сом` : 'Выберите место';
+}
+const plural = (n) => n%10===1 && n%100!==11 ? 'место' : (n%10>=2 && n%10<=4 && (n%100<10||n%100>=20)) ? 'места' : 'мест';
+function render() {
+  const f = FLOORS[S.floor]; fixTime();
+  $('fTitle').innerHTML = `<small>${f.tag}</small>${f.name}`; $('fDesc').textContent = f.desc; $('screenLbl').textContent = f.screen;
+  renderTabs(); renderPickers(); renderSeats(); renderSummary();
+}
+
+/* confirm */
+const modal = $('modal');
+$('cta').onclick = () => {
+  const nm = $('nm'), ph = $('ph'); let bad = false;
+  [nm, ph].forEach(inp => { inp.classList.remove('err'); if (!inp.value.trim()) { void inp.offsetWidth; inp.classList.add('err'); bad = true; } });
+  if (bad) return;
+  const list = seatList(S.floor).filter(s => S.sel.has(s.id));
+  const code = 'BRK-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+  $('tCode').textContent = code;
+  const d = new Date(now); d.setDate(d.getDate()+S.date);
+  $('tInfo').innerHTML = `<dt>Гость</dt><dd>${nm.value.replace(/[<>&]/g,'')}</dd><dt>Этаж</dt><dd>${FLOORS[S.floor].tag.replace(/^\d+ · /,'0'+(S.floor+1)+' · ')}</dd>
+    <dt>Места</dt><dd>${list.map(s=>'№'+s.n).join(', ')}</dd><dt>Когда</dt><dd>${d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}, ${S.time==='Ночь'?'00:00–08:00':S.time+' · '+S.dur+' ч'}</dd>
+    <dt>К оплате</dt><dd>${list.reduce((a,s)=>a+seatPrice(s),0)} сом</dd>`;
+  drawQR(code);
+  list.forEach(s => S.mine.add(`${S.date}|${S.time}#${s.id}`));
+  modal.classList.add('show');
+};
+function closeModal() { modal.classList.remove('show'); S.sel.clear(); render(); }
+$('done').onclick = closeModal;
+modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+function drawQR(code) {
+  const g = $('qr').getContext('2d'), N = 25, r = rng(hash(code));
+  g.fillStyle = '#fff'; g.fillRect(0,0,N,N); g.fillStyle = '#05050c';
+  for (let y=0; y<N; y++) for (let x=0; x<N; x++) if (r() < .5) g.fillRect(x,y,1,1);
+  for (const [x,y] of [[0,0],[N-7,0],[0,N-7]]) { g.fillStyle='#05050c'; g.fillRect(x,y,7,7); g.fillStyle='#fff'; g.fillRect(x+1,y+1,5,5); g.fillStyle='#05050c'; g.fillRect(x+2,y+2,3,3); }
+}
+
+/* go */
+fixTime(); render(); refreshLabels();
+requestAnimationFrame(() => { frame(); setTimeout(() => $('loader').classList.add('hide'), 300); });
+</script>
+</body>
+</html>
