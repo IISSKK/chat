@@ -60,6 +60,55 @@ window.FLOORS = [
   { name:'Третий этаж', short:'Bootcamp и PS5', color:'#4fc3a8', screen:'КОМАНДНЫЕ КОМНАТЫ · PS5',
     layout:['BBBBB..P.P','BBBBB.....','..........','BBBBB..P.P','BBBBB.....'] },
 ];
+
+/* =====================================================================
+   ХРАНИЛИЩЕ ДЛЯ АДМИНКИ. В макете данные лежат в браузере (localStorage).
+   В боевой версии эти функции заменяются запросами к серверу.
+   ===================================================================== */
+window.Store = (() => {
+  const KEY = 'club.admin.v1';
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  const BASE = { club:clone(window.CLUB), zones:clone(window.ZONES), promo:clone(window.PROMO),
+    floors:window.FLOORS.map(f => ({ name:f.name, short:f.short, screen:f.screen, layout:[...f.layout] })) };
+  const DEF = () => ({ v:1,
+    settings:{ pin:'1234', demoLoad:true,
+      msgConfirm:'Здравствуйте, {name}! Ваша бронь {code} подтверждена.\n{floor}, места: {seats}\n{date}, {time}\nСумма: {total}\nАдрес: {address}\nЖдём вас!',
+      msgCancel:'Здравствуйте, {name}! К сожалению, бронь {code} ({date}, {time}) отменена. Если хотите выбрать другое время, напишите нам.' },
+    club:{}, zones:{}, promo:null, floors:null, disabled:[], bookings:[], log:[] });
+  let mem = null;
+  const read = () => { try { const r = localStorage.getItem(KEY); if (r) return JSON.parse(r); } catch (e) {} try { return mem ? JSON.parse(mem) : null; } catch (e) { return null; } };
+  const d0 = DEF(), got = read() || {};
+  const db = { ...d0, ...got, settings:{ ...d0.settings, ...(got.settings || {}) } };
+  const save = () => { const s = JSON.stringify(db); try { localStorage.setItem(KEY, s); } catch (e) { mem = s; } document.dispatchEvent(new CustomEvent('club:changed')); };
+
+  const apply = () => {
+    Object.keys(window.CLUB).forEach(k => delete window.CLUB[k]); Object.assign(window.CLUB, clone(BASE.club), db.club || {});
+    for (const k in BASE.zones) Object.assign(window.ZONES[k], clone(BASE.zones[k]), (db.zones || {})[k] || {});
+    Object.keys(window.PROMO).forEach(k => delete window.PROMO[k]); Object.assign(window.PROMO, db.promo || BASE.promo);
+    window.FLOORS.forEach((f, i) => { const b = BASE.floors[i], o = (db.floors && db.floors[i]) || {};
+      Object.assign(f, { name:b.name, short:o.short || b.short, screen:o.screen || b.screen, layout:[...(o.layout || b.layout)] }); });
+  };
+
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const dayNum = (ds) => { const [y, m, d] = ds.split('-').map(Number); return Math.floor(Date.UTC(y, m - 1, d) / 86400000); };
+  const interval = (b) => { const d = dayNum(b.date); if (b.time === 'Ночь') return [d * 24, d * 24 + 8]; const h = parseInt(b.time); return [d * 24 + h, d * 24 + h + (+b.dur || 0) + (+b.bonus || 0)]; };
+  const ACTIVE = (b) => b.status !== 'cancelled' && b.status !== 'noshow';
+  const seatsOf = (fi) => { const out = []; let n = 1; window.FLOORS[fi].layout.forEach((row, r) => [...row].forEach((ch, c) => { if (ch !== '.') out.push({ k:`${fi}-${r}-${c}`, n:n++, t:ch, r, c }); })); return out; };
+  const busy = (fi, iv, ignoreId) => { const m = new Map(); db.bookings.forEach(b => { if (b.floor !== fi || !ACTIVE(b) || b.id === ignoreId) return; const x = interval(b); if (x[0] < iv[1] && iv[0] < x[1]) b.seats.forEach(s => m.set(s.k, b)); }); return m; };
+  const uid = () => Math.random().toString(36).slice(2, 10);
+  const prefix = () => ((window.CLUB.name || '').toUpperCase().replace(/[^A-Z]/g, '') + 'CLB').slice(0, 3);
+  const newCode = () => { let c; do { c = prefix() + '-' + String(1000 + Math.floor(Math.random() * 9000)); } while (db.bookings.some(b => b.code === c)); return c; };
+  const log = (text) => { db.log.unshift({ t:Date.now(), text }); if (db.log.length > 300) db.log.length = 300; };
+  const addBooking = (b) => { const rec = { id:uid(), code:newCode(), createdAt:Date.now(), status:'new', source:'admin', phone:'', note:'', bonus:0, name:'', ...b };
+    db.bookings.push(rec); log(`Новая бронь ${rec.code}: ${rec.name || 'без имени'}, ${rec.total} сом (${rec.source})`); save(); return rec; };
+  const updateBooking = (id, patch, what) => { const b = db.bookings.find(x => x.id === id); if (!b) return null; Object.assign(b, patch); log(`${b.code}: ${what || 'изменена'}`); save(); return b; };
+  const removeBooking = (id) => { const i = db.bookings.findIndex(x => x.id === id); if (i < 0) return; log(`Удалена бронь ${db.bookings[i].code}`); db.bookings.splice(i, 1); save(); };
+  const commit = (text) => { apply(); if (text) log(text); save(); };
+  const resetConfig = () => { db.club = {}; db.zones = {}; db.promo = null; db.floors = null; db.disabled = []; commit('Настройки сброшены к исходным'); };
+  const isDisabled = (k) => db.disabled.includes(k);
+  apply();
+  return { db, save, apply, commit, iso, dayNum, interval, ACTIVE, seatsOf, busy, newCode, uid, log, addBooking, updateBooking, removeBooking, resetConfig, isDisabled, BASE };
+})();
 </script>
 <style>
 /* Улица, бетон и красная занавеска из зала: чёрный, холодный бетон, один красный акцент.
@@ -316,17 +365,144 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .cta.off{background:#1a1a20;color:#565968;pointer-events:none}
 .note{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
 #preview{display:none;margin-top:12px;white-space:pre-wrap;font-size:12px;line-height:1.5;padding:12px;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.3)}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;z-index:60;padding:12px 18px;background:#0f1a14;border:1px solid rgba(37,211,102,.5);font-size:14px;font-weight:600;transition:.3s;pointer-events:none;max-width:calc(100% - 32px)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;z-index:90;padding:12px 18px;background:#0f1a14;border:1px solid rgba(37,211,102,.5);font-size:14px;font-weight:600;transition:.3s;pointer-events:none;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 @media (max-width:600px){:root{--s:27px}.seats{gap:4px}.seat svg{display:none}.seat em{position:static;font-size:10px;color:var(--text)}.seat.sel em{color:#fff}.card{padding:16px}.screen{width:94%;font-size:8px;letter-spacing:.2em}.lbl small{display:none}.lbl{font-size:10px;letter-spacing:.08em}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+
+/* ---------- admin ---------- */
+#admin{position:fixed;inset:0;z-index:70;background:#0b0b0e;overflow:auto;font-size:14px}
+#admin[hidden],.a-login[hidden],.a-app[hidden]{display:none}
+.a-login{min-height:100%;display:grid;place-items:center;padding:24px}
+.a-login form{width:min(380px,100%);padding:32px;background:var(--ink2);border:1px solid var(--line)}
+.a-login h1{font-size:36px;margin:8px 0 6px}
+.a-login p{color:var(--muted);margin-bottom:18px}
+.a-login .err{color:var(--red2);font-size:13px;min-height:20px;margin:-2px 0 10px}
+.a-app{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100%}
+.a-side{position:sticky;top:0;align-self:start;height:100vh;display:flex;flex-direction:column;padding:20px 14px;border-right:1px solid var(--line);background:#0d0d11}
+.a-brand{display:flex;align-items:center;gap:12px;padding:0 6px}
+.a-brand i{width:36px;height:36px;border-radius:50%;background:var(--navy);display:grid;place-items:center;font-style:normal;font-family:var(--display);font-weight:700;font-size:18px;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.7)}
+.a-brand b{display:block;font-family:var(--display);letter-spacing:.1em;font-size:16px;line-height:1}
+.a-brand small{font-size:10px;letter-spacing:.2em;color:var(--muted)}
+.a-nav{display:grid;gap:2px;margin-top:24px}
+.a-nav button{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:11px 12px;font-weight:600;color:var(--muted);text-align:left;border-left:3px solid transparent;white-space:nowrap}
+.a-nav button:hover{color:#fff}
+.a-nav button.on{color:#fff;background:rgba(255,255,255,.05);border-left-color:var(--red)}
+.a-nav .cnt{background:var(--red);color:#fff;font-size:11px;padding:1px 7px;border-radius:9px}
+.a-foot{margin-top:auto;display:grid;gap:8px}
+.a-main{padding:26px clamp(16px,3vw,36px) 70px;min-width:0}
+.a-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.a-top h1{font-size:clamp(28px,3.6vw,42px)}
+.a-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border:1.5px solid var(--line2);font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;text-decoration:none;color:var(--text);transition:background .15s,border-color .15s}
+.a-btn:hover{border-color:#fff}
+.a-btn.red{background:var(--red);border-color:var(--red);color:#fff}.a-btn.red:hover{background:var(--red2);border-color:var(--red2)}
+.a-btn.wa{background:var(--wa);border-color:var(--wa);color:#05260f}
+.a-btn.sm{padding:6px 10px;font-size:12px}
+.a-btn.ghost{border-color:var(--line)}
+.a-btn.warn{border-color:rgba(232,51,42,.6);color:var(--red2)}
+.a-btn[disabled]{opacity:.4;pointer-events:none}
+.a-card{background:var(--ink2);border:1px solid var(--line);padding:20px;min-width:0}
+.a-card h3{font-size:18px;margin-bottom:14px}
+.a-card h3 small{font-family:var(--body);font-size:12px;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;margin-left:8px}
+.a-grid{display:grid;gap:14px}
+.a-g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.a-g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.a-g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:1100px){.a-g4{grid-template-columns:repeat(2,minmax(0,1fr))}.a-g3{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){.a-g2,.a-g4{grid-template-columns:minmax(0,1fr)}}
+.kpi span{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.kpi b{display:block;margin-top:8px;font-family:var(--display);font-weight:700;font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
+.kpi small{display:block;margin-top:6px;color:var(--muted);font-size:12px}
+.kpi.hot b{color:var(--red2)}
+.bars{display:flex;align-items:flex-end;gap:6px;height:170px;padding-top:22px}
+.bars>div{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bars i{display:block;width:100%;background:#2c2e38;min-height:2px}
+.bars .cur i{background:var(--red)}
+.bars em{font-style:normal;color:var(--text);font-size:11px;white-space:nowrap}
+.bars.h>div{font-size:9px}.bars.h em{display:none}
+.bars.h .lab{writing-mode:horizontal-tb}
+.prog{display:grid;gap:14px}
+.prog div{display:grid;grid-template-columns:110px minmax(0,1fr) 64px;gap:12px;align-items:center;font-size:13px}
+.prog u{display:block;height:8px;background:#23242c;text-decoration:none}.prog u i{display:block;height:100%;background:var(--c)}
+.prog b{text-align:right;font-variant-numeric:tabular-nums}
+.list-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.list-row:last-child{border-bottom:0}
+.list-row small{display:block;color:var(--muted);font-size:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;font-size:12px;font-weight:700;border:1px solid var(--c);color:var(--c);white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;background:var(--c)}
+.a-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.a-bar .grow{flex:1;min-width:160px}
+.a-chip{padding:8px 12px;border:1px solid var(--line);font-weight:600;font-size:13px;color:var(--muted)}
+.a-chip.on{background:var(--red);border-color:var(--red);color:#fff}
+.a-in{width:100%;padding:10px 12px;border:1px solid var(--line2);background:#0a0a0d;color:var(--text);font:inherit;font-size:14px;outline:none;border-radius:0}
+.a-in:focus{border-color:var(--red2)}
+select.a-in{padding-right:8px}
+textarea.a-in{min-height:84px;resize:vertical;line-height:1.45}
+.a-in.sm{padding:6px 8px;font-size:13px;width:auto}
+.a-wrap{overflow-x:auto}
+.a-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.a-table th{padding:10px 10px;text-align:left;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line2);white-space:nowrap}
+.a-table td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.a-table tr:hover td{background:rgba(255,255,255,.02)}
+.a-table td small{display:block;color:var(--muted);font-size:12px}
+.a-table .acts{display:flex;gap:6px;justify-content:flex-end}
+.a-table .num{text-align:right;white-space:nowrap}
+.a-empty{padding:34px;text-align:center;color:var(--muted)}
+@media (max-width:760px){
+  .a-table thead{display:none}
+  .a-table,.a-table tbody,.a-table tr,.a-table td{display:block;width:100%}
+  .a-table tr{padding:12px 0;border-bottom:1px solid var(--line2)}
+  .a-table td{display:flex;justify-content:space-between;gap:12px;border:0;padding:5px 0;text-align:right}
+  .a-table td::before{content:attr(data-l);color:var(--muted);font-size:12px;text-align:left}
+  .a-table .acts{justify-content:flex-start}
+}
+.a-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.a-form label{display:grid;gap:6px;font-size:12px;color:var(--muted);font-weight:600}
+.a-form .wide{grid-column:1/-1}
+@media (max-width:560px){.a-form{grid-template-columns:minmax(0,1fr)}}
+.a-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:16px}
+.a-hint{color:var(--muted);font-size:12px;margin-top:8px}
+.a-hint.bad{color:var(--red2)}
+.a-modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.72);display:grid;place-items:start center;padding:5vh 14px;overflow:auto}
+.a-modal[hidden]{display:none}
+.a-dlg{width:min(640px,100%);background:var(--ink2);border:1px solid var(--line2);padding:24px}
+.a-dlg h3{font-size:22px;margin-bottom:16px}
+.a-dlg textarea{width:100%}
+.a-map-wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:start}
+@media (max-width:1000px){.a-map-wrap{grid-template-columns:minmax(0,1fr)}}
+#admin .seat.b{background:color-mix(in srgb,var(--sc) 22%,#101014);border-color:var(--sc);cursor:pointer}
+#admin .seat.b svg{stroke:var(--sc)}
+#admin .seat.off{cursor:pointer;border-color:transparent;background:repeating-linear-gradient(45deg,#17171c 0 5px,#1e1e25 5px 10px)}
+#admin .seat.off svg{stroke:#383a46}
+#admin .seat.cut{opacity:.35}
+.seat.zc{border-style:dashed}
+.legend2{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.legend2 span{display:flex;align-items:center;gap:7px}.legend2 i{width:12px;height:12px;border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 25%,transparent)}
+.toggle{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--text)}
+.toggle input{width:18px;height:18px;accent-color:var(--red)}
+.a-sec{display:grid;gap:14px;margin-bottom:26px}
+.a-sec>h2{font-size:22px}
+.mini{font-size:12px;color:var(--muted)}
+.hall-grid{display:grid;gap:6px;justify-content:start;margin:12px 0}
+.hall-grid button{width:44px;height:44px;border:1.5px solid color-mix(in srgb,var(--c,#555) 70%,transparent);background:color-mix(in srgb,var(--c,#555) 12%,transparent);font-family:var(--display);font-weight:700;font-size:16px;color:var(--c,#777);position:relative}
+.hall-grid button.e{border-style:dashed;border-color:var(--line2);background:none;color:var(--muted)}
+.hall-grid button.x{background:repeating-linear-gradient(45deg,#17171c 0 5px,#222229 5px 10px);border-color:#444}
+.hall-grid button em{position:absolute;right:3px;bottom:1px;font-style:normal;font-family:var(--body);font-size:9px;color:var(--muted);font-weight:600}
+@media (max-width:860px){
+  .a-app{grid-template-columns:minmax(0,1fr)}
+  .a-side{position:sticky;z-index:5;height:auto;flex-direction:column;border-right:0;border-bottom:1px solid var(--line);padding:12px 14px}
+  .a-nav{display:flex;overflow-x:auto;margin-top:10px;scrollbar-width:none}
+  .a-nav button{border-left:0;border-bottom:3px solid transparent}
+  .a-nav button.on{border-bottom-color:var(--red)}
+  .a-foot{display:none}
+}
 </style>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
 </script>
 </head>
 <body>
-
+<div id="site">
 <header class="nav"><div class="wrap">
   <a class="logo" href="#top"><i data-club="initial"></i><div><b data-club="name"></b><small data-club="sub"></small></div></a>
   <nav><a href="#about">О клубе</a><a href="#zones">Цены</a><a href="#floors">Этажи</a><a href="#promo">Акции</a><a href="#contacts">Контакты</a></nav>
@@ -431,7 +607,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   </div>
 </div></section>
 
-<footer><div class="wrap"><span>© <span data-club="full"></span><span id="fCity"></span></span><span>Концепт сайта. Цены и характеристики условные.</span></div></footer>
+<footer><div class="wrap"><span>© <span data-club="full"></span><span id="fCity"></span></span><span>Концепт сайта. Цены и характеристики условные. <a href="#admin" style="margin-left:14px;text-decoration:underline">Администратор</a></span></div></footer>
+</div>
 
 <!-- booking -->
 <section id="booking" role="dialog" aria-modal="true" aria-labelledby="fTitle"><div class="bk">
@@ -455,37 +632,37 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 </div></section>
 <div class="toast" id="toast"></div>
 
+<div id="admin" hidden>
+  <div class="a-login" id="aLogin" hidden>
+    <form id="aLoginForm" autocomplete="off">
+      <div class="eyebrow">Администратор</div>
+      <h1>Вход</h1>
+      <p>Введите PIN-код доступа к панели.</p>
+      <input class="a-in" id="aPin" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN" style="margin-bottom:10px">
+      <div class="err" id="aErr"></div>
+      <button class="a-btn red" style="width:100%" type="submit">Войти</button>
+      <p class="a-hint" style="margin-top:14px">Демо-доступ: PIN 1234. <a href="#" style="text-decoration:underline">Вернуться на сайт</a></p>
+    </form>
+  </div>
+  <div class="a-app" id="aApp" hidden>
+    <aside class="a-side"><div class="a-brand"><i id="aBrandI"></i><div><b id="aBrandB"></b><small id="aBrandS"></small></div></div><nav class="a-nav" id="aNav"></nav></aside>
+    <main class="a-main"><div class="a-top"><h1 id="aTitle"></h1><div class="a-row" style="margin:0"><a class="a-btn ghost" href="#">На сайт</a><button class="a-btn ghost" data-a="logout">Выйти</button></div></div><div id="aView"></div></main>
+  </div>
+  <div class="a-modal" id="aModal" hidden></div>
+</div>
+
+
 <script type="module">
 const $ = (id) => document.getElementById(id);
-const { CLUB, ZONES, PROMO, FLOORS, NIGHT } = window;
+const { CLUB, ZONES, PROMO, FLOORS, Store } = window;
 const WA_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.2 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.8-2.7-1.1-4.4-3.9-4.6-4.1-.1-.2-1.1-1.4-1.1-2.7s.7-2 .9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.1.3.7 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.3.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.2z"/></svg>';
 const waLink = (txt) => 'https://wa.me/' + CLUB.wa + (txt ? '?text=' + encodeURIComponent(txt) : '');
 
-/* ---------- static content ---------- */
-CLUB.initial = [...CLUB.name][0]; document.title = CLUB.full;
-document.querySelectorAll('[data-club]').forEach(el => el.textContent = CLUB[el.dataset.club] || '');
-document.querySelectorAll('[data-club-night]').forEach(el => el.textContent = NIGHT);
-$('fCity').textContent = CLUB.address ? ', ' + CLUB.city : '';
-if (CLUB.wa) $('waTop').href = waLink('Здравствуйте! Хочу узнать про бронь в ' + CLUB.full); else $('waTop').style.display = 'none';
-if (CLUB.map) $('mapLink').href = CLUB.map; else $('mapLink').removeAttribute('href');
-if (!CLUB.address) $('mapLink').style.display = 'none';
-if (CLUB.insta) { $('instaLink').href = 'https://instagram.com/' + CLUB.insta; $('instaTxt').textContent = '@' + CLUB.insta; } else $('instaLink').style.display = 'none';
-if (!CLUB.phone) $('phoneItem').style.display = 'none';
-document.querySelectorAll('[data-book]').forEach(b => b.addEventListener('click', () => openBooking(+b.dataset.book)));
-{ const items = ['Круглосуточно', 'Без выходных', 'Три этажа', 'Standard · VIP · Bootcamp · PS5', 'Акция 3+1', 'Акция 5+1', 'Ночной пакет']; const one = items.map(t => `<span>${t}</span>`).join(''); $('tickerIn').innerHTML = one + one; }
-const faq = [
-  ['Как работает бронь?', 'Вы выбираете место на схеме, дату и время, и сайт готовит сообщение. Вы отправляете его в WhatsApp клуба, администратор подтверждает бронь ответом.'],
-  ['Можно ли прийти без брони?', 'Да, если есть свободные места. Бронь гарантирует конкретное место на выбранное время.'],
-  ['Как считается подарочный час?', 'При оплате 3 часов вы играете 4, при оплате 5 часов играете 6. Подарочный час добавляется в конец сеанса.'],
-  ['Что входит в ночной пакет?', `Игра с ${NIGHT} по фиксированной цене. Стоимость для каждой зоны указана в тарифах.`],
-  ['Где вы находитесь и когда работаете?', (CLUB.address ? CLUB.address + '. ' : '') + CLUB.hours + '.'],
-];
-$('qa').innerHTML = faq.map(([q, a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join('');
-
-/* ---------- data helpers ---------- */
+/* ---------- helpers ---------- */
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-book]'); if (b) openBooking(+b.dataset.book); });
 function seatList(fi) {
   const out = []; let n = 1;
-  FLOORS[fi].layout.forEach((row, r) => [...row].forEach((ch, c) => { if (ch !== '.') out.push({ id:`${fi}-${n}`, n:n++, t:ch, r, c }); }));
+  FLOORS[fi].layout.forEach((row, r) => [...row].forEach((ch, c) => { if (ch !== '.') out.push({ id:`${fi}-${r}-${c}`, n:n++, t:ch, r, c }); }));
   return out;
 }
 const hash = (s) => { let h = 2166136261; for (const ch of s) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; };
@@ -493,41 +670,61 @@ const rng = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = M
 const now = new Date();
 const TIMES = [...Array(14)].map((_, k) => `${String(10 + k).padStart(2, '0')}:00`).concat(['Ночь']);
 const DURS = [1, 2, 3, 5];
-const S = { floor:0, date:0, time:null, dur:3, sel:new Set() };
-function busyMap(fi, date = S.date, time = S.time) {
-  const r = rng(hash(`${fi}|${date}|${time}`)), p = time === 'Ночь' ? .5 : (parseInt(time) >= 18 ? .48 : .28);
-  const set = new Set(); seatList(fi).forEach(s => { if (r() < p) set.add(s.id); }); return set;
+const S = { floor:0, date:0, time:null, dur:3, sel:new Set(), code:null };
+const iso = Store.iso;
+/* занятость: настоящие брони из админки + выведенные из работы места + условная загрузка (если включена) */
+function busyMap(fi, di = S.date, time = S.time, dur = S.dur) {
+  const set = new Set(), iv = Store.interval({ date:iso(dateOf(di)), time, dur, bonus:time === 'Ночь' ? 0 : (PROMO[dur] || 0) });
+  Store.busy(fi, iv).forEach((_, k) => set.add(k));
+  seatList(fi).forEach(s => { if (Store.isDisabled(s.id)) set.add(s.id); });
+  if (Store.db.settings.demoLoad) { const r = rng(hash(`${fi}|${di}|${time}`)), p = time === 'Ночь' ? .5 : (parseInt(time) >= 18 ? .48 : .28); seatList(fi).forEach(s => { if (r() < p) set.add(s.id); }); }
+  return set;
 }
 const zonesOf = (fi) => [...new Set(seatList(fi).map(s => s.t))];
 const minPrice = (fi) => Math.min(...zonesOf(fi).map(t => ZONES[t].hour));
-const freeNow = (fi) => { const t = `${String(Math.max(10, Math.min(23, now.getHours()))).padStart(2, '0')}:00`; const b = busyMap(fi, 0, t); const l = seatList(fi); return [l.length - b.size, l.length]; };
-
-/* ---------- hero strip ---------- */
-$('fSeats').textContent = FLOORS.reduce((a, _, i) => a + seatList(i).length, 0);
-$('liveRows').innerHTML = FLOORS.map((f, i) => { const [fr, all] = freeNow(i);
-  return `<button class="live-item" style="--c:${f.color}" data-book="${i}"><b>0${i + 1}</b><strong>${f.short}</strong><em>${fr}<small>из ${all}</small></em><span>от ${minPrice(i)} сом/ч · свободно сейчас</span><div class="bar"><i style="width:${Math.round(fr / all * 100)}%"></i></div></button>`; }).join('');
-document.querySelectorAll('.live-item').forEach(b => b.addEventListener('click', () => openBooking(+b.dataset.book)));
-
-/* ---------- floor list ---------- */
-$('flist').innerHTML = FLOORS.map((f, i) => i).reverse().map(i => { const f = FLOORS[i], [fr] = freeNow(i);
-  return `<button class="fcard" style="--c:${f.color}" data-f="${i}"><b>0${i + 1}</b><strong>${f.short}</strong><span>${f.name} · от ${minPrice(i)} сом/ч</span><em>${fr} свободно · выбрать место</em></button>`; }).join('');
+const freeNow = (fi) => { const t = `${String(Math.max(10, Math.min(23, now.getHours()))).padStart(2, '0')}:00`; const b = busyMap(fi, 0, t, 1); const l = seatList(fi); return [Math.max(0, l.length - b.size), l.length]; };
 const placeList = () => { const st = $('stage'), fl = $('flist'); if (innerWidth > 860) { if (fl.parentElement !== st) st.appendChild(fl); } else if (fl.parentElement === st) st.after(fl); };
-placeList(); addEventListener('resize', placeList);
-document.querySelectorAll('.fcard').forEach(b => { const i = +b.dataset.f;
-  b.onclick = () => openBooking(i); b.onmouseenter = () => setHover(i); b.onmouseleave = () => setHover(null); });
-
-/* ---------- zones / prices ---------- */
 const hoursWord = (h) => `${h} ${h % 10 === 1 && h % 100 !== 11 ? 'час' : (h % 10 >= 2 && h % 10 <= 4 && (h % 100 < 10 || h % 100 >= 20)) ? 'часа' : 'часов'}`;
-$('zonesGrid').innerHTML = Object.entries(ZONES).map(([k, z]) => {
-  const fi = FLOORS.findIndex(f => f.layout.join('').includes(k));
-  return `<div class="zone" style="--c:${z.color}"><h3>${z.name}<small>${fi + 1} ЭТАЖ</small></h3>
-  <div class="price">${z.hour}<small>сом / час</small></div>
-  <ul>${z.specs.map(s => `<li>${s}</li>`).join('')}</ul>
-  <div class="tbl"><div><span>1 час</span><b>${z.hour} сом</b></div>
-  ${Object.entries(PROMO).map(([h, b]) => `<div><span>${hoursWord(+h)}</span><b>${z.hour * h} сом<em>+${b} ч</em></b></div>`).join('')}
-  <div><span>Ночь ${NIGHT}</span><b>${z.night} сом</b></div></div>
-  <button class="btn" data-book="${fi}">Выбрать место</button></div>`; }).join('');
-document.querySelectorAll('#zonesGrid [data-book]').forEach(b => b.addEventListener('click', () => openBooking(+b.dataset.book)));
+
+/* всё, что зависит от данных клуба: перерисовывается при изменениях из админки */
+function renderStatic() {
+  CLUB.initial = [...CLUB.name][0]; document.title = CLUB.full;
+  document.querySelectorAll('[data-club]').forEach(el => el.textContent = CLUB[el.dataset.club] || '');
+  document.querySelectorAll('[data-club-night]').forEach(el => el.textContent = window.NIGHT);
+  $('fCity').textContent = CLUB.address ? ', ' + CLUB.city : '';
+  $('waTop').style.display = CLUB.wa ? '' : 'none'; if (CLUB.wa) $('waTop').href = waLink('Здравствуйте! Хочу узнать про бронь в ' + CLUB.full);
+  if (CLUB.map) $('mapLink').href = CLUB.map; else $('mapLink').removeAttribute('href');
+  $('mapLink').style.display = CLUB.address ? '' : 'none';
+  if (CLUB.insta) { $('instaLink').href = 'https://instagram.com/' + CLUB.insta; $('instaTxt').textContent = '@' + CLUB.insta; }
+  $('instaLink').style.display = CLUB.insta ? '' : 'none';
+  $('phoneItem').style.display = CLUB.phone ? '' : 'none';
+  { const items = ['Круглосуточно', 'Без выходных', 'Три этажа', 'Standard · VIP · Bootcamp · PS5', 'Акция 3+1', 'Акция 5+1', 'Ночной пакет']; const one = items.map(t => `<span>${t}</span>`).join(''); $('tickerIn').innerHTML = one + one; }
+  const faq = [
+    ['Как работает бронь?', 'Вы выбираете место на схеме, дату и время, и сайт готовит сообщение. Вы отправляете его в WhatsApp клуба, администратор подтверждает бронь ответом.'],
+    ['Можно ли прийти без брони?', 'Да, если есть свободные места. Бронь гарантирует конкретное место на выбранное время.'],
+    ['Как считается подарочный час?', Object.entries(PROMO).length ? 'Акция: ' + Object.entries(PROMO).map(([h, b]) => `при оплате ${hoursWord(+h)} вы играете ${hoursWord(+h + b)}`).join(', ') + '. Подарочный час добавляется в конец сеанса.' : 'Сейчас акций на подарочные часы нет.'],
+    ['Что входит в ночной пакет?', `Игра с ${window.NIGHT} по фиксированной цене. Стоимость для каждой зоны указана в тарифах.`],
+    ['Где вы находитесь и когда работаете?', (CLUB.address ? CLUB.address + '. ' : '') + CLUB.hours + '.'],
+  ];
+  $('qa').innerHTML = faq.map(([q, a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join('');
+  $('fSeats').textContent = FLOORS.reduce((a, _, i) => a + seatList(i).length, 0);
+  $('liveRows').innerHTML = FLOORS.map((f, i) => { const [fr, all] = freeNow(i);
+    return `<button class="live-item" style="--c:${f.color}" data-book="${i}"><b>0${i + 1}</b><strong>${f.short}</strong><em>${fr}<small>из ${all}</small></em><span>от ${minPrice(i)} сом/ч · свободно сейчас</span><div class="bar"><i style="width:${Math.round(fr / Math.max(1, all) * 100)}%"></i></div></button>`; }).join('');
+  $('flist').innerHTML = FLOORS.map((f, i) => i).reverse().map(i => { const f = FLOORS[i], [fr] = freeNow(i);
+    return `<button class="fcard" style="--c:${f.color}" data-f="${i}"><b>0${i + 1}</b><strong>${f.short}</strong><span>${f.name} · от ${minPrice(i)} сом/ч</span><em>${fr} свободно · выбрать место</em></button>`; }).join('');
+  document.querySelectorAll('.fcard').forEach(b => { const i = +b.dataset.f; b.onclick = () => openBooking(i); b.onmouseenter = () => setHover(i); b.onmouseleave = () => setHover(null); });
+  $('zonesGrid').innerHTML = Object.entries(ZONES).map(([k, z]) => {
+    const fi = Math.max(0, FLOORS.findIndex(f => f.layout.join('').includes(k)));
+    return `<div class="zone" style="--c:${z.color}"><h3>${z.name}<small>${fi + 1} ЭТАЖ</small></h3>
+    <div class="price">${z.hour}<small>сом / час</small></div>
+    <ul>${z.specs.map(s => `<li>${s}</li>`).join('')}</ul>
+    <div class="tbl"><div><span>1 час</span><b>${z.hour} сом</b></div>
+    ${Object.entries(PROMO).map(([h, b]) => `<div><span>${hoursWord(+h)}</span><b>${z.hour * h} сом<em>+${b} ч</em></b></div>`).join('')}
+    <div><span>Ночь ${window.NIGHT}</span><b>${z.night} сом</b></div></div>
+    <button class="btn" data-book="${fi}">Выбрать место</button></div>`; }).join('');
+  placeList();
+}
+placeList(); addEventListener('resize', placeList);
 
 /* =================== 3D BUILDING =================== */
 let hovered = null, setHover = () => {}, pauseScene = () => {}, resumeScene = () => {};
@@ -751,10 +948,10 @@ const bonus = () => S.time === 'Ночь' ? 0 : (PROMO[S.dur] || 0);
 const seatPrice = (s) => S.time === 'Ночь' ? ZONES[s.t].night : ZONES[s.t].hour * S.dur;
 const plural = (n, a, b, c) => n % 10 === 1 && n % 100 !== 11 ? a : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? b : c;
 const hh = (h) => String(h % 24).padStart(2, '0') + ':00';
-const span = () => { if (S.time === 'Ночь') return NIGHT; const st = parseInt(S.time); return `${S.time}–${hh(st + S.dur + bonus())}`; };
+const span = () => { if (S.time === 'Ночь') return window.NIGHT; const st = parseInt(S.time); return `${S.time}–${hh(st + S.dur + bonus())}`; };
 
 function openBooking(i) {
-  S.floor = i; S.sel.clear(); fixTime(); render();
+  S.floor = i; S.sel.clear(); S.code = S.code || Store.newCode(); fixTime(); render();
   $('booking').classList.add('show'); document.body.style.overflow = 'hidden'; pauseScene();
   $('booking').scrollTop = 0;
 }
@@ -772,9 +969,9 @@ function render() {
   $('dates').innerHTML = [...Array(7)].map((_, k) => { const d = dateOf(k);
     return `<button class="chip${k === S.date ? ' on' : ''}" data-k="${k}"><small>${k === 0 ? 'Сегодня' : k === 1 ? 'Завтра' : WD[d.getDay()]}</small>${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}</button>`; }).join('');
   $('dates').querySelectorAll('button').forEach(b => b.onclick = () => { S.date = +b.dataset.k; S.sel.clear(); fixTime(); render(); });
-  $('times').innerHTML = TIMES.map(tm => `<button class="chip${tm === S.time ? ' on' : ''}" data-t="${tm}" ${timeOff(tm) ? 'disabled' : ''}>${tm === 'Ночь' ? 'Ночь ' + NIGHT : tm}</button>`).join('');
+  $('times').innerHTML = TIMES.map(tm => `<button class="chip${tm === S.time ? ' on' : ''}" data-t="${tm}" ${timeOff(tm) ? 'disabled' : ''}>${tm === 'Ночь' ? 'Ночь ' + window.NIGHT : tm}</button>`).join('');
   $('times').querySelectorAll('button').forEach(b => b.onclick = () => { S.time = b.dataset.t; S.sel.clear(); render(); });
-  if (S.time === 'Ночь') $('durs').innerHTML = `<button class="chip on">Ночной пакет · ${NIGHT}</button>`;
+  if (S.time === 'Ночь') $('durs').innerHTML = `<button class="chip on">Ночной пакет · ${window.NIGHT}</button>`;
   else { $('durs').innerHTML = DURS.map(d => `<button class="chip${d === S.dur ? ' on' : ''}" data-d="${d}">${d} ч${PROMO[d] ? ` <span class="gift">+${PROMO[d]} ч</span>` : ''}</button>`).join('');
     $('durs').querySelectorAll('button').forEach(b => b.onclick = () => { S.dur = +b.dataset.d; render(); }); }
   renderSeats(); renderSummary();
@@ -805,7 +1002,7 @@ function message(list, total) {
     return `- ${z.name}: ${ss.map(s => '№' + s.n).join(', ')} — ${S.time === 'Ночь' ? `ночной пакет ${z.night} сом` : `${z.hour} сом/ч × ${S.dur} ч`}${ss.length > 1 ? ` × ${ss.length}` : ''} = ${each * ss.length} сом`;
   });
   return [
-    `Здравствуйте! Хочу забронировать в ${CLUB.full}.`, '',
+    `Здравствуйте! Хочу забронировать в ${CLUB.full}.`, `Заявка: ${S.code}`, '',
     `Этаж: ${S.floor + 1} (${f.short})`,
     'Места:', ...lines,
     `Дата: ${d.toLocaleDateString('ru-RU', { day:'numeric', month:'long' })} (${WD[d.getDay()]})`,
@@ -835,10 +1032,387 @@ function renderSummary() {
 $('nm').addEventListener('input', renderSummary);
 $('cta').addEventListener('click', (e) => {
   const list = seatList(S.floor).filter(s => S.sel.has(s.id)); if (!list.length) { e.preventDefault(); return; }
-  if (!CLUB.wa) { e.preventDefault(); const p = $('preview'); p.textContent = message(list, list.reduce((a, s) => a + seatPrice(s), 0)); p.style.display = 'block'; return; }
-  const t = $('toast'); t.textContent = 'Открываем WhatsApp. Нажмите «Отправить» в чате.'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500);
+  const total = list.reduce((a, s) => a + seatPrice(s), 0), txt = message(list, total);
+  const rec = { source:'site', status:'new', code:S.code, floor:S.floor, seats:list.map(s => ({ k:s.id, n:s.n, t:s.t, price:seatPrice(s) })), date:iso(dateOf(S.date)), time:S.time, dur:S.time === 'Ночь' ? 0 : S.dur, bonus:bonus(), name:$('nm').value.trim(), total };
+  const demo = !CLUB.wa;
+  if (demo) e.preventDefault(); else { const t = $('toast'); t.textContent = 'Открываем WhatsApp. Нажмите «Отправить» в чате.'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500); }
+  setTimeout(() => {          // заявка попадает в админку как «Новая»
+    Store.addBooking(rec); S.code = Store.newCode(); S.sel.clear(); render();
+    if (demo) { const p = $('preview'); p.textContent = txt; p.style.display = 'block'; const t = $('toast'); t.textContent = 'Заявка сохранена. Её видно в админке.'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500); }
+  }, 60);
 });
-fixTime();
+fixTime(); S.code = Store.newCode(); renderStatic();
+document.addEventListener('club:changed', () => { renderStatic(); if ($('booking').classList.contains('show')) render(); });
+document.addEventListener('club:admin', (e) => { if (e.detail) pauseScene(); else resumeScene(); });
+</script>
+<script type="module" id="adminJs">
+/* =================== ADMIN =================== */
+const Store = window.Store, CLUB = window.CLUB, ZONES = window.ZONES, PROMO = window.PROMO, FLOORS = window.FLOORS, db = Store.db;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const money = (n) => (Math.round(n) || 0).toLocaleString('ru-RU') + ' сом';
+const iso = Store.iso, today = () => iso(new Date());
+const WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+const fmtD = (ds) => { const [y, m, d] = ds.split('-').map(Number), dt = new Date(y, m - 1, d); return dt.toLocaleDateString('ru-RU', { day:'numeric', month:'short' }) + ', ' + WD[dt.getDay()]; };
+const hh = (h) => String(h % 24).padStart(2, '0') + ':00';
+const STATUS = { new:{ t:'Новая', c:'#e2b04a' }, confirmed:{ t:'Подтверждена', c:'#8fb1d9' }, arrived:{ t:'В клубе', c:'#4fc3a8' }, done:{ t:'Завершена', c:'#8a8d99' }, cancelled:{ t:'Отменена', c:'#e8332a' }, noshow:{ t:'Не пришёл', c:'#b0473f' } };
+const SRC = { site:'Сайт', whatsapp:'WhatsApp', admin:'Администратор' };
+const HOURS = [...Array(24)].map((_, h) => hh(h)), TIMES = [...HOURS, 'Ночь'], DURS = [1, 2, 3, 4, 5, 6, 8, 10, 12];
+const bonusFor = (time, dur) => time === 'Ночь' ? 0 : (PROMO[dur] || 0);
+const priceOf = (t, time, dur) => time === 'Ночь' ? ZONES[t].night : ZONES[t].hour * dur;
+const timeLbl = (b) => b.time === 'Ночь' ? 'Ночь 00:00–08:00' : `${b.time}–${hh(parseInt(b.time) + (+b.dur) + (+b.bonus || 0))}`;
+const seatsTxt = (b) => b.seats.map(s => '№' + s.n).join(', ');
+const nowAbs = () => { const n = new Date(); return Store.dayNum(today()) * 24 + n.getHours() + n.getMinutes() / 60; };
+const totalSeats = () => FLOORS.reduce((a, _, i) => a + Store.seatsOf(i).filter(s => !Store.isDisabled(s.k)).length, 0);
+const pill = (st) => `<span class="pill" style="--c:${STATUS[st].c}">${STATUS[st].t}</span>`;
+const ICON = { pc:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+  pad:'<svg viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4l-.6 4.2a2.5 2.5 0 0 1-4.5 1.1L15 15H9l-1.9 2.3a2.5 2.5 0 0 1-4.5-1.1L2 12a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18 13.5h.01"/></svg>' };
+const rngF = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const toast = (txt) => { const t = $('toast'); t.textContent = txt; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600); };
+const copyText = async (txt) => { try { await navigator.clipboard.writeText(txt); toast('Скопировано'); } catch (e) { const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); toast('Скопировано'); } catch (e2) { toast('Выделите текст и скопируйте вручную'); } ta.remove(); } };
+const waNum = (p) => { let d = String(p || '').replace(/\D/g, ''); if (d.length === 10 && d[0] === '0') d = '996' + d.slice(1); return d; };
+const timeOpts = (sel) => TIMES.map(t => `<option ${t === sel ? 'selected' : ''}>${t}</option>`).join('');
+const durOpts = (sel) => DURS.map(d => `<option value="${d}" ${d === +sel ? 'selected' : ''}>${d} ч</option>`).join('');
+const stOpts = (sel) => Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${v.t}</option>`).join('');
+
+/* ---------- модальные окна ---------- */
+let askRes = null;
+const modal = (html) => { const m = $('aModal'); m.innerHTML = `<div class="a-dlg">${html}</div>`; m.hidden = false; };
+const closeModal = () => { $('aModal').hidden = true; $('aModal').innerHTML = ''; refresh(); };
+const ask = (text, ok = 'Подтвердить') => new Promise(res => { askRes = res; modal(`<h3>${esc(text)}</h3><div class="a-row"><button class="a-btn ghost" data-a="mno">Отмена</button><button class="a-btn red" data-a="myes">${esc(ok)}</button></div>`); });
+
+/* ---------- состояние ---------- */
+const nowHour = () => hh(new Date().getHours());
+const A = { tab:'dash', bk:{ st:'all', range:'week', q:'' }, map:{ fl:0, date:today(), time:nowHour(), dur:2, sel:new Set() }, cl:{ q:'' }, hall:{ fl:0, mode:'zone' } };
+const TABS = { dash:'Обзор', book:'Брони', map:'Схема зала', clients:'Клиенты', prices:'Цены и акции', halls:'Залы и места', set:'Настройки', log:'Журнал' };
+
+/* ---------- вход ---------- */
+let okMem = false;
+const authed = () => { try { return sessionStorage.getItem('club.admin.ok') === '1'; } catch (e) { return okMem; } };
+const setAuth = (v) => { okMem = v; try { v ? sessionStorage.setItem('club.admin.ok', '1') : sessionStorage.removeItem('club.admin.ok'); } catch (e) {} };
+function route() {
+  const adm = location.hash === '#admin';
+  $('site').hidden = adm; $('admin').hidden = !adm;
+  document.dispatchEvent(new CustomEvent('club:admin', { detail:adm }));
+  if (!adm) { return; }
+  if (authed()) enter(); else { $('aLogin').hidden = false; $('aApp').hidden = true; setTimeout(() => $('aPin').focus(), 50); }
+}
+function enter() {
+  $('aLogin').hidden = true; $('aApp').hidden = false;
+  $('aBrandI').textContent = [...CLUB.name][0]; $('aBrandB').textContent = CLUB.name; $('aBrandS').textContent = 'АДМИНИСТРАТОР';
+  show(A.tab);
+}
+$('aLoginForm').addEventListener('submit', (e) => { e.preventDefault();
+  if ($('aPin').value === String(db.settings.pin)) { setAuth(true); $('aPin').value = ''; $('aErr').textContent = ''; enter(); }
+  else { $('aErr').textContent = 'Неверный PIN'; $('aPin').select(); } });
+
+/* ---------- каркас ---------- */
+function renderNav() {
+  const nNew = db.bookings.filter(b => b.status === 'new').length;
+  $('aNav').innerHTML = Object.entries(TABS).map(([k, v]) => `<button class="${k === A.tab ? 'on' : ''}" data-a="tab" data-t="${k}">${v}${k === 'book' && nNew ? `<span class="cnt">${nNew}</span>` : ''}</button>`).join('');
+}
+function show(tab) {
+  A.tab = tab; renderNav(); $('aTitle').textContent = TABS[tab];
+  $('aView').innerHTML = VIEW[tab](); if (AFTER[tab]) AFTER[tab]();
+}
+const refresh = () => { if ($('admin').hidden || $('aApp').hidden) return; show(A.tab); };
+
+/* ---------- ОБЗОР ---------- */
+function vDash() {
+  const td = today(), act = db.bookings.filter(Store.ACTIVE), tds = act.filter(b => b.date === td);
+  const rev = tds.reduce((a, b) => a + b.total, 0), cap = Math.max(1, totalSeats()), nA = nowAbs();
+  let occ = 0; act.forEach(b => { const [a, z] = Store.interval(b); if (a <= nA && nA < z) occ += b.seats.length; });
+  const nNew = db.bookings.filter(b => b.status === 'new').length;
+  const days = [...Array(7)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - 6 + i); const ds = iso(d); return { ds, lbl:WD[d.getDay()], v:act.filter(b => b.date === ds).reduce((a, b) => a + b.total, 0), cur:ds === td }; });
+  const maxV = Math.max(1, ...days.map(d => d.v));
+  const base0 = Store.dayNum(td) * 24;
+  const hrs = [...Array(24)].map((_, h) => { let n = 0; act.forEach(b => { const [a, z] = Store.interval(b); if (a < base0 + h + 1 && base0 + h < z) n += b.seats.length; }); return Math.min(100, Math.round(n / cap * 100)); });
+  const curH = new Date().getHours();
+  const floors = FLOORS.map((f, i) => { const seats = Store.seatsOf(i).filter(s => !Store.isDisabled(s.k)); let n = 0; act.forEach(b => { if (b.floor !== i) return; const [a, z] = Store.interval(b); if (a <= nA && nA < z) n += b.seats.length; }); return { f, n, all:seats.length }; });
+  const next = act.filter(b => Store.interval(b)[1] > nA).sort((a, b) => Store.interval(a)[0] - Store.interval(b)[0]).slice(0, 6);
+  return `<div class="a-grid a-g4">
+    <div class="a-card kpi"><span>Выручка сегодня</span><b>${money(rev)}</b><small>${tds.length} броней на ${fmtD(td)}</small></div>
+    <div class="a-card kpi"><span>Брони сегодня</span><b>${tds.length}</b><small>всего в базе: ${db.bookings.length}</small></div>
+    <div class="a-card kpi"><span>Загрузка сейчас</span><b>${Math.round(occ / cap * 100)}%</b><small>${occ} из ${cap} мест занято</small></div>
+    <div class="a-card kpi ${nNew ? 'hot' : ''}"><span>Новые заявки</span><b>${nNew}</b><small>${nNew ? '<a href="#admin" data-a="goNew" style="color:var(--red2)">Показать и обработать</a>' : 'всё обработано'}</small></div>
+  </div>
+  <div class="a-grid a-g2" style="margin-top:14px">
+    <div class="a-card"><h3>Выручка за 7 дней<small>${money(days.reduce((a, d) => a + d.v, 0))}</small></h3>
+      <div class="bars">${days.map(d => `<div class="${d.cur ? 'cur' : ''}"><em>${d.v ? Math.round(d.v / 100) / 10 + 'к' : ''}</em><i style="height:${Math.max(2, d.v / maxV * 100)}%"></i><span>${d.lbl}</span></div>`).join('')}</div></div>
+    <div class="a-card"><h3>Загрузка по часам сегодня<small>% занятых мест</small></h3>
+      <div class="bars h">${hrs.map((v, h) => `<div class="${h === curH ? 'cur' : ''}" title="${hh(h)}: ${v}%"><i style="height:${Math.max(2, v)}%"></i><span>${h % 3 === 0 ? String(h).padStart(2, '0') : ''}</span></div>`).join('')}</div></div>
+  </div>
+  <div class="a-grid a-g2" style="margin-top:14px">
+    <div class="a-card"><h3>Этажи сейчас</h3><div class="prog">${floors.map(x => `<div style="--c:${x.f.color}"><span>${esc(x.f.short)}</span><u><i style="width:${x.all ? x.n / x.all * 100 : 0}%"></i></u><b>${x.n}/${x.all}</b></div>`).join('')}</div></div>
+    <div class="a-card"><h3>Ближайшие брони</h3>${next.length ? next.map(b => `<div class="list-row"><div><b>${esc(b.name || 'Без имени')}</b> · ${esc(FLOORS[b.floor].short)}, ${seatsTxt(b)}<small>${fmtD(b.date)}, ${timeLbl(b)} · ${esc(b.code)}</small></div>${pill(b.status)}</div>`).join('') : '<div class="a-empty">Ближайших броней нет</div>'}</div>
+  </div>`;
+}
+
+/* ---------- БРОНИ ---------- */
+function bookFiltered() {
+  const f = A.bk, t0 = Store.dayNum(today()); let list = db.bookings.slice();
+  if (f.st !== 'all') list = list.filter(b => b.status === f.st);
+  if (f.range !== 'all') list = list.filter(b => { const d = Store.dayNum(b.date) - t0; return f.range === 'today' ? d === 0 : f.range === 'tomorrow' ? d === 1 : f.range === 'week' ? d >= 0 && d <= 6 : d < 0; });
+  if (f.q) { const q = f.q.toLowerCase(); list = list.filter(b => [b.code, b.name, b.phone].join(' ').toLowerCase().includes(q)); }
+  list.sort((a, b) => Store.interval(a)[0] - Store.interval(b)[0]); if (f.range === 'past' || f.range === 'all') list.reverse(); return list;
+}
+function bookRows() {
+  const list = bookFiltered();
+  if (!list.length) return '<div class="a-empty">Броней по этим условиям нет. Измените фильтры или добавьте бронь на схеме зала.</div>';
+  return `<div class="a-wrap"><table class="a-table"><thead><tr><th>Код</th><th>Клиент</th><th>Где</th><th>Когда</th><th class="num">Сумма</th><th>Статус</th><th></th></tr></thead><tbody>${list.map(b => `<tr>
+    <td data-l="Код"><b>${esc(b.code)}</b><small>${SRC[b.source] || b.source}</small></td>
+    <td data-l="Клиент">${esc(b.name || 'Без имени')}<small>${esc(b.phone || 'телефон не указан')}</small></td>
+    <td data-l="Где">${esc(FLOORS[b.floor] ? FLOORS[b.floor].short : '?')}<small>${seatsTxt(b)}</small></td>
+    <td data-l="Когда">${fmtD(b.date)}<small>${timeLbl(b)}</small></td>
+    <td class="num" data-l="Сумма">${money(b.total)}</td>
+    <td data-l="Статус"><select class="a-in sm" data-f="status" data-id="${b.id}" style="border-color:${STATUS[b.status].c}">${stOpts(b.status)}</select></td>
+    <td><div class="acts"><button class="a-btn sm ghost" data-a="reply" data-id="${b.id}">Ответ</button><button class="a-btn sm ghost" data-a="edit" data-id="${b.id}">Изменить</button><button class="a-btn sm warn" data-a="del" data-id="${b.id}">Удалить</button></div></td></tr>`).join('')}</tbody></table></div>`;
+}
+function vBook() {
+  const f = A.bk, chip = (k, t) => `<button class="a-chip ${f.st === k ? 'on' : ''}" data-a="bkSt" data-v="${k}">${t}</button>`;
+  return `<div class="a-bar">${chip('all', 'Все')}${Object.entries(STATUS).map(([k, v]) => chip(k, v.t)).join('')}</div>
+  <div class="a-bar"><select class="a-in sm" data-f="bkRange">${[['today', 'Сегодня'], ['tomorrow', 'Завтра'], ['week', '7 дней вперёд'], ['past', 'Прошедшие'], ['all', 'Все даты']].map(([k, v]) => `<option value="${k}" ${f.range === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+  <input class="a-in grow" data-f="bkQ" placeholder="Поиск: имя, телефон или код" value="${esc(f.q)}">
+  <button class="a-btn ghost" data-a="export">Экспорт CSV</button><button class="a-btn red" data-a="tab" data-t="map">Новая бронь</button></div>
+  <div class="a-card" id="bkRows" style="padding:8px 14px">${bookRows()}</div>`;
+}
+
+/* ---------- ответ клиенту и правка ---------- */
+const fillTpl = (tpl, b) => tpl.replace(/\{(\w+)\}/g, (_, k) => ({ name:b.name || 'гость', code:b.code, floor:FLOORS[b.floor].short, seats:seatsTxt(b), date:fmtD(b.date), time:timeLbl(b), total:money(b.total), address:CLUB.address || '' }[k] ?? ''));
+function openReply(id) {
+  const b = db.bookings.find(x => x.id === id); if (!b) return;
+  const txt = fillTpl(b.status === 'cancelled' || b.status === 'noshow' ? db.settings.msgCancel : db.settings.msgConfirm, b), num = waNum(b.phone);
+  modal(`<h3>Ответ клиенту · ${esc(b.code)}</h3><textarea class="a-in" id="rTxt" rows="9">${esc(txt)}</textarea>
+  <div class="a-hint">${num ? 'Откроется WhatsApp клиента с этим текстом.' : 'Телефон не указан: скопируйте текст и ответьте клиенту в чате, откуда пришла заявка.'}</div>
+  <div class="a-row"><button class="a-btn ghost" data-a="mno">Закрыть</button><button class="a-btn" data-a="rCopy">Скопировать</button>${num ? `<a class="a-btn wa" id="rWa" target="_blank" rel="noopener" href="https://wa.me/${num}?text=${encodeURIComponent(txt)}">Открыть WhatsApp</a>` : ''}</div>`);
+  $('rTxt').addEventListener('input', () => { const a = $('rWa'); if (a) a.href = `https://wa.me/${num}?text=${encodeURIComponent($('rTxt').value)}`; });
+}
+function openEdit(id) {
+  const b = db.bookings.find(x => x.id === id); if (!b) return;
+  modal(`<h3>${esc(b.code)} · ${esc(FLOORS[b.floor].short)}, места ${seatsTxt(b)}</h3><div class="a-form">
+    <label>Имя<input class="a-in" id="eName" value="${esc(b.name)}"></label>
+    <label>Телефон<input class="a-in" id="ePhone" value="${esc(b.phone)}" inputmode="tel" placeholder="0555 123 456"></label>
+    <label>Дата<input type="date" class="a-in" id="eDate" value="${b.date}"></label>
+    <label>Начало<select class="a-in" id="eTime">${timeOpts(b.time)}</select></label>
+    <label>Часов оплачено<select class="a-in" id="eDur">${durOpts(b.dur || 1)}</select></label>
+    <label>Статус<select class="a-in" id="eSt">${stOpts(b.status)}</select></label>
+    <label>Сумма, сом<input type="number" class="a-in" id="eTotal" value="${b.total}" min="0"></label>
+    <label>Источник<input class="a-in" value="${SRC[b.source] || b.source}" disabled></label>
+    <label class="wide">Заметка<textarea class="a-in" id="eNote">${esc(b.note)}</textarea></label></div>
+    <div class="a-hint" id="eErr"></div>
+    <div class="a-row"><button class="a-btn ghost" data-a="mno">Закрыть</button><button class="a-btn" data-a="eRecalc" data-id="${b.id}">Пересчитать сумму</button><button class="a-btn red" data-a="eSave" data-id="${b.id}">Сохранить</button></div>`);
+}
+function eVals() { const time = $('eTime').value, dur = +$('eDur').value; return { time, dur:time === 'Ночь' ? 0 : dur, bonus:bonusFor(time, dur), date:$('eDate').value }; }
+
+/* ---------- СХЕМА ЗАЛА ---------- */
+function mapIv() { const m = A.map; return Store.interval({ date:m.date, time:m.time, dur:m.dur, bonus:bonusFor(m.time, m.dur) }); }
+function vMap() {
+  const m = A.map;
+  return `<div class="a-bar">${FLOORS.map((f, i) => `<button class="a-chip ${m.fl === i ? 'on' : ''}" data-a="mapFl" data-i="${i}">0${i + 1} ${esc(f.short)}</button>`).join('')}</div>
+  <div class="a-bar"><input type="date" class="a-in sm" data-f="mapDate" value="${m.date}"><select class="a-in sm" data-f="mapTime">${timeOpts(m.time)}</select>
+  <select class="a-in sm" data-f="mapDur" ${m.time === 'Ночь' ? 'disabled' : ''}>${durOpts(m.dur)}</select><button class="a-btn ghost sm" data-a="mapNow">Сейчас</button>
+  <span class="mini">Занятые места показывают, кто сидит. Нажмите на свободные, чтобы создать бронь.</span></div>
+  <div class="a-map-wrap"><div class="a-card" id="mapCard"></div><div class="a-card" id="mapSide"></div></div>`;
+}
+function drawMap() {
+  const m = A.map, f = FLOORS[m.fl], seats = Store.seatsOf(m.fl), bm = Store.busy(m.fl, mapIv()), list = seats;
+  const cells = []; f.layout.forEach((row, r) => [...row].forEach((ch, c) => {
+    if (ch === '.') { cells.push('<div class="gap"></div>'); return; }
+    const s = list.find(x => x.r === r && x.c === c), z = ZONES[ch], b = bm.get(s.k), off = Store.isDisabled(s.k);
+    const cls = 'seat' + (A.map.sel.has(s.k) ? ' sel' : '') + (b ? ' b' : '') + (off ? ' off' : '');
+    const style = b ? `--c:${z.color};--sc:${STATUS[b.status].c}` : `--c:${z.color}`;
+    const tip = off ? `Место ${s.n}: на обслуживании` : b ? `${b.name || 'Без имени'} · ${b.code} · ${STATUS[b.status].t}` : `${z.name}, место ${s.n} · ${z.hour} сом/ч`;
+    cells.push(`<button class="${cls}" style="${style}" data-a="seat" data-k="${s.k}" ${b ? `data-bid="${b.id}"` : ''} title="${esc(tip)}">${ICON[z.icon]}<em>${s.n}</em></button>`);
+  }));
+  $('mapCard').innerHTML = `<div class="room"><div class="screen" style="--c:${f.color}">${esc(f.screen)}</div><div class="seats" style="grid-template-columns:repeat(${f.layout[0].length},var(--s))">${cells.join('')}</div><div class="recep">РЕСЕПШН · ВХОД</div></div>
+    <div class="legend2"><span style="--c:#9a9ca6"><i></i>Свободно</span><span style="--c:#e8332a"><i style="background:var(--red);border-color:var(--red)"></i>Выбрано</span>${Object.entries(STATUS).filter(([k]) => Store.ACTIVE({ status:k })).map(([k, v]) => `<span style="--c:${v.c}"><i></i>${v.t}</span>`).join('')}<span style="--c:#555"><i style="background:repeating-linear-gradient(45deg,#17171c 0 3px,#2a2a33 3px 6px)"></i>На обслуживании</span></div>`;
+  const sel = seats.filter(s => A.map.sel.has(s.k)), total = sel.reduce((a, s) => a + priceOf(s.t, m.time, m.dur), 0), bo = bonusFor(m.time, m.dur);
+  const free = seats.filter(s => !bm.has(s.k) && !Store.isDisabled(s.k)).length;
+  $('mapSide').innerHTML = `<h3>${m.time === 'Ночь' ? 'Ночной пакет' : `${m.time}–${hh(parseInt(m.time) + m.dur + bo)}`}<small>${fmtD(m.date)}</small></h3>
+    <div class="list-row"><span>Свободно мест</span><b>${free} из ${seats.length}</b></div>
+    ${sel.length ? sel.map(s => `<div class="list-row"><span>${ZONES[s.t].name} · место ${s.n}</span><b>${money(priceOf(s.t, m.time, m.dur))}</b></div>`).join('') + `<div class="list-row"><span>Итого${bo ? ` (+${bo} ч в подарок)` : ''}</span><b style="font-family:var(--display);font-size:24px">${money(total)}</b></div>` : '<div class="a-empty" style="padding:20px 0">Выберите свободные места на схеме</div>'}
+    <div class="a-row" style="justify-content:stretch"><button class="a-btn red" style="flex:1" data-a="newBook" ${sel.length ? '' : 'disabled'}>Создать бронь</button>${sel.length ? '<button class="a-btn ghost" data-a="selClear">Сбросить</button>' : ''}</div>`;
+}
+function openNew() {
+  const m = A.map, seats = Store.seatsOf(m.fl).filter(s => m.sel.has(s.k));
+  modal(`<h3>Новая бронь · ${esc(FLOORS[m.fl].short)}, ${seats.map(s => '№' + s.n).join(', ')}</h3><div class="a-form">
+    <label>Имя<input class="a-in" id="nName" placeholder="Как зовут клиента"></label>
+    <label>Телефон<input class="a-in" id="nPhone" inputmode="tel" placeholder="0555 123 456"></label>
+    <label>Статус<select class="a-in" id="nSt">${stOpts('confirmed')}</select></label>
+    <label>Когда<input class="a-in" value="${fmtD(m.date)}, ${m.time === 'Ночь' ? 'ночь' : m.time + ' · ' + m.dur + ' ч'}" disabled></label>
+    <label class="wide">Заметка<textarea class="a-in" id="nNote" placeholder="Например: придут вчетвером, нужна колонка"></textarea></label></div>
+    <div class="a-row"><button class="a-btn ghost" data-a="mno">Отмена</button><button class="a-btn red" data-a="nSave">Создать</button></div>`);
+  $('nName').focus();
+}
+
+/* ---------- КЛИЕНТЫ ---------- */
+function clientsList() {
+  const map = new Map();
+  db.bookings.forEach(b => { const key = (b.phone ? waNum(b.phone) : (b.name || '').toLowerCase()) || b.code; const c = map.get(key) || { name:b.name || 'Без имени', phone:b.phone, n:0, sum:0, last:'' , key};
+    if (Store.ACTIVE(b)) { c.n++; c.sum += b.total; } if (b.date > c.last) c.last = b.date; if (b.phone) c.phone = b.phone; if (b.name) c.name = b.name; map.set(key, c); });
+  let list = [...map.values()]; const q = A.cl.q.toLowerCase(); if (q) list = list.filter(c => (c.name + ' ' + c.phone).toLowerCase().includes(q));
+  return list.sort((a, b) => b.sum - a.sum);
+}
+function clientRows() {
+  const list = clientsList(); if (!list.length) return '<div class="a-empty">Клиентов пока нет. Они появятся из броней.</div>';
+  return `<div class="a-wrap"><table class="a-table"><thead><tr><th>Клиент</th><th>Телефон</th><th class="num">Визитов</th><th class="num">Потрачено</th><th>Последний визит</th><th></th></tr></thead><tbody>${list.map(c => `<tr>
+    <td data-l="Клиент"><b>${esc(c.name)}</b></td><td data-l="Телефон">${esc(c.phone || '—')}</td><td class="num" data-l="Визитов">${c.n}</td><td class="num" data-l="Потрачено">${money(c.sum)}</td><td data-l="Последний визит">${c.last ? fmtD(c.last) : '—'}</td>
+    <td><div class="acts"><button class="a-btn sm ghost" data-a="clBooks" data-q="${esc(c.phone || c.name)}">Брони</button></div></td></tr>`).join('')}</tbody></table></div>`;
+}
+const vClients = () => `<div class="a-bar"><input class="a-in grow" data-f="clQ" placeholder="Поиск по имени или телефону" value="${esc(A.cl.q)}"><span class="mini">Клиенты собираются из броней автоматически</span></div><div class="a-card" id="clRows" style="padding:8px 14px">${clientRows()}</div>`;
+
+/* ---------- ЦЕНЫ И АКЦИИ ---------- */
+function vPrices() {
+  return `<div class="a-sec"><h2>Цены по зонам</h2><div class="a-grid a-g2">${Object.entries(ZONES).map(([k, z]) => `<div class="a-card" style="border-top:3px solid ${z.color}"><h3>${esc(z.name)}<small>зона ${k}</small></h3><div class="a-form">
+    <label>Название<input class="a-in" data-z="${k}" data-p="name" value="${esc(z.name)}"></label>
+    <label>Цена за час, сом<input type="number" min="0" class="a-in" data-z="${k}" data-p="hour" value="${z.hour}"></label>
+    <label>Ночной пакет, сом<input type="number" min="0" class="a-in" data-z="${k}" data-p="night" value="${z.night}"></label><div></div>
+    <label class="wide">Характеристики (по одной в строке)<textarea class="a-in" data-z="${k}" data-p="specs">${esc(z.specs.join('\n'))}</textarea></label></div></div>`).join('')}</div></div>
+  <div class="a-sec"><h2>Акции «оплатите N часов, получите ещё»</h2><div class="a-card" id="promoBox">${promoRows()}</div></div>
+  <div class="a-row" style="justify-content:flex-start"><button class="a-btn red" data-a="savePrices">Сохранить цены и акции</button><button class="a-btn ghost" data-a="resetPrices">Вернуть исходные</button></div>
+  <div class="a-hint">Изменения сразу появятся на сайте: в тарифах, на схеме, в сумме и в сообщении для WhatsApp.</div>`;
+}
+const promoRows = () => `${Object.entries(PROMO).map(([h, b]) => `<div class="a-bar" style="margin-bottom:8px"><span>Оплачено</span><input type="number" min="1" class="a-in sm" style="width:80px" data-pr="h" value="${h}"><span>ч, в подарок</span><input type="number" min="1" class="a-in sm" style="width:80px" data-pr="b" value="${b}"><span>ч</span><button class="a-btn sm warn" data-a="promoDel" data-h="${h}">Убрать</button></div>`).join('') || '<div class="mini" style="margin-bottom:10px">Акций нет</div>'}<button class="a-btn sm ghost" data-a="promoAdd">Добавить акцию</button>`;
+function readPromo() { const out = {}; const hs = [...document.querySelectorAll('[data-pr="h"]')], bs = [...document.querySelectorAll('[data-pr="b"]')]; hs.forEach((e, i) => { const h = parseInt(e.value), b = parseInt(bs[i].value); if (h > 0 && b > 0) out[h] = b; }); return out; }
+function readPrices() { document.querySelectorAll('[data-z]').forEach(e => { const k = e.dataset.z, p = e.dataset.p; db.zones[k] = db.zones[k] || {}; db.zones[k][p] = p === 'specs' ? e.value.split('\n').map(s => s.trim()).filter(Boolean) : (p === 'name' ? e.value.trim() || ZONES[k].name : Math.max(0, +e.value || 0)); }); db.promo = readPromo(); }
+
+/* ---------- ЗАЛЫ И МЕСТА ---------- */
+const ORDER = () => ['.', ...Object.keys(ZONES)];
+function layoutOf(fi) { return FLOORS[fi].layout.map(r => [...r]); }
+function setLayout(fi, grid) { db.floors = db.floors || FLOORS.map(() => ({})); db.floors[fi] = db.floors[fi] || {}; db.floors[fi].layout = grid.map(r => r.join('')); Store.commit(`Изменена схема этажа ${fi + 1}`); }
+function orphanWarn(fi) { const keys = new Set(Store.seatsOf(fi).map(s => s.k)); const n = db.bookings.filter(b => b.floor === fi && Store.ACTIVE(b) && Store.dayNum(b.date) >= Store.dayNum(today()) && b.seats.some(s => !keys.has(s.k))).length; return n ? `<div class="a-hint bad">Внимание: ${n} буд. броней относятся к местам, которых больше нет на схеме.</div>` : ''; }
+function vHalls() {
+  const fi = A.hall.fl, f = FLOORS[fi], grid = layoutOf(fi), seats = Store.seatsOf(fi);
+  return `<div class="a-bar">${FLOORS.map((x, i) => `<button class="a-chip ${fi === i ? 'on' : ''}" data-a="hallFl" data-i="${i}">0${i + 1} ${esc(x.short)}</button>`).join('')}</div>
+  <div class="a-grid a-g2"><div class="a-card"><h3>Этаж ${fi + 1}</h3><div class="a-form"><label>Название зала<input class="a-in" id="hShort" value="${esc(f.short)}"></label><label>Подпись схемы (экран)<input class="a-in" id="hScreen" value="${esc(f.screen)}"></label></div>
+    <div class="a-row" style="justify-content:flex-start"><button class="a-btn" data-a="hallMeta">Сохранить названия</button></div></div>
+  <div class="a-card"><h3>Что делает клик по клетке</h3><div class="a-bar"><button class="a-chip ${A.hall.mode === 'zone' ? 'on' : ''}" data-a="hallMode" data-m="zone">Менять зону</button><button class="a-chip ${A.hall.mode === 'off' ? 'on' : ''}" data-a="hallMode" data-m="off">Вывести место из работы</button></div>
+    <div class="mini">${A.hall.mode === 'zone' ? 'Каждый клик переключает: пусто, Standard, VIP, Bootcamp, PS5.' : 'Место на обслуживании нельзя забронировать ни на сайте, ни в админке.'}</div></div></div>
+  <div class="a-card" style="margin-top:14px"><h3>Схема этажа<small>${seats.length} мест, из них на обслуживании ${seats.filter(s => Store.isDisabled(s.k)).length}</small></h3>
+    <div class="hall-grid" style="grid-template-columns:repeat(${grid[0].length},44px)">${grid.map((row, r) => row.map((ch, c) => { const s = seats.find(x => x.r === r && x.c === c); const off = s && Store.isDisabled(s.k);
+      return ch === '.' ? `<button class="e" data-a="cell" data-r="${r}" data-c="${c}" title="Пусто">+</button>` : `<button class="${off ? 'x' : ''}" style="--c:${ZONES[ch].color}" data-a="cell" data-r="${r}" data-c="${c}" title="${ZONES[ch].name}, место ${s.n}">${ch}<em>${s.n}</em></button>`; }).join('')).join('')}</div>
+    <div class="a-row" style="justify-content:flex-start"><button class="a-btn sm ghost" data-a="rowAdd">Добавить ряд</button><button class="a-btn sm ghost" data-a="rowDel">Убрать ряд</button><button class="a-btn sm ghost" data-a="colAdd">Добавить колонку</button><button class="a-btn sm ghost" data-a="colDel">Убрать колонку</button><button class="a-btn sm warn" data-a="hallReset">Вернуть исходную схему</button></div>${orphanWarn(fi)}
+    <div class="legend2">${Object.entries(ZONES).map(([k, z]) => `<span style="--c:${z.color}"><i></i>${k} · ${esc(z.name)}</span>`).join('')}</div></div>`;
+}
+
+/* ---------- НАСТРОЙКИ ---------- */
+function vSet() {
+  const C = CLUB, S = db.settings, fld = (k, l, ph = '') => `<label>${l}<input class="a-in" data-c="${k}" value="${esc(C[k] || '')}" placeholder="${ph}"></label>`;
+  return `<div class="a-sec"><h2>Данные клуба</h2><div class="a-card"><div class="a-form">${fld('name', 'Название на сайте')}${fld('sub', 'Подпись под названием')}${fld('city', 'Город')}${fld('address', 'Адрес')}${fld('hours', 'Режим работы')}${fld('phone', 'Телефон для показа', '0555 000 000')}${fld('wa', 'WhatsApp для заявок (цифры, без +)', '996555000000')}${fld('insta', 'Instagram (без @)')}</div>
+    <div class="a-row" style="justify-content:flex-start"><button class="a-btn red" data-a="saveClub">Сохранить данные клуба</button></div>
+    <div class="a-hint">Номер WhatsApp нужен, чтобы кнопка «Забронировать» открывала чат клуба с готовой заявкой. Название на вывеске здания обновится после перезагрузки страницы.</div></div></div>
+  <div class="a-sec"><h2>Шаблоны ответов клиентам</h2><div class="a-card"><div class="a-form"><label class="wide">Бронь подтверждена<textarea class="a-in" id="tConf" rows="6">${esc(S.msgConfirm)}</textarea></label><label class="wide">Бронь отменена<textarea class="a-in" id="tCanc" rows="4">${esc(S.msgCancel)}</textarea></label></div>
+    <div class="a-hint">Подстановки: {name} имя, {code} код, {floor} этаж, {seats} места, {date} дата, {time} время, {total} сумма, {address} адрес.</div>
+    <div class="a-row" style="justify-content:flex-start"><button class="a-btn red" data-a="saveTpl">Сохранить шаблоны</button></div></div></div>
+  <div class="a-sec"><h2>Доступ и режимы</h2><div class="a-card"><div class="a-form"><label>Новый PIN-код (минимум 4 цифры)<input class="a-in" id="newPin" inputmode="numeric" placeholder="Оставьте пустым, чтобы не менять"></label><div></div>
+    <label class="toggle wide"><input type="checkbox" data-f="demoLoad" ${S.demoLoad ? 'checked' : ''}> Показывать на сайте условную занятость (для демонстрации; настоящие брони видны всегда)</label></div>
+    <div class="a-row" style="justify-content:flex-start"><button class="a-btn" data-a="savePin">Сохранить PIN</button></div>
+    <div class="a-hint">В макете PIN проверяется в браузере и не защищает данные. В рабочей версии вход должен проверять сервер.</div></div></div>
+  <div class="a-sec"><h2>Данные</h2><div class="a-card"><div class="a-row" style="justify-content:flex-start;margin:0">
+    <button class="a-btn" data-a="seed">Заполнить демо-бронями</button><button class="a-btn ghost" data-a="exportJson">Резервная копия</button><button class="a-btn ghost" data-a="importJson">Восстановить из копии</button>
+    <button class="a-btn warn" data-a="clearBooks">Удалить все брони</button><button class="a-btn warn" data-a="resetAll">Сбросить цены и схему</button></div>
+    <div class="a-hint">Сейчас в базе: ${db.bookings.length} броней. Данные хранятся в этом браузере.</div></div></div>`;
+}
+
+/* ---------- ЖУРНАЛ ---------- */
+const vLog = () => `<div class="a-card" style="padding:8px 14px">${db.log.length ? db.log.map(l => `<div class="list-row"><span>${esc(l.text)}</span><small style="white-space:nowrap">${new Date(l.t).toLocaleString('ru-RU', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}</small></div>`).join('') : '<div class="a-empty">Событий пока нет</div>'}</div>`;
+
+const VIEW = { dash:vDash, book:vBook, map:vMap, clients:vClients, prices:vPrices, halls:vHalls, set:vSet, log:vLog };
+const AFTER = { map:drawMap };
+
+/* ---------- экспорт и демо ---------- */
+function csv() {
+  const q = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const head = ['Код', 'Создана', 'Источник', 'Статус', 'Имя', 'Телефон', 'Этаж', 'Места', 'Дата', 'Время', 'Часов', 'Подарок, ч', 'Сумма', 'Заметка'];
+  return [head.map(q).join(';'), ...bookFiltered().map(b => [b.code, new Date(b.createdAt).toLocaleString('ru-RU'), SRC[b.source] || b.source, STATUS[b.status].t, b.name, b.phone, FLOORS[b.floor].short, seatsTxt(b), b.date, b.time, b.dur, b.bonus, b.total, b.note].map(q).join(';'))].join('\n');
+}
+function seedDemo() {
+  const r = rngF(Date.now() % 100000), names = ['Айбек', 'Нурбек', 'Эрмек', 'Максат', 'Азамат', 'Тилек', 'Данияр', 'Бекзат', 'Адилет', 'Руслан', 'Эльдар', 'Артём', 'Санжар', 'Улан', 'Алмаз', 'Кайрат'];
+  const hoursP = [1, 2, 3, 5], nA = nowAbs(); let made = 0;
+  for (let off = -3; off <= 3; off++) { const d = new Date(); d.setDate(d.getDate() + off); const ds = iso(d);
+    FLOORS.forEach((f, fi) => { const seats = Store.seatsOf(fi).filter(s => !Store.isDisabled(s.k)), cnt = 4 + Math.floor(r() * 5);
+      for (let k = 0; k < cnt; k++) {
+        const night = r() < .12, time = night ? 'Ночь' : hh(10 + Math.floor(r() * 13)), dur = night ? 0 : hoursP[Math.floor(r() * 4)], bonus = night ? 0 : (PROMO[dur] || 0);
+        const iv = Store.interval({ date:ds, time, dur, bonus }), taken = Store.busy(fi, iv), free = seats.filter(s => !taken.has(s.k)); if (!free.length) continue;
+        const n = 1 + Math.floor(r() * Math.min(3, free.length)), st0 = Math.floor(r() * Math.max(1, free.length - n + 1)), pick = free.slice(st0, st0 + n);
+        let status; if (iv[1] <= nA) status = r() < .1 ? 'noshow' : r() < .1 ? 'cancelled' : 'done'; else if (iv[0] <= nA) status = 'arrived'; else status = r() < .06 ? 'cancelled' : r() < .3 ? 'new' : 'confirmed';
+        const seatsR = pick.map(s => ({ k:s.k, n:s.n, t:s.t, price:priceOf(s.t, time, dur) }));
+        db.bookings.push({ id:Store.uid(), code:Store.newCode(), createdAt:Date.now() - Math.floor(r() * 3e8), source:['site', 'site', 'whatsapp', 'admin'][Math.floor(r() * 4)], status, floor:fi, seats:seatsR, date:ds, time, dur, bonus,
+          name:names[Math.floor(r() * names.length)], phone:'0' + (r() < .5 ? '555' : '700') + ' ' + String(100 + Math.floor(r() * 899)) + ' ' + String(100 + Math.floor(r() * 899)), note:'', total:seatsR.reduce((a, s) => a + s.price, 0) }); made++;
+      } }); }
+  Store.log(`Загружены демо-брони (${made})`); Store.save(); toast(`Добавлено броней: ${made}`);
+}
+
+/* ---------- обработчики кликов ---------- */
+const ACT = {
+  tab:(t) => { A.tab = t.dataset.t; show(A.tab); },
+  goNew:(t, e) => { e.preventDefault(); A.bk.st = 'new'; A.bk.range = 'all'; A.bk.q = ''; show('book'); },
+  mno:() => { closeModal(); if (askRes) { askRes(false); askRes = null; } },
+  myes:() => { closeModal(); if (askRes) { askRes(true); askRes = null; } },
+  bkSt:(t) => { A.bk.st = t.dataset.v; show('book'); },
+  reply:(t) => openReply(t.dataset.id), edit:(t) => openEdit(t.dataset.id),
+  del:async (t) => { if (await ask('Удалить эту бронь без возможности восстановления?', 'Удалить')) { Store.removeBooking(t.dataset.id); toast('Бронь удалена'); } },
+  rCopy:() => copyText($('rTxt').value),
+  eRecalc:(t) => { const b = db.bookings.find(x => x.id === t.dataset.id), v = eVals(); $('eTotal').value = b.seats.reduce((a, s) => a + priceOf(s.t, v.time, v.dur || 1), 0); },
+  eSave:(t) => { const b = db.bookings.find(x => x.id === t.dataset.id), v = eVals(); if (!v.date) { $('eErr').textContent = 'Укажите дату'; return; }
+    const taken = Store.busy(b.floor, Store.interval({ ...v }), b.id), clash = b.seats.filter(s => taken.has(s.k)); const st = $('eSt').value;
+    if (Store.ACTIVE({ status:st }) && clash.length) { $('eErr').className = 'a-hint bad'; $('eErr').textContent = 'Эти места уже заняты на это время: ' + clash.map(s => '№' + s.n).join(', '); return; }
+    Store.updateBooking(b.id, { name:$('eName').value.trim(), phone:$('ePhone').value.trim(), note:$('eNote').value.trim(), status:st, total:Math.max(0, +$('eTotal').value || 0), ...v }, 'изменена'); closeModal(); toast('Сохранено'); },
+  export:() => { modal(`<h3>Экспорт броней (CSV)</h3><textarea class="a-in" id="csvTxt" rows="12" readonly>${esc(csv())}</textarea><div class="a-hint">Выгружается то, что видно в таблице с учётом фильтров. Откроется в Excel и Google Таблицах.</div>
+    <div class="a-row"><button class="a-btn ghost" data-a="mno">Закрыть</button><button class="a-btn" data-a="csvCopy">Скопировать</button><button class="a-btn red" data-a="csvDl">Скачать файл</button></div>`); },
+  csvCopy:() => copyText($('csvTxt').value),
+  csvDl:() => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + $('csvTxt').value], { type:'text/csv;charset=utf-8' })); a.download = 'bookings.csv'; a.click(); toast('Если файл не скачался, воспользуйтесь кнопкой «Скопировать»'); },
+  mapFl:(t) => { A.map.fl = +t.dataset.i; A.map.sel.clear(); show('map'); },
+  mapNow:() => { A.map.date = today(); A.map.time = nowHour(); A.map.sel.clear(); show('map'); },
+  seat:(t) => { const bid = t.dataset.bid; if (bid) { openEdit(bid); return; } const k = t.dataset.k; if (Store.isDisabled(k)) { toast('Это место на обслуживании'); return; } A.map.sel.has(k) ? A.map.sel.delete(k) : A.map.sel.add(k); drawMap(); },
+  selClear:() => { A.map.sel.clear(); drawMap(); },
+  newBook:() => openNew(),
+  nSave:() => { const m = A.map, seats = Store.seatsOf(m.fl).filter(s => m.sel.has(s.k)); if (!seats.length) return; const seatsR = seats.map(s => ({ k:s.k, n:s.n, t:s.t, price:priceOf(s.t, m.time, m.dur) }));
+    Store.addBooking({ source:'admin', status:$('nSt').value, floor:m.fl, seats:seatsR, date:m.date, time:m.time, dur:m.time === 'Ночь' ? 0 : m.dur, bonus:bonusFor(m.time, m.dur), name:$('nName').value.trim(), phone:$('nPhone').value.trim(), note:$('nNote').value.trim(), total:seatsR.reduce((a, s) => a + s.price, 0) });
+    m.sel.clear(); closeModal(); toast('Бронь создана'); },
+  clBooks:(t) => { A.bk = { st:'all', range:'all', q:t.dataset.q }; show('book'); },
+  promoAdd:() => { const cur = readPromo(); let h = 2; while (cur[h]) h++; cur[h] = 1; Object.keys(PROMO).forEach(k => delete PROMO[k]); Object.assign(PROMO, cur); $('promoBox').innerHTML = promoRows(); },
+  promoDel:(t) => { const cur = readPromo(); delete cur[t.dataset.h]; Object.keys(PROMO).forEach(k => delete PROMO[k]); Object.assign(PROMO, cur); $('promoBox').innerHTML = promoRows(); },
+  savePrices:() => { readPrices(); Store.commit('Изменены цены и акции'); toast('Цены сохранены'); show('prices'); },
+  resetPrices:async () => { if (await ask('Вернуть исходные цены и акции?', 'Вернуть')) { db.zones = {}; db.promo = null; Store.commit('Цены сброшены'); show('prices'); } },
+  hallFl:(t) => { A.hall.fl = +t.dataset.i; show('halls'); },
+  hallMode:(t) => { A.hall.mode = t.dataset.m; show('halls'); },
+  hallMeta:() => { const fi = A.hall.fl; db.floors = db.floors || FLOORS.map(() => ({})); db.floors[fi] = { ...(db.floors[fi] || {}), short:$('hShort').value.trim(), screen:$('hScreen').value.trim() }; Store.commit('Изменены названия этажа ' + (fi + 1)); toast('Сохранено'); show('halls'); },
+  cell:(t) => { const fi = A.hall.fl, r = +t.dataset.r, c = +t.dataset.c, grid = layoutOf(fi);
+    if (A.hall.mode === 'off') { if (grid[r][c] === '.') return; const k = `${fi}-${r}-${c}`; const i = db.disabled.indexOf(k); i >= 0 ? db.disabled.splice(i, 1) : db.disabled.push(k); Store.commit(`Место ${k} ${i >= 0 ? 'возвращено в работу' : 'выведено из работы'}`); }
+    else { const o = ORDER(); grid[r][c] = o[(o.indexOf(grid[r][c]) + 1) % o.length]; setLayout(fi, grid); }
+    show('halls'); },
+  rowAdd:() => { const g = layoutOf(A.hall.fl); g.push(g[0].map(() => '.')); setLayout(A.hall.fl, g); show('halls'); },
+  rowDel:() => { const g = layoutOf(A.hall.fl); if (g.length > 1) { g.pop(); setLayout(A.hall.fl, g); show('halls'); } },
+  colAdd:() => { const g = layoutOf(A.hall.fl); g.forEach(r => r.push('.')); setLayout(A.hall.fl, g); show('halls'); },
+  colDel:() => { const g = layoutOf(A.hall.fl); if (g[0].length > 1) { g.forEach(r => r.pop()); setLayout(A.hall.fl, g); show('halls'); } },
+  hallReset:async () => { if (await ask('Вернуть исходную схему этого этажа?', 'Вернуть')) { const fi = A.hall.fl; if (db.floors && db.floors[fi]) delete db.floors[fi].layout; db.disabled = db.disabled.filter(k => !k.startsWith(fi + '-')); Store.commit('Схема этажа ' + (fi + 1) + ' возвращена'); show('halls'); } },
+  saveClub:() => { const o = {}; document.querySelectorAll('[data-c]').forEach(e => o[e.dataset.c] = e.value.trim()); o.wa = (o.wa || '').replace(/\D/g, ''); db.club = o; Store.commit('Изменены данные клуба'); toast('Данные клуба сохранены'); show('set'); },
+  saveTpl:() => { db.settings.msgConfirm = $('tConf').value; db.settings.msgCancel = $('tCanc').value; Store.commit('Изменены шаблоны ответов'); toast('Шаблоны сохранены'); },
+  savePin:() => { const p = $('newPin').value.trim(); if (!p) { toast('Введите новый PIN'); return; } if (!/^\d{4,}$/.test(p)) { toast('PIN: минимум 4 цифры'); return; } db.settings.pin = p; Store.commit('Изменён PIN'); toast('PIN изменён'); $('newPin').value = ''; },
+  seed:async () => { if (await ask('Добавить демонстрационные брони на несколько дней?', 'Добавить')) seedDemo(); },
+  clearBooks:async () => { if (await ask('Удалить ВСЕ брони? Это действие нельзя отменить.', 'Удалить всё')) { db.bookings = []; Store.log('Удалены все брони'); Store.save(); toast('Брони удалены'); } },
+  resetAll:async () => { if (await ask('Сбросить цены, акции, схему этажей и названия к исходным?', 'Сбросить')) { Store.resetConfig(); toast('Сброшено'); show('set'); } },
+  exportJson:() => modal(`<h3>Резервная копия</h3><textarea class="a-in" id="jsonTxt" rows="12" readonly>${esc(JSON.stringify(db))}</textarea><div class="a-hint">Сохраните этот текст. Из него можно восстановить все брони и настройки.</div><div class="a-row"><button class="a-btn ghost" data-a="mno">Закрыть</button><button class="a-btn red" data-a="jsonCopy">Скопировать</button></div>`),
+  jsonCopy:() => copyText($('jsonTxt').value),
+  importJson:() => modal(`<h3>Восстановить из копии</h3><textarea class="a-in" id="jsonIn" rows="10" placeholder="Вставьте текст резервной копии"></textarea><div class="a-hint bad" id="jsonErr"></div><div class="a-row"><button class="a-btn ghost" data-a="mno">Отмена</button><button class="a-btn red" data-a="jsonGo">Восстановить</button></div>`),
+  jsonGo:() => { try { const o = JSON.parse($('jsonIn').value); if (!o || !Array.isArray(o.bookings)) throw new Error('bad'); ['bookings', 'club', 'zones', 'promo', 'floors', 'disabled', 'log'].forEach(k => { if (k in o) db[k] = o[k]; }); if (o.settings) Object.assign(db.settings, o.settings); Store.commit('Данные восстановлены из копии'); closeModal(); toast('Восстановлено'); show('set'); } catch (e) { $('jsonErr').textContent = 'Не удалось прочитать копию. Проверьте, что текст вставлен целиком.'; } },
+  logout:() => { setAuth(false); location.hash = ''; },
+};
+$('admin').addEventListener('click', (e) => { const t = e.target.closest('[data-a]'); if (!t) { if (e.target === $('aModal')) { closeModal(); if (askRes) { askRes(false); askRes = null; } } return; } const f = ACT[t.dataset.a]; if (f) f(t, e); });
+$('admin').addEventListener('change', (e) => { const t = e.target, f = t.dataset.f; if (!f) return;
+  if (f === 'status') { const b = db.bookings.find(x => x.id === t.dataset.id); if (!b) return;
+    if (Store.ACTIVE({ status:t.value }) && !Store.ACTIVE(b)) { const taken = Store.busy(b.floor, Store.interval(b), b.id); const clash = b.seats.filter(s => taken.has(s.k)); if (clash.length) { toast('Нельзя вернуть: места уже заняты другой бронью'); t.value = b.status; return; } }
+    Store.updateBooking(b.id, { status:t.value }, 'статус: ' + STATUS[t.value].t); toast('Статус: ' + STATUS[t.value].t); }
+  if (f === 'bkRange') { A.bk.range = t.value; $('bkRows').innerHTML = bookRows(); }
+  if (f === 'mapDate') { A.map.date = t.value || today(); A.map.sel.clear(); drawMap(); }
+  if (f === 'mapTime') { A.map.time = t.value; A.map.sel.clear(); show('map'); }
+  if (f === 'mapDur') { A.map.dur = +t.value; A.map.sel.clear(); drawMap(); }
+  if (f === 'demoLoad') { db.settings.demoLoad = t.checked; Store.commit('Демо-занятость на сайте: ' + (t.checked ? 'вкл' : 'выкл')); } });
+$('admin').addEventListener('input', (e) => { const t = e.target, f = t.dataset.f; if (f === 'bkQ') { A.bk.q = t.value; $('bkRows').innerHTML = bookRows(); } if (f === 'clQ') { A.cl.q = t.value; $('clRows').innerHTML = clientRows(); } });
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('aModal').hidden) { closeModal(); if (askRes) { askRes(false); askRes = null; } } });
+document.addEventListener('club:changed', () => { if (!$('aModal').hidden) { renderNav(); return; } refresh(); });
+addEventListener('hashchange', route); route();
 </script>
 </body>
 </html>
