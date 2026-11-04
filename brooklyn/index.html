@@ -5,740 +5,716 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Brooklyn Cyber Arena</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#030308; --panel:rgba(12,12,24,.78); --line:rgba(255,255,255,.08); --text:#eef0ff; --muted:#8a8fb3;
-  --cyan:#22e6ff; --pink:#ff2bd6; --violet:#a78bfa; --amber:#ffb020; --busy:#2a2b3d;
-  --accent:var(--cyan); --s:44px;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,sans-serif;overflow:hidden}
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-canvas#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-
-/* ---------- loader ---------- */
-#loader{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:var(--bg);transition:opacity .8s}
-#loader.hide{opacity:0;pointer-events:none}
-#loader .logo{font-family:Unbounded;font-weight:800;font-size:clamp(28px,6vw,56px);letter-spacing:.12em;color:#ffe3fa;
-  text-shadow:0 0 8px var(--pink),0 0 24px var(--pink),0 0 60px var(--pink);animation:flick 2.4s infinite}
-#loader small{display:block;text-align:center;margin-top:14px;color:var(--muted);letter-spacing:.3em;font-size:11px}
-@keyframes flick{0%,18%,22%,62%,64%,100%{opacity:1}20%,63%{opacity:.35}}
-
-/* ---------- top bar ---------- */
-#top{position:fixed;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;
-  padding:18px clamp(16px,4vw,40px);pointer-events:none}
-#top>*{pointer-events:auto}
-.brand{font-family:Unbounded;font-weight:800;letter-spacing:.14em;font-size:18px;color:#ffe3fa;
-  text-shadow:0 0 6px var(--pink),0 0 20px var(--pink)}
-.brand span{color:var(--cyan);text-shadow:0 0 6px var(--cyan),0 0 18px var(--cyan);font-size:11px;letter-spacing:.3em;margin-left:10px;vertical-align:middle}
-nav{display:flex;gap:28px;font-size:13px;color:var(--muted)}
-nav a{color:inherit;text-decoration:none;transition:color .2s}
-nav a:hover{color:var(--text)}
-.btn{padding:11px 20px;border-radius:999px;font-weight:700;font-size:13px;letter-spacing:.04em;
-  background:linear-gradient(90deg,var(--pink),#7c3aed);box-shadow:0 0 24px rgba(255,43,214,.45);transition:transform .2s,box-shadow .2s}
-.btn:hover{transform:translateY(-1px);box-shadow:0 0 36px rgba(255,43,214,.7)}
-@media (max-width:820px){nav{display:none}}
-
-/* ---------- hero ---------- */
-#hero{position:fixed;left:clamp(16px,4vw,40px);bottom:clamp(20px,5vh,48px);z-index:5;max-width:460px;pointer-events:none;transition:opacity .5s}
-#hero .kicker{font-size:11px;letter-spacing:.35em;color:var(--cyan);text-shadow:0 0 10px var(--cyan);margin-bottom:14px}
-#hero h1{font-family:Unbounded;font-weight:800;font-size:clamp(28px,4.4vw,52px);line-height:1.05;letter-spacing:-.01em}
-#hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--cyan),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
-#hero p{margin-top:16px;color:var(--muted);font-size:15px;line-height:1.55}
-#hero .hint{display:inline-flex;align-items:center;gap:10px;margin-top:20px;font-size:13px;color:var(--text)}
-#hero .hint i{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 0 var(--cyan);animation:ping 1.6s infinite}
-@keyframes ping{0%{box-shadow:0 0 0 0 rgba(34,230,255,.7)}100%{box-shadow:0 0 0 14px rgba(34,230,255,0)}}
-
-/* ---------- floor rail ---------- */
-#rail{position:fixed;right:clamp(16px,4vw,40px);top:50%;transform:translateY(-50%);z-index:5;display:flex;flex-direction:column;gap:10px;transition:opacity .5s}
-#rail button{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:rgba(12,12,24,.55);
-  border:1px solid var(--line);backdrop-filter:blur(8px);text-align:left;transition:border-color .2s,background .2s,transform .2s}
-#rail button:hover,#rail button.on{border-color:var(--c);background:rgba(20,20,40,.75);transform:translateX(-4px)}
-#rail b{font-family:Unbounded;font-size:20px;color:var(--c);text-shadow:0 0 12px var(--c)}
-#rail span{font-size:12px;line-height:1.3}
-#rail span small{display:block;color:var(--muted)}
-@media (max-width:820px){
-  #rail{top:auto;bottom:16px;right:16px;left:16px;transform:none;flex-direction:row}
-  #rail button{flex:1;padding:10px;justify-content:center}#rail span{display:none}
-  #hero{bottom:96px}#hero p,#hero .addr{display:none}#hero .promo{font-size:11px}
-}
-
-/* ---------- 3D labels ---------- */
-.lbl{position:fixed;left:0;top:0;z-index:4;pointer-events:auto;cursor:pointer;white-space:nowrap;
-  font-size:11px;font-weight:800;letter-spacing:.18em;padding:6px 10px 6px 8px;border-radius:8px;
-  background:rgba(5,5,12,.7);border:1px solid var(--c);color:var(--text);box-shadow:0 0 18px -4px var(--c);
-  transition:opacity .4s,background .2s;display:flex;align-items:center;gap:8px}
-.lbl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}
-.lbl:hover,.lbl.on{background:rgba(25,25,50,.9)}
-.lbl small{font-weight:600;letter-spacing:.04em;color:var(--muted)}
-
-/* ---------- booking overlay ---------- */
-#booking{position:fixed;inset:0;z-index:20;display:none;opacity:0;transition:opacity .5s;
-  background:radial-gradient(120% 80% at 50% 0%,rgba(30,10,50,.55),rgba(3,3,8,.88));backdrop-filter:blur(16px) saturate(1.2);overflow-y:auto;overflow-x:hidden}
-#booking.show{opacity:1}
-.bk-wrap{max-width:1240px;margin:0 auto;padding:22px clamp(16px,3vw,32px) 40px}
-.bk-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}
-.back{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid var(--line);font-size:13px;background:rgba(255,255,255,.03)}
-.back:hover{border-color:rgba(255,255,255,.25)}
-.tabs{display:flex;gap:6px;padding:5px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line);margin-left:auto;overflow-x:auto;max-width:100%}
-.tabs button{padding:9px 16px;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;transition:.2s}
-.tabs button.on{color:#05050c;background:var(--c);box-shadow:0 0 20px -2px var(--c)}
-.bk-title{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px}
-.bk-title h2{font-family:Unbounded;font-weight:800;font-size:clamp(24px,3.4vw,40px);line-height:1}
-.bk-title h2 small{display:block;font-family:Manrope;font-size:12px;letter-spacing:.3em;color:var(--accent);text-shadow:0 0 10px var(--accent);margin-bottom:10px;font-weight:800}
-.bk-title p{color:var(--muted);font-size:14px;margin-top:10px}
-.stat{display:flex;gap:26px}
-.stat div{font-size:12px;color:var(--muted)}
-.stat b{display:block;font-family:Unbounded;font-size:24px;color:var(--text)}
-.stat b.acc{color:var(--accent);text-shadow:0 0 14px var(--accent)}
-
-.bk-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
-@media (max-width:980px){.bk-grid{grid-template-columns:minmax(0,1fr)}}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:22px}
-
-/* room */
-.room{position:relative;padding:8px 0 4px;overflow-x:auto}
-.screen{margin:0 auto 34px;width:78%;height:46px;border-radius:50% 50% 0 0/100% 100% 0 0;border-top:3px solid var(--accent);
-  box-shadow:0 -10px 40px -10px var(--accent);position:relative;text-align:center;padding-top:14px;font-size:10px;letter-spacing:.4em;color:var(--muted)}
-.screen::after{content:"";position:absolute;inset:-3px 0 auto;height:40px;border-radius:inherit;background:linear-gradient(var(--accent),transparent);opacity:.12}
-.seats{display:grid;gap:9px;justify-content:safe center;margin:0 auto}
-.seat{width:var(--s);height:var(--s);border-radius:11px;position:relative;display:grid;place-items:center;
-  border:1.5px solid color-mix(in srgb,var(--c) 55%,transparent);background:color-mix(in srgb,var(--c) 8%,transparent);
-  transition:transform .15s,background .2s,box-shadow .2s,border-color .2s}
-.seat svg{width:20px;height:20px;stroke:var(--c);opacity:.9}
-.seat em{position:absolute;bottom:2px;right:4px;font-style:normal;font-size:9px;font-weight:800;color:var(--muted)}
-.seat:hover:not(:disabled){transform:translateY(-2px) scale(1.06);background:color-mix(in srgb,var(--c) 22%,transparent);box-shadow:0 0 18px -4px var(--c)}
-.seat.sel{background:var(--c);border-color:var(--c);box-shadow:0 0 26px -2px var(--c),inset 0 0 12px rgba(255,255,255,.4);animation:pop .3s}
-.seat.sel svg{stroke:#05050c}.seat.sel em{color:#05050c}
-.seat:disabled{cursor:not-allowed;border-color:transparent;
-  background:repeating-linear-gradient(45deg,#1b1c2a 0 5px,#222335 5px 10px)}
-.seat:disabled svg{stroke:#3d3f58}.seat:disabled em{color:#3d3f58}
-.seat.wide{width:auto;grid-column:span 2}
-.gap{width:var(--s);height:var(--s)}
-@keyframes pop{50%{transform:scale(1.15)}}
-.reception{margin:30px auto 0;width:max-content;padding:9px 20px;border-radius:10px;border:1px dashed rgba(255,255,255,.18);font-size:10px;letter-spacing:.35em;color:var(--muted)}
-.legend{display:flex;flex-wrap:wrap;gap:16px 22px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
-.legend span{display:flex;align-items:center;gap:8px}
-.legend i{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 15%,transparent)}
-.legend i.busy{border-color:transparent;background:repeating-linear-gradient(45deg,#1b1c2a 0 3px,#2a2b40 3px 6px)}
-.legend i.sel{background:var(--c);box-shadow:0 0 10px var(--c)}
-.legend b{color:var(--text)}
-
-/* sidebar */
-.side{position:sticky;top:20px;display:flex;flex-direction:column;gap:20px}
-.side h4{font-size:11px;letter-spacing:.28em;color:var(--muted);margin-bottom:12px;font-weight:800}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
-.chips.wrap{flex-wrap:wrap}
-.chip{flex:none;padding:9px 13px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13px;font-weight:700;transition:.15s;text-align:center}
-.chip small{display:block;font-size:10px;color:var(--muted);font-weight:600;margin-bottom:2px}
-.chip:hover:not(:disabled){border-color:rgba(255,255,255,.3)}
-.chip.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent);box-shadow:0 0 16px -6px var(--accent)}
-.chip:disabled{opacity:.28;cursor:not-allowed}
-.sum-list{display:flex;flex-direction:column;gap:8px;max-height:180px;overflow:auto;margin-bottom:14px}
-.sum-list .row{display:flex;justify-content:space-between;font-size:13px;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.035)}
-.sum-list .row span{color:var(--muted)}
-.empty{font-size:13px;color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:12px;text-align:center;margin-bottom:14px}
-.total{display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;border-top:1px solid var(--line);margin-bottom:16px}
-.total span{color:var(--muted);font-size:13px}
-.total b{font-family:Unbounded;font-size:26px}
-input.f{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--text);font:inherit;font-size:14px;margin-bottom:10px;outline:none;transition:border-color .2s}
-input.f:focus{border-color:var(--accent)}
-input.f.err{border-color:#ff4d6d;animation:shake .35s}
-@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.cta{width:100%;padding:16px;border-radius:14px;font-weight:800;font-size:15px;color:#05050c;
-  background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 50%,#fff));box-shadow:0 0 30px -6px var(--accent);transition:.2s}
-.cta:disabled{background:#1d1e2e;color:#555874;box-shadow:none;cursor:not-allowed}
-.cta:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 0 40px -4px var(--accent)}
-.note{font-size:11px;color:var(--muted);margin-top:10px;text-align:center}
-
-/* modal */
-#modal{position:fixed;inset:0;z-index:40;display:none;place-items:center;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);padding:16px}
-#modal.show{display:grid}
-.ticket{width:min(400px,100%);border-radius:24px;background:linear-gradient(160deg,#141428,#0a0a16);border:1px solid var(--line);
-  padding:28px;text-align:center;box-shadow:0 0 80px -20px var(--accent);animation:rise .45s cubic-bezier(.2,.9,.3,1.2)}
-@keyframes rise{from{transform:translateY(30px) scale(.95);opacity:0}}
-.ok{width:64px;height:64px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;background:var(--accent);box-shadow:0 0 40px var(--accent)}
-.ticket h3{font-family:Unbounded;font-size:22px;margin-bottom:6px}
-.ticket .code{font-family:Unbounded;font-size:28px;letter-spacing:.12em;color:var(--accent);text-shadow:0 0 18px var(--accent);margin:18px 0 6px}
-.ticket canvas{width:132px;height:132px;image-rendering:pixelated;border-radius:10px;background:#fff;padding:8px;margin:14px auto;display:block}
-.ticket dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;text-align:left;font-size:13px;margin:16px 0 22px;padding:16px;border-radius:14px;background:rgba(255,255,255,.04)}
-.ticket dt{color:var(--muted)}.ticket dd{text-align:right;font-weight:700}
-.ticket p{font-size:12px;color:var(--muted)}
-#hero .addr{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:14px;font-size:13px;color:var(--text)}
-#hero .promo{display:inline-block;margin-top:14px;padding:8px 12px;border-radius:10px;font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--amber);border:1px solid rgba(255,176,32,.4);background:rgba(255,176,32,.08)}
-.cta.wa{display:block;text-decoration:none;margin-bottom:10px;background:linear-gradient(90deg,#25d366,#7dffb0);box-shadow:0 0 30px -8px #25d366;color:#05250f}
-.foot{position:fixed;left:50%;transform:translateX(-50%);top:70px;z-index:5;font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.25);pointer-events:none;white-space:nowrap}
-@media (max-width:820px){.foot{display:none}}
-@media (max-width:600px){:root{--s:26px}.seats{gap:4px}.seat{border-radius:7px}.seat svg{display:none}.seat em{position:static;font-size:10px;color:var(--text)}.screen{font-size:8px;letter-spacing:.25em}.card{padding:16px}.stat{gap:18px}.brand span{display:none}.screen{width:92%}}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
-/* ===== Данные клуба — правьте здесь ===== */
+/* =====================================================================
+   ВСЕ ДАННЫЕ КЛУБА — ПРАВЬТЕ ТОЛЬКО ЭТОТ БЛОК
+   ===================================================================== */
 window.CLUB = {
   name: 'BROOKLYN',
-  sub: 'CYBER ARENA · ОШ',
-  city: 'ОШ',
+  full: 'Brooklyn Cyber Arena',
+  sub: 'CYBER ARENA',
+  city: 'Ош',
   address: 'Курманжан Датка 278А, Ош',
+  hours: 'Круглосуточно · без выходных',
   phone: '0555 020 206',
-  wa: '996555020206',          // номер для WhatsApp, пусто = кнопки нет
+  wa: '996555020206',            // номер WhatsApp без +. Пусто — вместо WhatsApp покажется текст брони
   insta: 'brooklyn_kgz',
+  map: 'https://2gis.kg/osh/search/%D0%9A%D1%83%D1%80%D0%BC%D0%B0%D0%BD%D0%B6%D0%B0%D0%BD%20%D0%94%D0%B0%D1%82%D0%BA%D0%B0%20278%D0%90',
 };
+/* Зоны и цены (сом). ЗАМЕНИТЕ на прайс клуба */
+window.ZONES = {
+  S: { name:'Standard',   hour:60,  night:300, color:'#22d3ee', icon:'pc',  specs:['RTX 4060','165 Гц','Игровые кресла'] },
+  V: { name:'VIP',        hour:100, night:450, color:'#a78bfa', icon:'pc',  specs:['RTX 4070 Super','240 Гц','Кресла премиум'] },
+  B: { name:'Bootcamp',   hour:120, night:500, color:'#f472b6', icon:'pc',  specs:['Комната на 5','RTX 4070','Своя колонка'] },
+  P: { name:'PS5',        hour:150, night:600, color:'#fbbf24', icon:'pad', specs:['PS5 + 2 геймпада','ТВ 65"','Диван'] },
+};
+window.PROMO = { 3:1, 5:1 };     // акция: 3 часа +1, 5 часов +1
+window.NIGHT = '00:00–08:00';
+/* Схема мест по этажам: буква — зона, точка — проход */
+window.FLOORS = [
+  { name:'Первый этаж', short:'Standard Hall', color:'#22d3ee', screen:'СТРИМ-ЭКРАН',
+    layout:['SSSSS.SSSSS','SSSSS.SSSSS','...........','SSSSS.SSSSS','SSSSS.SSSSS'] },
+  { name:'Второй этаж', short:'VIP Zone', color:'#a78bfa', screen:'ПАНОРАМНЫЕ ОКНА',
+    layout:['VVVV..VVVV','VVVV..VVVV','..........','VVVV..VVVV'] },
+  { name:'Третий этаж', short:'Bootcamp & PS5', color:'#f472b6', screen:'КОМАНДНЫЕ КОМНАТЫ · PS5',
+    layout:['BBBBB..P.P','BBBBB.....','..........','BBBBB..P.P','BBBBB.....'] },
+];
 </script>
+<style>
+/* Ночной неон: тёмно-синяя база бренда, неон по этажам, сетка 1200px */
+:root{
+  --bg:#05060d; --bg2:#0a0c18; --card:#0d1020; --line:rgba(150,165,255,.12); --line2:rgba(150,165,255,.22);
+  --text:#eef1ff; --muted:#8d94ba; --blue:#4c6fff; --violet:#8b5cf6; --cyan:#22d3ee; --pink:#f472b6; --amber:#fbbf24; --wa:#25d366;
+  --accent:var(--cyan); --s:42px;
+  --display:'Unbounded',system-ui,sans-serif; --body:'Manrope',system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;letter-spacing:-.01em}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--accent)}
+.sec{padding-block:clamp(64px,10vw,120px)}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:40px}
+.sec-head h2{font-size:clamp(28px,4.2vw,48px);line-height:1.05;margin-top:12px}
+.sec-head p{color:var(--muted);max-width:420px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 22px;border-radius:14px;font-weight:800;font-size:15px;text-decoration:none;transition:transform .15s,box-shadow .2s,background .2s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn-main{background:linear-gradient(90deg,var(--blue),var(--violet));box-shadow:0 10px 30px -10px var(--blue)}
+.btn-main:hover{box-shadow:0 14px 40px -10px var(--violet)}
+.btn-ghost{border:1px solid var(--line2);background:rgba(255,255,255,.03)}
+.btn-ghost:hover{border-color:rgba(255,255,255,.4)}
+.btn-wa{background:var(--wa);color:#062b14}
+.btn-wa svg{width:18px;height:18px}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:30;background:rgba(5,6,13,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.nav .wrap{display:flex;align-items:center;gap:28px;height:68px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo i{width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2a3a9a,#0b1240);display:grid;place-items:center;font-style:normal;font-family:var(--display);font-weight:800;font-size:15px;box-shadow:0 0 0 1px rgba(255,255,255,.15),0 0 18px -4px var(--blue)}
+.logo b{font-family:var(--display);font-weight:800;letter-spacing:.08em;font-size:16px}
+.logo small{display:block;font-size:9px;letter-spacing:.32em;color:var(--muted);font-weight:700}
+.nav nav{display:flex;gap:26px;margin-left:auto;font-size:14px;font-weight:600;color:var(--muted)}
+.nav nav a{text-decoration:none}.nav nav a:hover{color:var(--text)}
+.nav .btn{padding:10px 16px;font-size:13px}
+@media (max-width:860px){.nav nav{display:none}.nav .btn-book{margin-left:auto}}
+
+/* hero */
+.hero{position:relative;overflow:hidden;padding-block:clamp(56px,9vw,110px) clamp(48px,7vw,90px)}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(60% 70% at 85% 20%,rgba(76,111,255,.28),transparent 60%),
+  radial-gradient(50% 60% at 10% 90%,rgba(139,92,246,.22),transparent 60%);pointer-events:none}
+.hero::after{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:56px 56px;mask-image:radial-gradient(70% 80% at 70% 30%,#000 20%,transparent 75%);-webkit-mask-image:radial-gradient(70% 80% at 70% 30%,#000 20%,transparent 75%);opacity:.5;pointer-events:none}
+.hero .wrap{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.85fr);gap:48px;align-items:center}
+@media (max-width:900px){.hero .wrap{grid-template-columns:minmax(0,1fr)}}
+.badge{display:inline-flex;align-items:center;gap:10px;padding:7px 14px 7px 10px;border-radius:999px;border:1px solid var(--line2);background:rgba(255,255,255,.03);font-size:13px;font-weight:700}
+.badge i{width:8px;height:8px;border-radius:50%;background:var(--wa);box-shadow:0 0 0 4px rgba(37,211,102,.18)}
+.hero h1{font-size:clamp(38px,6.4vw,78px);line-height:.98;font-weight:800;margin:22px 0 22px}
+.hero h1 span{background:linear-gradient(90deg,var(--cyan),var(--blue) 45%,var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lead{font-size:clamp(16px,1.6vw,19px);color:var(--muted);max-width:520px}
+.hero .ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin-top:44px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--line)}
+.facts div{background:var(--bg2);padding:16px 18px}
+.facts b{display:block;font-family:var(--display);font-size:22px;font-weight:700}
+.facts span{font-size:12px;color:var(--muted)}
+@media (max-width:600px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.live{background:linear-gradient(160deg,rgba(20,24,52,.9),rgba(10,12,24,.9));border:1px solid var(--line2);border-radius:24px;padding:24px;box-shadow:0 30px 80px -30px rgba(76,111,255,.45)}
+.live h3{font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.live h3 small{font-family:var(--body);font-size:12px;color:var(--muted);font-weight:600}
+.live-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.live-row:last-of-type{border-bottom:0}
+.live-row .n{font-family:var(--display);font-size:22px;font-weight:800;color:var(--c);width:44px}
+.live-row .t{font-size:14px;font-weight:700}.live-row .t small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.bar{height:6px;border-radius:9px;background:rgba(255,255,255,.07);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:inherit;background:var(--c)}
+.live-row .f{text-align:right;font-variant-numeric:tabular-nums;font-weight:800}
+.live-row .f small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.live .btn{width:100%;margin-top:16px}
+
+/* floors / 3D */
+.floors{position:relative;background:linear-gradient(var(--bg),#04050b 30%,#04050b 70%,var(--bg))}
+.stage{position:relative;height:min(82vh,760px);min-height:520px;border-radius:28px;overflow:hidden;border:1px solid var(--line);background:#05060d}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:grab}
+.stage canvas:active{cursor:grabbing}
+.stage .hint{position:absolute;left:20px;bottom:18px;font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;pointer-events:none}
+.stage .hint i{width:8px;height:8px;border-radius:50%;background:var(--cyan);animation:ping 1.6s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(34,211,238,.6)}100%{box-shadow:0 0 0 12px rgba(34,211,238,0)}}
+.lbl{position:absolute;left:0;top:0;z-index:2;display:flex;align-items:center;gap:8px;padding:6px 10px 6px 8px;border-radius:9px;white-space:nowrap;
+  background:rgba(5,6,13,.78);border:1px solid var(--c);font-size:11px;font-weight:800;letter-spacing:.14em;box-shadow:0 0 16px -6px var(--c);transition:opacity .25s;will-change:transform}
+.lbl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c)}
+.lbl small{letter-spacing:.02em;color:var(--muted);font-weight:600}
+.flist{position:absolute;right:18px;top:18px;bottom:18px;width:300px;display:flex;flex-direction:column;justify-content:center;gap:10px;z-index:3}
+.fcard{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;text-align:left;padding:16px;border-radius:18px;background:rgba(10,12,24,.78);border:1px solid var(--line);backdrop-filter:blur(10px);transition:border-color .2s,transform .2s}
+.fcard:hover,.fcard.on{border-color:var(--c);transform:translateX(-4px)}
+.fcard b{grid-row:span 2;font-family:var(--display);font-size:28px;color:var(--c);width:44px}
+.fcard strong{font-size:15px}
+.fcard span{font-size:12px;color:var(--muted)}
+.fcard em{grid-column:2;font-style:normal;font-size:12px;font-weight:800;color:var(--c);margin-top:6px}
+.nogl{position:absolute;inset:0;display:none;place-items:center;color:var(--muted);font-size:14px;padding:24px;text-align:center}
+@media (max-width:860px){
+  .stage{height:62vh;min-height:420px}
+  .flist{position:static;width:auto;margin-top:12px}
+  .fcard:hover,.fcard.on{transform:none}
+}
+
+/* prices */
+.plans{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media (max-width:1000px){.plans{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.plans{grid-template-columns:minmax(0,1fr)}}
+.plan{position:relative;display:flex;flex-direction:column;padding:24px;border-radius:22px;background:var(--card);border:1px solid var(--line);overflow:hidden}
+.plan::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:var(--c)}
+.plan h3{font-size:18px;display:flex;justify-content:space-between;align-items:center}
+.plan h3 small{font-family:var(--body);font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--c)}
+.plan .price{font-family:var(--display);font-size:40px;font-weight:800;margin:18px 0 2px;font-variant-numeric:tabular-nums}
+.plan .price small{font-family:var(--body);font-size:14px;color:var(--muted);font-weight:600}
+.plan ul{list-style:none;margin:16px 0 18px;display:grid;gap:8px;font-size:14px;color:var(--muted)}
+.plan li{display:flex;gap:8px}.plan li::before{content:"";flex:none;width:5px;height:5px;border-radius:50%;background:var(--c);margin-top:9px}
+.tbl{display:grid;gap:6px;margin-bottom:20px;font-size:13px;font-variant-numeric:tabular-nums}
+.tbl div{display:flex;justify-content:space-between;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.035)}
+.tbl span{color:var(--muted)}.tbl b em{font-style:normal;color:var(--amber);font-size:11px;margin-left:6px}
+.plan .btn{margin-top:auto;width:100%;border:1px solid var(--line2);background:rgba(255,255,255,.03);font-size:14px}
+.plan .btn:hover{border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent)}
+
+/* promo */
+.promos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.promos{grid-template-columns:minmax(0,1fr)}}
+.promo{position:relative;padding:28px;border-radius:24px;overflow:hidden;border:1px solid var(--line2);background:linear-gradient(150deg,#1b1450,#0c0f26 60%)}
+.promo.alt{background:linear-gradient(150deg,#0f2a55,#0a1022 60%)}
+.promo.night{background:linear-gradient(150deg,#2a1036,#0d0a1c 60%)}
+.promo .big{font-family:var(--display);font-weight:800;font-size:64px;line-height:1;background:linear-gradient(180deg,#fff,#a5b4fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+.promo h3{font-size:18px;margin:14px 0 8px}
+.promo p{font-size:14px;color:var(--muted)}
+.promo .tag{position:absolute;top:22px;right:22px;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--amber);border:1px solid rgba(251,191,36,.4);padding:5px 9px;border-radius:8px}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
+@media (max-width:760px){.steps{grid-template-columns:minmax(0,1fr)}}
+.step{padding:22px;border-radius:20px;border:1px dashed var(--line2)}
+.step b{font-family:var(--display);color:var(--accent);font-size:13px}
+.step h3{font-size:16px;margin:10px 0 6px}.step p{font-size:14px;color:var(--muted)}
+
+/* contacts */
+.contact{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:16px}
+@media (max-width:860px){.contact{grid-template-columns:minmax(0,1fr)}}
+.c-main{padding:clamp(24px,4vw,40px);border-radius:28px;background:linear-gradient(140deg,#1a2060,#0b0e22 70%);border:1px solid var(--line2)}
+.c-main h2{font-size:clamp(26px,3.6vw,42px);line-height:1.05;margin:12px 0 18px}
+.c-main p{color:var(--muted);max-width:460px}
+.c-main .ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.c-list{display:grid;gap:12px}
+.c-item{display:flex;gap:16px;align-items:center;padding:18px 20px;border-radius:18px;background:var(--card);border:1px solid var(--line);text-decoration:none}
+a.c-item:hover{border-color:var(--line2)}
+.c-item i{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(76,111,255,.14);font-style:normal;font-size:18px}
+.c-item span{font-size:12px;color:var(--muted);display:block}.c-item b{font-size:15px}
+footer{border-top:1px solid var(--line);padding-block:28px calc(28px + env(safe-area-inset-bottom,0px));font-size:13px;color:var(--muted)}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* ---------- booking sheet ---------- */
+#booking{position:fixed;inset:0;z-index:50;display:none;background:rgba(3,4,10,.72);backdrop-filter:blur(10px);overflow-y:auto;overscroll-behavior:contain}
+#booking.show{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0}}
+.bk{max-width:1180px;margin:0 auto;padding:max(20px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px))}
+.bk-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.x{width:44px;height:44px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-size:20px;background:var(--bg2)}
+.tabs{display:flex;gap:6px;padding:5px;border-radius:999px;background:var(--bg2);border:1px solid var(--line);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.tabs button{padding:9px 16px;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap}
+.tabs button.on{color:#05060d;background:var(--c)}
+.bk-title{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.bk-title h2{font-size:clamp(24px,3.4vw,38px);line-height:1}
+.bk-title h2 small{display:block;font-family:var(--body);font-size:12px;letter-spacing:.24em;color:var(--accent);margin-bottom:10px;font-weight:800}
+.stat{display:flex;gap:24px;font-size:12px;color:var(--muted)}
+.stat b{display:block;font-family:var(--display);font-size:22px;color:var(--text);font-variant-numeric:tabular-nums}
+.stat b.acc{color:var(--accent)}
+.bk-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+@media (max-width:980px){.bk-grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px}
+.room{overflow-x:auto;padding:4px 0}
+.screen{margin:0 auto 30px;width:80%;height:40px;border-top:3px solid var(--accent);border-radius:50% 50% 0 0/100% 100% 0 0;text-align:center;padding-top:12px;font-size:10px;letter-spacing:.32em;color:var(--muted);box-shadow:0 -12px 30px -14px var(--accent)}
+.seats{display:grid;gap:8px;justify-content:safe center}
+.seat{width:var(--s);height:var(--s);border-radius:10px;position:relative;display:grid;place-items:center;border:1.5px solid color-mix(in srgb,var(--c) 55%,transparent);background:color-mix(in srgb,var(--c) 8%,transparent);transition:transform .12s,background .15s}
+.seat svg{width:19px;height:19px;stroke:var(--c);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.seat em{position:absolute;bottom:1px;right:4px;font-style:normal;font-size:9px;font-weight:800;color:var(--muted)}
+.seat:hover:not(:disabled){transform:translateY(-2px);background:color-mix(in srgb,var(--c) 22%,transparent)}
+.seat.sel{background:var(--c);border-color:var(--c);box-shadow:0 0 20px -4px var(--c)}
+.seat.sel svg{stroke:#05060d}.seat.sel em{color:#05060d}
+.seat:disabled{cursor:not-allowed;border-color:transparent;background:repeating-linear-gradient(45deg,#161827 0 5px,#1d2033 5px 10px)}
+.seat:disabled svg{stroke:#363a55}.seat:disabled em{color:#363a55}
+.gap{width:var(--s);height:var(--s)}
+.recep{margin:26px auto 0;width:max-content;padding:8px 18px;border-radius:10px;border:1px dashed var(--line2);font-size:10px;letter-spacing:.3em;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:12px 20px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 15%,transparent)}
+.legend i.busy{border-color:transparent;background:repeating-linear-gradient(45deg,#161827 0 3px,#262a42 3px 6px)}
+.legend i.sel{background:var(--c)}
+.legend b{color:var(--text)}
+.side{display:flex;flex-direction:column;gap:16px;position:sticky;top:16px}
+.side h4{font-size:11px;letter-spacing:.24em;color:var(--muted);margin:0 0 10px;font-weight:800}
+.side h4:not(:first-child){margin-top:18px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips.wrap{flex-wrap:wrap}
+.chip{flex:none;padding:9px 12px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.chip small{display:block;font-size:10px;color:var(--muted);font-weight:600}
+.chip:hover:not(:disabled){border-color:var(--line2)}
+.chip.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 15%,transparent)}
+.chip:disabled{opacity:.28;cursor:not-allowed}
+.chip .gift{color:var(--amber)}
+.rows{display:grid;gap:6px;max-height:170px;overflow:auto;margin-bottom:12px}
+.rows div{display:flex;justify-content:space-between;font-size:13px;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.035)}
+.rows span{color:var(--muted)}
+.empty{font-size:13px;color:var(--muted);padding:14px;border:1px dashed var(--line2);border-radius:12px;text-align:center;margin-bottom:12px}
+.total{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding-top:12px;border-top:1px solid var(--line);margin-bottom:14px}
+.total span{color:var(--muted);font-size:13px}
+.total b{font-family:var(--display);font-size:24px;white-space:nowrap}
+.f{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--text);font:inherit;font-size:15px;margin-bottom:10px;outline:none}
+.f:focus{border-color:var(--accent)}
+.cta{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border-radius:14px;font-weight:800;font-size:15px;text-decoration:none;background:var(--wa);color:#062b14;box-shadow:0 10px 30px -12px var(--wa);transition:.15s;cursor:pointer}
+.cta svg{width:20px;height:20px;flex:none}
+.cta.off{background:#1a1d2e;color:#5a5f80;box-shadow:none;pointer-events:none}
+.note{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
+#preview{display:none;margin-top:12px;white-space:pre-wrap;font-size:12px;line-height:1.5;padding:12px;border-radius:12px;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.3)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;z-index:60;padding:12px 18px;border-radius:12px;background:#0f1a14;border:1px solid rgba(37,211,102,.5);font-size:14px;font-weight:700;transition:.3s;pointer-events:none;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-width:600px){:root{--s:27px}.seats{gap:4px}.seat{border-radius:7px}.seat svg{display:none}.seat em{position:static;font-size:10px;color:var(--text)}.seat.sel em{color:#05060d}.card{padding:16px}.screen{width:94%;font-size:8px;letter-spacing:.2em}}
+@media (max-width:600px){.lbl small{display:none}.lbl{font-size:10px;letter-spacing:.08em}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
 <script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
 </script>
 </head>
 <body>
-<div id="loader"><div><div class="logo" data-club="name"></div><small>ЗАГРУЗКА…</small></div></div>
-<canvas id="scene"></canvas>
 
-<header id="top">
-  <div class="brand"><b data-club="name" style="font-weight:800"></b><span data-club="sub"></span></div>
-  <nav><a href="#" id="navFloors">Этажи</a><a href="#" id="navPrice">Цены</a><a href="#" id="navPromo">Акции</a><a href="#" id="navContact" target="_blank" rel="noopener">Контакты</a></nav>
-  <button class="btn" data-open="0">Забронировать</button>
-</header>
-<div class="foot">КОНЦЕПТ-МАКЕТ · ДАННЫЕ УСЛОВНЫЕ</div>
+<header class="nav"><div class="wrap">
+  <a class="logo" href="#top"><i>B</i><div><b data-club="name"></b><small data-club="sub"></small></div></a>
+  <nav><a href="#floors">Этажи</a><a href="#prices">Цены</a><a href="#promo">Акции</a><a href="#contacts">Контакты</a></nav>
+  <button class="btn btn-main btn-book" data-book="0">Забронировать</button>
+</div></header>
 
-<section id="hero">
-  <div class="kicker">ОТКРЫТО 24/7 · БЕЗ ВЫХОДНЫХ · <span data-club="city"></span></div>
-  <h1>Три этажа.<br><em>Одна ночь.</em></h1>
-  <p>Три этажа — одна цель: Top Gaming. Выбери этаж, место и время — бронь за 30 секунд.</p>
-  <div class="addr"><span>📍 <span data-club="address"></span></span><span>📱 <span data-club="phone"></span></span></div>
-  <div class="promo">🎁 АКЦИЯ: 3 часа +1 в подарок · 5 часов +1 в подарок</div>
-  <div class="hint"><i></i>Нажми на светящуюся точку этажа</div>
-</section>
-
-<aside id="rail"></aside>
-<div id="labels"></div>
-
-<section id="booking">
-  <div class="bk-wrap">
-    <div class="bk-head">
-      <button class="back" id="back">← К зданию</button>
-      <div class="tabs" id="tabs"></div>
+<section class="hero" id="top"><div class="wrap">
+  <div>
+    <div class="badge"><i></i><span data-club="hours"></span> · <span data-club="city"></span></div>
+    <h1>Три этажа.<br><span>Одна цель — Top Gaming.</span></h1>
+    <p class="lead">Мощные ПК, VIP-зона, командные буткемпы и PS5. Выберите этаж и место на схеме — бронь уйдёт администратору в WhatsApp.</p>
+    <div class="ctas">
+      <a class="btn btn-main" href="#floors">Выбрать место ↓</a>
+      <a class="btn btn-ghost" href="#prices">Посмотреть цены</a>
     </div>
-    <div class="bk-title">
-      <div><h2 id="fTitle"></h2><p id="fDesc"></p></div>
-      <div class="stat"><div><b class="acc" id="sFree">0</b>свободно</div><div><b id="sAll">0</b>всего мест</div><div><b id="sPrice">0</b>сом / час</div></div>
+    <div class="facts">
+      <div><b>24/7</b><span>без выходных</span></div>
+      <div><b>3</b><span>этажа</span></div>
+      <div><b id="fSeats">0</b><span>игровых мест</span></div>
+      <div><b>3+1</b><span>час в подарок</span></div>
     </div>
-    <div class="bk-grid">
+  </div>
+  <aside class="live">
+    <h3>Свободно сейчас <small id="liveTime"></small></h3>
+    <div id="liveRows"></div>
+    <button class="btn btn-main" data-book="0">Забронировать место</button>
+  </aside>
+</div></section>
+
+<section class="floors sec" id="floors"><div class="wrap">
+  <div class="sec-head">
+    <div><div class="eyebrow">Этажи</div><h2>Выберите этаж</h2></div>
+    <p>Покрутите здание и нажмите на светящуюся точку — откроется схема зала со свободными местами.</p>
+  </div>
+  <div class="stage" id="stage">
+    <canvas id="scene" aria-label="3D-модель здания клуба"></canvas>
+    <div id="labels"></div>
+    <div class="hint"><i></i>Потяните, чтобы повернуть</div>
+    <div class="nogl" id="nogl">3D-модель не поддерживается этим браузером — выберите этаж в списке.</div>
+  </div>
+  <div class="flist" id="flist"></div>
+</div></section>
+
+<section class="sec" id="prices"><div class="wrap">
+  <div class="sec-head">
+    <div><div class="eyebrow">Цены</div><h2>Тарифы по зонам</h2></div>
+    <p>Цена за одно место. По акции за 3 и 5 часов — ещё час в подарок.</p>
+  </div>
+  <div class="plans" id="plans"></div>
+</div></section>
+
+<section class="sec" id="promo" style="padding-top:0"><div class="wrap">
+  <div class="sec-head"><div><div class="eyebrow">Акции</div><h2>Больше игры — больше кайфа</h2></div></div>
+  <div class="promos">
+    <div class="promo"><span class="tag">АКЦИЯ</span><div class="big">3+1</div><h3>3 часа + 1 в подарок</h3><p>Оплачиваете три часа — играете четыре. Действует на все зоны.</p></div>
+    <div class="promo alt"><span class="tag">АКЦИЯ</span><div class="big">5+1</div><h3>5 часов + 1 в подарок</h3><p>Длинная сессия с друзьями: шестой час за счёт клуба.</p></div>
+    <div class="promo night"><div class="big">Ночь</div><h3>Ночной пакет <span data-club-night></span></h3><p>Фиксированная цена за всю ночь. Цена для вашей зоны — в тарифах выше.</p></div>
+  </div>
+  <div class="steps">
+    <div class="step"><b>Шаг 1</b><h3>Выберите место</h3><p>Этаж, свободное место на схеме, дата и время.</p></div>
+    <div class="step"><b>Шаг 2</b><h3>Отправьте в WhatsApp</h3><p>Сообщение с местами, временем и суммой уже готово — просто нажмите «Отправить».</p></div>
+    <div class="step"><b>Шаг 3</b><h3>Приходите играть</h3><p>Администратор подтвердит бронь и будет ждать вас.</p></div>
+  </div>
+</div></section>
+
+<section class="sec" id="contacts" style="padding-top:0"><div class="wrap contact">
+  <div class="c-main">
+    <div class="eyebrow">Контакты</div>
+    <h2>Ждём вас в любое время дня и ночи</h2>
+    <p>Бронь, турниры, аренда этажа под мероприятие — пишите в WhatsApp или звоните.</p>
+    <div class="ctas">
+      <a class="btn btn-wa" id="waTop" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.2 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.8-2.7-1.1-4.4-3.9-4.6-4.1-.1-.2-1.1-1.4-1.1-2.7s.7-2 .9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.1.3.7 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.3.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.2z"/></svg>Написать в WhatsApp</a>
+      <button class="btn btn-ghost" data-book="0">Забронировать место</button>
+    </div>
+  </div>
+  <div class="c-list">
+    <a class="c-item" id="mapLink" target="_blank" rel="noopener"><i>📍</i><div><span>Адрес</span><b data-club="address"></b></div></a>
+    <div class="c-item"><i>🕐</i><div><span>Режим работы</span><b data-club="hours"></b></div></div>
+    <div class="c-item" id="phoneItem"><i>📱</i><div><span>Телефон</span><b data-club="phone"></b></div></div>
+    <a class="c-item" id="instaLink" target="_blank" rel="noopener"><i>📷</i><div><span>Instagram</span><b id="instaTxt"></b></div></a>
+  </div>
+</div></section>
+
+<footer><div class="wrap"><span>© <span data-club="full"></span>, <span data-club="city"></span></span><span>Концепт сайта</span></div></footer>
+
+<!-- booking -->
+<section id="booking" role="dialog" aria-modal="true" aria-labelledby="fTitle"><div class="bk">
+  <div class="bk-top"><button class="x" id="close" aria-label="Закрыть">✕</button><div class="tabs" id="tabs"></div></div>
+  <div class="bk-title"><h2 id="fTitle"></h2>
+    <div class="stat"><div><b class="acc" id="sFree">0</b>свободно</div><div><b id="sAll">0</b>мест</div><div><b id="sPrice">0</b>сом/час</div></div></div>
+  <div class="bk-grid">
+    <div class="card"><div class="room"><div class="screen" id="screenLbl"></div><div class="seats" id="seats"></div><div class="recep">РЕСЕПШН · ВХОД</div></div><div class="legend" id="legend"></div></div>
+    <div class="side">
+      <div class="card"><h4>Дата</h4><div class="chips" id="dates"></div><h4>Начало</h4><div class="chips wrap" id="times"></div><h4>Сколько играть</h4><div class="chips wrap" id="durs"></div></div>
       <div class="card">
-        <div class="room">
-          <div class="screen" id="screenLbl">СТРИМ-ЭКРАН</div>
-          <div class="seats" id="seats"></div>
-          <div class="reception">РЕСЕПШН · БАР · ВХОД</div>
-        </div>
-        <div class="legend" id="legend"></div>
-      </div>
-      <div class="side">
-        <div class="card">
-          <h4>ДАТА</h4><div class="chips" id="dates"></div>
-          <h4 style="margin-top:20px">НАЧАЛО</h4><div class="chips wrap" id="times"></div>
-          <h4 style="margin-top:20px">ДЛИТЕЛЬНОСТЬ</h4><div class="chips" id="durs"></div>
-        </div>
-        <div class="card">
-          <h4>ВАША БРОНЬ</h4>
-          <div id="sum"></div>
-          <div class="total"><span id="totalLbl">Итого</span><b id="total">0 сом</b></div>
-          <input class="f" id="nm" placeholder="Имя или ник" autocomplete="off">
-          <input class="f" id="ph" placeholder="+996 ___ ___ ___" inputmode="tel" autocomplete="off">
-          <button class="cta" id="cta" disabled>Выберите место</button>
-          <div class="note">Бронь держится 15 минут после начала сеанса</div>
-        </div>
+        <h4>Ваша бронь</h4><div id="sum"></div>
+        <div class="total"><span id="totalLbl">Итого</span><b id="total">0 сом</b></div>
+        <input class="f" id="nm" placeholder="Ваше имя" autocomplete="given-name">
+        <a class="cta off" id="cta" target="_blank" rel="noopener"></a>
+        <div class="note" id="ctaNote">Откроется WhatsApp с готовым сообщением — останется нажать «Отправить»</div>
+        <div id="preview"></div>
       </div>
     </div>
   </div>
-</section>
-
-<div id="modal"><div class="ticket">
-  <div class="ok"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#05050c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
-  <h3>Бронь подтверждена</h3><p>Покажите код администратору на ресепшне</p>
-  <div class="code" id="tCode"></div>
-  <canvas id="qr" width="25" height="25"></canvas>
-  <dl id="tInfo"></dl>
-  <a class="cta wa" id="waBtn" target="_blank" rel="noopener">Отправить бронь в WhatsApp</a>
-  <button class="cta" id="done">Готово</button>
-</div></div>
+</div></section>
+<div class="toast" id="toast"></div>
 
 <script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { Reflector } from 'three/addons/objects/Reflector.js';
+const $ = (id) => document.getElementById(id);
+const { CLUB, ZONES, PROMO, FLOORS, NIGHT } = window;
+const WA_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.2 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.8-2.7-1.1-4.4-3.9-4.6-4.1-.1-.2-1.1-1.4-1.1-2.7s.7-2 .9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.1.3.7 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.3.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.2z"/></svg>';
+const waLink = (txt) => 'https://wa.me/' + CLUB.wa + (txt ? '?text=' + encodeURIComponent(txt) : '');
 
-/* =================== CLUB CONFIG =================== */
+/* ---------- static content ---------- */
 document.querySelectorAll('[data-club]').forEach(el => el.textContent = CLUB[el.dataset.club] || '');
-document.title = CLUB.name.charAt(0) + CLUB.name.slice(1).toLowerCase() + ' · ' + CLUB.sub;
-if (CLUB.wa) document.getElementById('navContact').href = 'https://wa.me/' + CLUB.wa; else document.getElementById('navContact').style.display = 'none';
-if (!CLUB.address) document.querySelector('#hero .addr').style.display = 'none';
+document.querySelectorAll('[data-club-night]').forEach(el => el.textContent = NIGHT);
+if (CLUB.wa) $('waTop').href = waLink('Здравствуйте! Хочу узнать про бронь в ' + CLUB.full); else $('waTop').style.display = 'none';
+if (CLUB.map) $('mapLink').href = CLUB.map; else $('mapLink').removeAttribute('href');
+if (!CLUB.address) $('mapLink').style.display = 'none';
+if (CLUB.insta) { $('instaLink').href = 'https://instagram.com/' + CLUB.insta; $('instaTxt').textContent = '@' + CLUB.insta; } else $('instaLink').style.display = 'none';
+if (!CLUB.phone) $('phoneItem').style.display = 'none';
+document.querySelectorAll('[data-book]').forEach(b => b.addEventListener('click', () => openBooking(+b.dataset.book)));
 
-/* =================== DATA =================== */
-const TYPES = {
-  S:{name:'Standard',  price:60,  color:'#22e6ff', icon:'pc'},
-  V:{name:'VIP',       price:100, color:'#ff2bd6', icon:'pc'},
-  B:{name:'Bootcamp',  price:120, color:'#a78bfa', icon:'pc'},
-  P:{name:'PS5 Lounge',price:150, color:'#ffb020', icon:'pad'},
-};
-const FLOORS = [
-  {name:'Standard Hall', tag:'01 · STANDARD', color:0x22e6ff, css:'#22e6ff', desc:'40 ПК · RTX 4060 · мониторы 165 Гц · общий зал', screen:'СТРИМ-ЭКРАН · ТУРНИРЫ',
-   layout:['SSSSS.SSSSS','SSSSS.SSSSS','...........','SSSSS.SSSSS','SSSSS.SSSSS']},
-  {name:'VIP Zone', tag:'02 · VIP', color:0xff2bd6, css:'#ff2bd6', desc:'24 ПК · RTX 4070 Super · 240 Гц · кресла премиум-класса', screen:'ПАНОРАМНОЕ ОКНО · ВИД НА ГОРОД',
-   layout:['VVVV..VVVV','VVVV..VVVV','..........','VVVV..VVVV']},
-  {name:'Bootcamp & PS5', tag:'03 · BOOTCAMP', color:0xa78bfa, css:'#a78bfa', desc:'Командные комнаты на 5 человек + PS5-лаунж с диванами', screen:'КОМАНДНЫЕ КОМНАТЫ  ·  PS5 LOUNGE',
-   layout:['BBBBB..P.P','BBBBB.....','..........','BBBBB..P.P','BBBBB.....']},
-];
-
-/* =================== THREE SETUP =================== */
-const canvas = document.getElementById('scene');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setSize(innerWidth, innerHeight);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = .85;
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x030308);
-scene.fog = new THREE.FogExp2(0x05040c, 0.011);
-
-const camera = new THREE.PerspectiveCamera(40, innerWidth/innerHeight, 0.1, 600);
-const HOME = { pos:new THREE.Vector3(26, 13, 31), target:new THREE.Vector3(0, 5.2, 0) };
-if (innerWidth < 820) HOME.pos.set(34, 16, 42);
-camera.position.set(70, 40, 95);
-
-const controls = new OrbitControls(camera, canvas);
-controls.target.copy(HOME.target);
-controls.enableDamping = true; controls.dampingFactor = .06;
-controls.enablePan = false; controls.minDistance = 18; controls.maxDistance = 70;
-controls.maxPolarAngle = Math.PI*0.47; controls.minPolarAngle = Math.PI*0.2;
-controls.autoRotate = true; controls.autoRotateSpeed = 0.35;
-controls.enabled = false;
-
-scene.add(new THREE.AmbientLight(0x30305a, 0.6));
-scene.add(new THREE.HemisphereLight(0x3b4cff, 0x050008, 0.35));
-const moon = new THREE.DirectionalLight(0x9aa8ff, 0.5); moon.position.set(-30, 50, -20); scene.add(moon);
-
-/* ---------- ground: wet asphalt ---------- */
-const mirror = new Reflector(new THREE.PlaneGeometry(400, 400), {
-  textureWidth: innerWidth*0.5*Math.min(devicePixelRatio,2), textureHeight: innerHeight*0.5*Math.min(devicePixelRatio,2), color: 0x777788
-});
-mirror.rotation.x = -Math.PI/2; scene.add(mirror);
-const asphalt = new THREE.Mesh(new THREE.PlaneGeometry(400,400),
-  new THREE.MeshStandardMaterial({color:0x06060b, roughness:.9, metalness:.1, transparent:true, opacity:.86}));
-asphalt.rotation.x = -Math.PI/2; asphalt.position.y = .02; scene.add(asphalt);
-const grid = new THREE.GridHelper(240, 120, 0x3a1f7a, 0x16102e);
-grid.position.y = .04; grid.material.transparent = true; grid.material.opacity = .45; scene.add(grid);
-
-/* ---------- helpers ---------- */
-const neon = (c) => new THREE.MeshBasicMaterial({color:new THREE.Color(c).multiplyScalar(.6), toneMapped:false});
-const box = (w,h,d,mat,x=0,y=0,z=0,parent=scene) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat); m.position.set(x,y,z); parent.add(m); return m; };
-const srgb = (t) => { t.colorSpace = THREE.SRGBColorSpace; return t; };
-
-/* ---------- building ---------- */
-const W = 16, D = 10, H = 3.4, SLAB = .35;
-const building = new THREE.Group(); scene.add(building);
-const darkMetal = new THREE.MeshStandardMaterial({color:0x0c0c14, roughness:.45, metalness:.7});
-const mullionMat = new THREE.MeshStandardMaterial({color:0x15151f, roughness:.4, metalness:.8});
-const floorObjs = [];
-
-FLOORS.forEach((f, i) => {
-  const y0 = i*H, g = new THREE.Group(); building.add(g);
-  const c = new THREE.Color(f.color);
-  box(W+.6, SLAB, D+.6, darkMetal, 0, y0+SLAB/2, 0, g);
-  // neon slab edges
-  const nm = neon(c);
-  box(W+.64, .07, .07, nm, 0, y0+SLAB-.05,  (D+.6)/2, g);
-  box(W+.64, .07, .07, nm, 0, y0+SLAB-.05, -(D+.6)/2, g);
-  box(.07, .07, D+.64, nm,  (W+.6)/2, y0+SLAB-.05, 0, g);
-  box(.07, .07, D+.64, nm, -(W+.6)/2, y0+SLAB-.05, 0, g);
-  // glass
-  const gh = H-SLAB;
-  const glass = box(W, gh, D, new THREE.MeshPhysicalMaterial({color:0x0b1328, roughness:.08, metalness:.2, transparent:true, opacity:.32, depthWrite:false, side:THREE.DoubleSide}), 0, y0+SLAB+gh/2, 0, g);
-  glass.renderOrder = 2;
-  // mullions
-  for (let x=-W/2; x<=W/2+.01; x+=2) { box(.08, gh, .08, mullionMat, x, y0+SLAB+gh/2,  D/2, g); box(.08, gh, .08, mullionMat, x, y0+SLAB+gh/2, -D/2, g); }
-  for (let z=-D/2+2; z<D/2; z+=2) { box(.08, gh, .08, mullionMat,  W/2, y0+SLAB+gh/2, z, g); box(.08, gh, .08, mullionMat, -W/2, y0+SLAB+gh/2, z, g); }
-  // interior floor glow + ceiling strips
-  const fl = new THREE.Mesh(new THREE.PlaneGeometry(W-.3, D-.3), new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:.07}));
-  fl.rotation.x = -Math.PI/2; fl.position.y = y0+SLAB+.01; g.add(fl);
-  const strip = new THREE.MeshBasicMaterial({color:c.clone().lerp(new THREE.Color(0xffffff), .5), toneMapped:false, transparent:true, opacity:.28});
-  for (let z of [-3, 0, 3]) box(W-1.5, .04, .1, strip, 0, y0+H-.08, z, g);
-  // desks + monitors (instanced)
-  const deskGeo = new THREE.BoxGeometry(1.1, .06, .55), monGeo = new THREE.BoxGeometry(.62, .36, .03), chairGeo = new THREE.BoxGeometry(.45,.7,.45);
-  const pos = [];
-  const cols = i===1 ? [-6,-4.4,-2.8,2.8,4.4,6] : [-6.4,-5.1,-3.8,-2.5,2.5,3.8,5.1,6.4];
-  const rows = i===1 ? [-2.6, 1.6] : [-3, -.6, 2.2];
-  for (const z of rows) for (const x of cols) pos.push([x, z]);
-  const desks = new THREE.InstancedMesh(deskGeo, darkMetal, pos.length);
-  const mons  = new THREE.InstancedMesh(monGeo, neon(c.clone().multiplyScalar(1.3)), pos.length);
-  const chairs = new THREE.InstancedMesh(chairGeo, new THREE.MeshStandardMaterial({color:0x111118, roughness:.6}), pos.length);
-  const m4 = new THREE.Matrix4();
-  pos.forEach(([x,z], k) => {
-    desks.setMatrixAt(k, m4.makeTranslation(x, y0+SLAB+.75, z));
-    mons.setMatrixAt(k, m4.makeTranslation(x, y0+SLAB+1.05, z-.18));
-    chairs.setMatrixAt(k, m4.makeTranslation(x, y0+SLAB+.45, z+.55));
-    if (Math.random() < .3) mons.setColorAt(k, new THREE.Color(0x222233)); else mons.setColorAt(k, c.clone().multiplyScalar(.8+Math.random()*.8));
-  });
-  g.add(desks, mons, chairs);
-  // light
-  const pl = new THREE.PointLight(c, 20, 22, 1.6); pl.position.set(0, y0+H-.6, 0); g.add(pl);
-  floorObjs.push({group:g, light:pl, glass, floorGlow:fl, y0, color:c});
-});
-
-// roof
-const roofY = FLOORS.length*H;
-box(W+.6, SLAB, D+.6, darkMetal, 0, roofY+SLAB/2, 0, building);
-box(W+.64, .5, .14, darkMetal, 0, roofY+.6,  (D+.6)/2-.07, building);
-box(W+.64, .07, .07, neon(0xff2bd6), 0, roofY+.85, (D+.6)/2-.05, building);
-box(3, 1.2, 2.4, mullionMat, -4.5, roofY+.95, -2, building); // AC units
-box(2, 1, 2, mullionMat, 4, roofY+.85, -2.5, building);
-// vertical corner neon
-box(.12, roofY+.9, .12, neon(0xff2bd6),  (W+.6)/2+.06, (roofY+.9)/2, (D+.6)/2+.06, building);
-box(.12, roofY+.9, .12, neon(0x22e6ff), -(W+.6)/2-.06, (roofY+.9)/2, (D+.6)/2+.06, building);
-// entrance
-const doorX = -5.2;
-box(3.4, .14, 1.6, darkMetal, doorX, 2.75, D/2+.8, building);
-box(3.4, .05, .05, neon(0x22e6ff), doorX, 2.68, D/2+1.6, building);
-box(2.2, .05, .05, neon(0xffffff), doorX, 2.45, D/2+.05, building);
-box(.05, 2.1, .05, neon(0xffffff), doorX-1.1, 1.4, D/2+.05, building);
-box(.05, 2.1, .05, neon(0xffffff), doorX+1.1, 1.4, D/2+.05, building);
-const doorLight = new THREE.PointLight(0x22e6ff, 12, 9, 1.8); doorLight.position.set(doorX, 2.2, D/2+2.2); scene.add(doorLight);
-
-// neon sign
-await document.fonts.load('800 100px Unbounded').catch(()=>{});
-function signTexture() {
-  const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 640; const g = cv.getContext('2d');
-  g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = '800 290px Unbounded, Arial Black, sans-serif';
-  for (const [blur, col] of [[40,'#ff2bd6'],[12,'#ff7ae6']]) { g.shadowColor = col; g.shadowBlur = blur; g.fillStyle = '#ffb8f1'; g.fillText(CLUB.name, 1024, 260); }
-  g.font = '600 92px Unbounded, Arial, sans-serif'; g.letterSpacing = '30px';
-  for (const blur of [30, 10]) { g.shadowColor = '#22e6ff'; g.shadowBlur = blur; g.fillStyle = '#d9fbff'; g.fillText(CLUB.sub, 1024, 510); }
-  return srgb(new THREE.CanvasTexture(cv));
-}
-const signMat = new THREE.MeshBasicMaterial({map:signTexture(), color:0xb0b0b0, transparent:true, toneMapped:false, depthWrite:false});
-const sign = new THREE.Mesh(new THREE.PlaneGeometry(13, 4.06), signMat);
-sign.position.set(0, roofY+2.9, D/2-.2); building.add(sign);
-box(.1, 2.4, .1, mullionMat, -4.5, roofY+1.5, D/2-.4, building); box(.1, 2.4, .1, mullionMat, 4.5, roofY+1.5, D/2-.4, building);
-const signLight = new THREE.PointLight(0xff2bd6, 18, 20, 1.6); signLight.position.set(0, roofY+3, D/2+2); scene.add(signLight);
-// ground glow pools
-for (const [c,x,z] of [[0xff2bd6, 9, 9],[0x22e6ff,-9,9],[0x7c3aed,0,-10]]) { const p = new THREE.PointLight(c, 12, 18, 1.5); p.position.set(x, 1.2, z); scene.add(p); }
-
-/* ---------- city ---------- */
-function windowsTex() {
-  const cv = document.createElement('canvas'); cv.width = 64; cv.height = 128; const g = cv.getContext('2d');
-  g.fillStyle = '#000'; g.fillRect(0,0,64,128);
-  for (let y=0; y<16; y++) for (let x=0; x<8; x++) if (Math.random() < .28) {
-    const warm = Math.random() < .75; g.fillStyle = warm ? `rgba(255,${180+Math.random()*50|0},110,${.4+Math.random()*.6})` : `rgba(140,200,255,${.4+Math.random()*.5})`;
-    g.fillRect(x*8+2, y*8+2, 4, 5);
-  }
-  const t = srgb(new THREE.CanvasTexture(cv)); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.magFilter = THREE.NearestFilter; return t;
-}
-const roofMat = new THREE.MeshStandardMaterial({color:0x07070c, roughness:1});
-for (let k=0; k<70; k++) {
-  const a = Math.random()*Math.PI*2, r = 42 + Math.random()*90;
-  const w = 5+Math.random()*9, d = 5+Math.random()*9, h = 4+Math.random()*(r>80?28:16);
-  const t = windowsTex(); t.repeat.set(Math.max(1,w/8), Math.max(1,h/16));
-  const side = new THREE.MeshStandardMaterial({color:0x07070c, roughness:.9, emissive:0xffffff, emissiveMap:t, emissiveIntensity:.3});
-  const b = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), [side,side,roofMat,roofMat,side,side]);
-  b.position.set(Math.cos(a)*r, h/2, Math.sin(a)*r); b.rotation.y = Math.random()*Math.PI; scene.add(b);
-  if (Math.random() < .15) { const bl = new THREE.Mesh(new THREE.SphereGeometry(.25), neon(0xff3344)); bl.position.set(b.position.x, h+.3, b.position.z); bl.userData.blink = Math.random()*6; scene.add(bl); }
-}
-// mountain silhouette far away
-const mtn = new THREE.Mesh(new THREE.ConeGeometry(60, 34, 7, 1), new THREE.MeshBasicMaterial({color:0x0a0916}));
-mtn.position.set(-60, 14, -190); mtn.scale.set(2.2, 1, 1); scene.add(mtn);
-// stars
-{
-  const n = 1800, p = new Float32Array(n*3);
-  for (let k=0; k<n; k++) { const th = Math.random()*Math.PI*2, ph = Math.random()*Math.PI*.45; const r = 260;
-    p[k*3] = r*Math.sin(ph)*Math.cos(th); p[k*3+1] = r*Math.cos(ph)+10; p[k*3+2] = r*Math.sin(ph)*Math.sin(th); }
-  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(p,3));
-  scene.add(new THREE.Points(geo, new THREE.PointsMaterial({color:0xc8ccff, size:.9, sizeAttenuation:true, fog:false, transparent:true, opacity:.8})));
-}
-
-/* ---------- hotspots ---------- */
-function radial(inner, outer) {
-  const cv = document.createElement('canvas'); cv.width = cv.height = 128; const g = cv.getContext('2d');
-  const gr = g.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,inner); gr.addColorStop(.25,inner); gr.addColorStop(1,outer);
-  g.fillStyle = gr; g.fillRect(0,0,128,128); return new THREE.CanvasTexture(cv);
-}
-function ringTex() {
-  const cv = document.createElement('canvas'); cv.width = cv.height = 128; const g = cv.getContext('2d');
-  g.strokeStyle = '#fff'; g.lineWidth = 6; g.shadowColor = '#fff'; g.shadowBlur = 10; g.beginPath(); g.arc(64,64,54,0,Math.PI*2); g.stroke(); return new THREE.CanvasTexture(cv);
-}
-const glowT = radial('rgba(255,255,255,1)','rgba(255,255,255,0)'), ringT = ringTex();
-const hotspots = [];
-FLOORS.forEach((f, i) => {
-  const g = new THREE.Group(); g.position.set(i===0 ? 1.5 : 0, i*H + H/2 + .2, D/2 + 1.1); scene.add(g);
-  const core = new THREE.Mesh(new THREE.SphereGeometry(.2, 24, 24), neon(new THREE.Color(f.color).lerp(new THREE.Color(0xffffff), .6)));
-  const halo = new THREE.Sprite(new THREE.SpriteMaterial({map:glowT, color:f.color, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true, toneMapped:false}));
-  halo.scale.setScalar(1.5); halo.material.opacity = .6;
-  const ring = new THREE.Sprite(new THREE.SpriteMaterial({map:ringT, color:f.color, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true, toneMapped:false}));
-  const hit = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8), new THREE.MeshBasicMaterial({transparent:true, opacity:0, depthWrite:false}));
-  hit.userData.floor = i;
-  // short beam into facade
-  const beam = box(.03, .03, 1.1, neon(f.color), 0, 0, -.55, g);
-  const l = new THREE.PointLight(f.color, 6, 5, 2);
-  g.add(core, halo, ring, hit, l);
-  hotspots.push({g, core, halo, ring, hit, phase:i*.7});
-});
-
-/* ---------- labels ---------- */
-const labelsEl = document.getElementById('labels'), railEl = document.getElementById('rail');
-const freeCount = (fi) => { const b = busyMap(fi); const all = seatList(fi); return [all.filter(s=>!b.has(s.id)).length, all.length]; };
-const labels = FLOORS.map((f, i) => {
-  const el = document.createElement('div'); el.className = 'lbl'; el.style.setProperty('--c', f.css);
-  el.innerHTML = `${f.tag} <small></small>`; el.onclick = () => enterFloor(i);
-  el.onmouseenter = () => setHover(i); el.onmouseleave = () => setHover(null);
-  labelsEl.appendChild(el); return el;
-});
-FLOORS.slice().reverse().forEach((f) => {
-  const i = FLOORS.indexOf(f), b = document.createElement('button'); b.style.setProperty('--c', f.css);
-  b.innerHTML = `<b>0${i+1}</b><span>${f.name}<small>от ${Math.min(...seatList(i).map(s=>TYPES[s.t].price))} сом/ч</small></span>`;
-  b.onclick = () => enterFloor(i); b.onmouseenter = () => setHover(i); b.onmouseleave = () => setHover(null);
-  railEl.appendChild(b);
-});
-function refreshLabels() { labels.forEach((el,i) => { const [fr, all] = freeCount(i); el.querySelector('small').textContent = `${fr}/${all} свободно`; }); }
-
-let hovered = null;
-function setHover(i) {
-  hovered = i; canvas.style.cursor = i==null ? '' : 'pointer';
-  labels.forEach((el,k) => el.classList.toggle('on', k===i));
-  [...railEl.children].forEach((b) => b.classList.toggle('on', b.querySelector('b').textContent === '0'+(i+1)));
-}
-
-/* ---------- post ---------- */
-const composer = new EffectComposer(renderer);
-composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .45, .4, .45);
-composer.addPass(bloom); composer.addPass(new OutputPass());
-
-/* ---------- interaction ---------- */
-const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(); let down = null;
-const setMouse = (e) => { mouse.set(e.clientX/innerWidth*2-1, -(e.clientY/innerHeight)*2+1); };
-const pick = () => { ray.setFromCamera(mouse, camera); const h = ray.intersectObjects(hotspots.map(h=>h.hit)); return h.length ? h[0].object.userData.floor : null; };
-canvas.addEventListener('pointermove', (e) => { if (mode!=='city') return; setMouse(e); const p = pick(); if (p !== hovered) setHover(p); controls.autoRotate = false; idleT = 0; });
-canvas.addEventListener('pointerdown', (e) => { down = [e.clientX, e.clientY]; });
-canvas.addEventListener('pointerup', (e) => { if (!down || mode!=='city') return; if (Math.hypot(e.clientX-down[0], e.clientY-down[1]) < 6) { setMouse(e); const p = pick(); if (p != null) enterFloor(p); } down = null; });
-
-let tween = null, mode = 'intro', idleT = 0;
-const ease = (t) => t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
-function flyTo(pos, target, dur, done) {
-  tween = {p0:camera.position.clone(), t0:controls.target.clone(), p1:pos, t1:target, start:performance.now(), dur, done};
-}
-function floorView(i) {
-  const y = i*H + H/2;
-  return { pos:new THREE.Vector3(innerWidth<820 ? 0 : 6, y+1.2, D/2 + (innerWidth<820 ? 16 : 10)), target:new THREE.Vector3(0, y, 0) };
-}
-const bookingEl = document.getElementById('booking');
-function enterFloor(i) {
-  if (mode === 'booking') { setFloor(i); return; }
-  mode = 'flying'; controls.enabled = false; controls.autoRotate = false; setHover(null);
-  document.getElementById('hero').style.opacity = 0; railEl.style.opacity = 0; labelsEl.style.opacity = 0;
-  const v = floorView(i);
-  openBooking(i, true);
-  flyTo(v.pos, v.target, 1500, () => { mode = 'booking'; });
-  setTimeout(() => { bookingEl.style.display = 'block'; requestAnimationFrame(() => bookingEl.classList.add('show')); }, 900);
-}
-function exitFloor() {
-  bookingEl.classList.remove('show'); setTimeout(() => bookingEl.style.display = 'none', 500);
-  mode = 'flying';
-  flyTo(HOME.pos.clone(), HOME.target.clone(), 1600, () => { mode = 'city'; controls.enabled = true; idleT = 0; });
-  document.getElementById('hero').style.opacity = 1; railEl.style.opacity = 1; labelsEl.style.opacity = 1;
-  refreshLabels();
-}
-document.getElementById('back').onclick = exitFloor;
-document.querySelector('[data-open]').onclick = () => enterFloor(0);
-document.getElementById('navFloors').onclick = (e) => { e.preventDefault(); if (mode==='booking') exitFloor(); };
-document.getElementById('navPrice').onclick = (e) => { e.preventDefault(); enterFloor(0); };
-document.getElementById('navPromo').onclick = (e) => { e.preventDefault(); const p = document.querySelector('#hero .promo'); p.animate([{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}], {duration:500, iterations:2}); };
-addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (modal.classList.contains('show')) closeModal(); else if (mode==='booking') exitFloor(); } });
-
-addEventListener('resize', () => {
-  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
-});
-
-/* ---------- loop ---------- */
-const clock = new THREE.Clock(), v3 = new THREE.Vector3();
-let flickerT = 3;
-flyTo(HOME.pos.clone(), HOME.target.clone(), 2800, () => { mode = 'city'; controls.enabled = true; });
-function frame() {
-  const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
-  if (tween) {
-    const k = Math.min(1, (performance.now()-tween.start)/tween.dur), e = ease(k);
-    camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.t0, tween.t1, e);
-    if (k === 1) { const d = tween.done; tween = null; d && d(); }
-  }
-  if (mode === 'city') { idleT += dt; if (idleT > 4) controls.autoRotate = true; }
-  controls.update();
-  // hotspots pulse
-  hotspots.forEach((h, i) => {
-    const s = 1 + Math.sin(t*3 + h.phase)*.18, hv = hovered===i ? 1.45 : 1;
-    h.core.scale.setScalar(s*hv); h.halo.scale.setScalar(1.5*s*hv);
-    const r = ((t*.7 + h.phase) % 1); h.ring.scale.setScalar(.6 + r*2.6); h.ring.material.opacity = (1-r)*.55;
-    floorObjs[i].light.intensity = THREE.MathUtils.lerp(floorObjs[i].light.intensity, hovered===i ? 45 : 20, .1);
-    floorObjs[i].floorGlow.material.opacity = THREE.MathUtils.lerp(floorObjs[i].floorGlow.material.opacity, hovered===i ? .2 : .07, .1);
-  });
-  // sign flicker
-  flickerT -= dt;
-  if (flickerT < 0) { signMat.opacity = Math.random() < .5 ? .25 : .6; if (flickerT < -.12) { signMat.opacity = 1; flickerT = 2 + Math.random()*5; } }
-  signLight.intensity = 18*signMat.opacity;
-  // labels
-  hotspots.forEach((h, i) => {
-    h.g.getWorldPosition(v3); v3.project(camera);
-    const x = (v3.x*.5+.5)*innerWidth, y = (-v3.y*.5+.5)*innerHeight;
-    labels[i].style.transform = `translate(${x+22}px, ${y-14}px)`;
-    labels[i].style.visibility = v3.z < 1 ? 'visible' : 'hidden';
-  });
-  composer.render();
-  requestAnimationFrame(frame);
-}
-// blinking aviation lights
-const blinkers = []; scene.children.forEach(o => { if (o.userData.blink != null) blinkers.push(o); });
-setInterval(() => { const t = clock.elapsedTime; blinkers.forEach(b => b.visible = ((t + b.userData.blink) % 2) < .25); }, 100);
-
-/* =================== BOOKING =================== */
+/* ---------- data helpers ---------- */
 function seatList(fi) {
   const out = []; let n = 1;
-  FLOORS[fi].layout.forEach((row, r) => [...row].forEach((ch, c) => { if (ch !== '.') out.push({id:`${fi}-${n}`, n:n++, t:ch, r, c}); }));
+  FLOORS[fi].layout.forEach((row, r) => [...row].forEach((ch, c) => { if (ch !== '.') out.push({ id:`${fi}-${n}`, n:n++, t:ch, r, c }); }));
   return out;
 }
 const hash = (s) => { let h = 2166136261; for (const ch of s) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; };
 const rng = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
-
 const now = new Date();
-const TIMES = [...Array(14)].map((_,k) => `${String(10+k).padStart(2,'0')}:00`).concat(['Ночь']);
-const DURS = [1,2,3,5];
-const BONUS = {3:1, 5:1}; // акция: 3+1, 5+1
-const S = { floor:0, date:0, time:null, dur:2, sel:new Set(), mine:new Set() };
+const TIMES = [...Array(14)].map((_, k) => `${String(10 + k).padStart(2, '0')}:00`).concat(['Ночь']);
+const DURS = [1, 2, 3, 5];
+const S = { floor:0, date:0, time:null, dur:3, sel:new Set() };
+function busyMap(fi, date = S.date, time = S.time) {
+  const r = rng(hash(`${fi}|${date}|${time}`)), p = time === 'Ночь' ? .5 : (parseInt(time) >= 18 ? .48 : .28);
+  const set = new Set(); seatList(fi).forEach(s => { if (r() < p) set.add(s.id); }); return set;
+}
+const zonesOf = (fi) => [...new Set(seatList(fi).map(s => s.t))];
+const minPrice = (fi) => Math.min(...zonesOf(fi).map(t => ZONES[t].hour));
+const freeNow = (fi) => { const t = `${String(Math.max(10, Math.min(23, now.getHours()))).padStart(2, '0')}:00`; const b = busyMap(fi, 0, t); const l = seatList(fi); return [l.length - b.size, l.length]; };
 
-function busyMap(fi) {
-  const key = `${fi}|${S.date}|${S.time}`, r = rng(hash(key));
-  const evening = S.time === 'Ночь' ? .55 : (parseInt(S.time) >= 18 ? .5 : .3);
-  const set = new Set(); seatList(fi).forEach(s => { if (r() < evening) set.add(s.id); });
-  S.mine.forEach(k => { const [mk, id] = k.split('#'); if (mk === `${S.date}|${S.time}` && id.startsWith(fi+'-')) set.add(id); });
-  return set;
-}
-const ICON = {
-  pc:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
-  pad:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a4 4 0 0 1 4 4l-.6 4.2a2.5 2.5 0 0 1-4.5 1.1L15 15H9l-1.9 2.3a2.5 2.5 0 0 1-4.5-1.1L2 12a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18 13.5h.01"/></svg>'
-};
+/* ---------- hero live block ---------- */
+$('fSeats').textContent = FLOORS.reduce((a, _, i) => a + seatList(i).length, 0);
+$('liveTime').textContent = 'на ' + now.toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' });
+$('liveRows').innerHTML = FLOORS.map((f, i) => { const [fr, all] = freeNow(i);
+  return `<div class="live-row" style="--c:${f.color}"><div class="n">0${i + 1}</div><div class="t">${f.short}<small>${f.name} · от ${minPrice(i)} сом/ч</small><div class="bar"><i style="width:${Math.round(fr / all * 100)}%"></i></div></div><div class="f">${fr}<small>из ${all}</small></div></div>`; }).join('');
 
-const $ = (id) => document.getElementById(id);
-function openBooking(i) { setFloor(i, true); }
-function setFloor(i, silent) {
-  S.floor = i; S.sel.clear();
-  const f = FLOORS[i];
-  document.documentElement.style.setProperty('--accent', f.css);
-  if (!silent && mode === 'booking') { const v = floorView(i); mode = 'flying'; flyTo(v.pos, v.target, 1100, () => mode = 'booking'); }
-  render();
-}
-function renderTabs() {
-  $('tabs').innerHTML = '';
-  FLOORS.forEach((f, i) => { const b = document.createElement('button'); b.textContent = `0${i+1} · ${f.name}`; b.style.setProperty('--c', f.css);
-    b.className = i===S.floor ? 'on' : ''; b.onclick = () => setFloor(i); $('tabs').appendChild(b); });
-}
-function renderPickers() {
-  const wd = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-  $('dates').innerHTML = '';
-  for (let k=0; k<7; k++) {
-    const d = new Date(now); d.setDate(d.getDate()+k);
-    const b = document.createElement('button'); b.className = 'chip' + (k===S.date ? ' on' : '');
-    b.innerHTML = `<small>${k===0?'Сегодня':k===1?'Завтра':wd[d.getDay()]}</small>${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`;
-    b.onclick = () => { S.date = k; S.sel.clear(); fixTime(); render(); }; $('dates').appendChild(b);
-  }
-  $('times').innerHTML = '';
-  TIMES.forEach(tm => {
-    const b = document.createElement('button'); b.className = 'chip' + (tm===S.time ? ' on' : '');
-    b.textContent = tm === 'Ночь' ? '🌙 Ночь 00–08' : tm; b.disabled = timeDisabled(tm);
-    b.onclick = () => { S.time = tm; S.sel.clear(); render(); }; $('times').appendChild(b);
+/* ---------- floor list ---------- */
+$('flist').innerHTML = FLOORS.map((f, i) => i).reverse().map(i => { const f = FLOORS[i], [fr] = freeNow(i);
+  return `<button class="fcard" style="--c:${f.color}" data-f="${i}"><b>0${i + 1}</b><strong>${f.short}</strong><span>${f.name} · от ${minPrice(i)} сом/ч</span><em>${fr} свободно · выбрать место →</em></button>`; }).join('');
+// on desktop the list floats over the 3D stage
+const placeList = () => { const st = $('stage'), fl = $('flist'); if (innerWidth > 860) { if (fl.parentElement !== st) st.appendChild(fl); } else if (fl.parentElement === st) st.after(fl); };
+placeList(); addEventListener('resize', placeList);
+document.querySelectorAll('.fcard').forEach(b => { const i = +b.dataset.f;
+  b.onclick = () => openBooking(i); b.onmouseenter = () => setHover(i); b.onmouseleave = () => setHover(null); });
+
+/* ---------- price plans ---------- */
+const hoursWord = (h) => `${h} ${h % 10 === 1 && h % 100 !== 11 ? 'час' : (h % 10 >= 2 && h % 10 <= 4 && (h % 100 < 10 || h % 100 >= 20)) ? 'часа' : 'часов'}`;
+$('plans').innerHTML = Object.entries(ZONES).map(([k, z]) => {
+  const fi = FLOORS.findIndex(f => f.layout.join('').includes(k));
+  return `<div class="plan" style="--c:${z.color}"><h3>${z.name}<small>${fi + 1} ЭТАЖ</small></h3>
+  <div class="price">${z.hour}<small> сом / час</small></div>
+  <ul>${z.specs.map(s => `<li>${s}</li>`).join('')}</ul>
+  <div class="tbl"><div><span>1 час</span><b>${z.hour} сом</b></div>
+  ${Object.entries(PROMO).map(([h, b]) => `<div><span>${hoursWord(+h)}</span><b>${z.hour * h} сом<em>+${b} ч</em></b></div>`).join('')}
+  <div><span>Ночь ${NIGHT}</span><b>${z.night} сом</b></div></div>
+  <button class="btn" data-book="${fi}">Выбрать место</button></div>`; }).join('');
+document.querySelectorAll('#plans [data-book]').forEach(b => b.addEventListener('click', () => openBooking(+b.dataset.book)));
+
+/* =================== 3D BUILDING (лёгкая версия) =================== */
+let hovered = null, setHover = () => {}, pauseScene = () => {}, resumeScene = () => {};
+initScene().catch((e) => { console.warn(e); $('nogl').style.display = 'grid'; $('scene').style.display = 'none'; $('labels').innerHTML = ''; });
+
+async function initScene() {
+  const THREE = await import('three');
+  const stage = $('stage'), canvas = $('scene');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: devicePixelRatio < 2, powerPreference:'high-performance' });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x04050b);
+  scene.fog = new THREE.Fog(0x04050b, 70, 190);
+  const camera = new THREE.PerspectiveCamera(36, 1, .5, 400);
+  const world = new THREE.Group(); scene.add(world);
+
+  const basic = (c, o = {}) => new THREE.MeshBasicMaterial({ color:c, ...o });
+  const box = (w, h, d, m, x, y, z, p = world) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); p.add(b); return b; };
+  const tex = (cv) => { const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t; };
+  const radial = (stops) => { const cv = document.createElement('canvas'); cv.width = cv.height = 128; const g = cv.getContext('2d');
+    const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); stops.forEach(([o, c]) => gr.addColorStop(o, c)); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return tex(cv); };
+  const glowT = radial([[0, 'rgba(255,255,255,1)'], [.2, 'rgba(255,255,255,.6)'], [1, 'rgba(255,255,255,0)']]);
+  const softT = radial([[0, 'rgba(255,255,255,.55)'], [1, 'rgba(255,255,255,0)']]);
+  const glowSprite = (map, color, s, op) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map, color, transparent:true, opacity:op, blending:THREE.AdditiveBlending, depthWrite:false, fog:false })); sp.scale.setScalar(s); return sp; };
+
+  // ground
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(500, 500), basic(0x06070f)); ground.rotation.x = -Math.PI / 2; scene.add(ground);
+  const grid = new THREE.GridHelper(260, 104, 0x27306a, 0x111633); grid.position.y = .02; grid.material.transparent = true; grid.material.opacity = .5; scene.add(grid);
+
+  // building
+  const W = 16, D = 10, H = 3.4, SL = .35;
+  const slabM = basic(0x0c0e1a), frameM = basic(0x141728), deskM = basic(0x0a0b14);
+  const floorFx = [];
+  FLOORS.forEach((f, i) => {
+    const y0 = i * H, c = new THREE.Color(f.color), gh = H - SL;
+    box(W + .6, SL, D + .6, slabM, 0, y0 + SL / 2, 0);
+    const nm = basic(c.clone().multiplyScalar(.85));
+    box(W + .64, .07, .07, nm, 0, y0 + SL - .05, (D + .6) / 2); box(W + .64, .07, .07, nm, 0, y0 + SL - .05, -(D + .6) / 2);
+    box(.07, .07, D + .64, nm, (W + .6) / 2, y0 + SL - .05, 0); box(.07, .07, D + .64, nm, -(W + .6) / 2, y0 + SL - .05, 0);
+    box(W, gh, .05, basic(c.clone().multiplyScalar(.16)), 0, y0 + SL + gh / 2, -D / 2 + .05);
+    const floorM = basic(c.clone().multiplyScalar(.1)); box(W - .2, .02, D - .2, floorM, 0, y0 + SL + .01, 0);
+    box(W, gh, D, basic(c, { transparent:true, opacity:.05, depthWrite:false, side:THREE.DoubleSide }), 0, y0 + SL + gh / 2, 0);
+    for (let x = -W / 2; x <= W / 2 + .01; x += 2) box(.08, gh, .08, frameM, x, y0 + SL + gh / 2, D / 2);
+    for (const z of [-D / 2 + 2, 0, D / 2 - 2]) { box(.08, gh, .08, frameM, W / 2, y0 + SL + gh / 2, z); box(.08, gh, .08, frameM, -W / 2, y0 + SL + gh / 2, z); }
+    box(W - 2, .04, .12, basic(c.clone().lerp(new THREE.Color(0xffffff), .4).multiplyScalar(.7)), 0, y0 + H - .1, 0);
+    const cols = i === 1 ? [-6, -4.4, -2.8, 2.8, 4.4, 6] : [-6.4, -5.1, -3.8, -2.5, 2.5, 3.8, 5.1, 6.4];
+    const rows = i === 1 ? [-2.4, 1.6] : [-3, -.6, 2];
+    const n = cols.length * rows.length;
+    const desks = new THREE.InstancedMesh(new THREE.BoxGeometry(1.1, .5, .55), deskM, n);
+    const mons = new THREE.InstancedMesh(new THREE.BoxGeometry(.62, .36, .03), basic(0xffffff), n);
+    const m4 = new THREE.Matrix4(); let k = 0; const r = rng(i + 7);
+    for (const z of rows) for (const x of cols) {
+      desks.setMatrixAt(k, m4.makeTranslation(x, y0 + SL + .5, z));
+      mons.setMatrixAt(k, m4.makeTranslation(x, y0 + SL + 1.05, z - .15));
+      mons.setColorAt(k, r() < .3 ? new THREE.Color(0x1a1c2c) : c.clone().multiplyScalar(.6 + r() * .5)); k++;
+    }
+    world.add(desks, mons);
+    const halo = glowSprite(softT, c, 14, .22); halo.position.set(0, y0 + H / 2, -1); world.add(halo);
+    floorFx.push({ floorM, halo, c });
   });
-  $('durs').innerHTML = '';
-  if (S.time === 'Ночь') { $('durs').innerHTML = '<button class="chip on">Ночной пакет · 8 ч · −50%</button>'; }
-  else DURS.forEach(d => { const b = document.createElement('button'); b.className = 'chip' + (d===S.dur ? ' on' : ''); b.innerHTML = BONUS[d] ? `${d} ч <span style="color:var(--amber)">+${BONUS[d]} 🎁</span>` : `${d} ч`;
-    b.onclick = () => { S.dur = d; render(); }; $('durs').appendChild(b); });
-}
-const timeDisabled = (tm) => S.date === 0 && tm !== 'Ночь' && parseInt(tm) <= now.getHours();
-function fixTime() { if (!S.time || timeDisabled(S.time)) S.time = TIMES.find(t => !timeDisabled(t)); }
-const durTxt = () => BONUS[S.dur] ? `${S.dur}+${BONUS[S.dur]} ч 🎁` : `${S.dur} ч`;
-const seatPrice = (s) => TYPES[s.t].price * (S.time === 'Ночь' ? 4 : S.dur);
+  const roofY = FLOORS.length * H;
+  box(W + .6, SL, D + .6, slabM, 0, roofY + SL / 2, 0);
+  box(3, 1.1, 2.4, frameM, -4.5, roofY + .9, -2); box(2, .9, 2, frameM, 4, roofY + .8, -2.5);
+  box(.12, roofY + .6, .12, basic(0x4c6fff), (W + .6) / 2 + .06, (roofY + .6) / 2, (D + .6) / 2 + .06);
+  box(.12, roofY + .6, .12, basic(0x8b5cf6), -(W + .6) / 2 - .06, (roofY + .6) / 2, (D + .6) / 2 + .06);
+  const dx = -5.2;
+  box(3.6, .14, 1.6, slabM, dx, 2.75, D / 2 + .8); box(3.6, .05, .05, basic(0x22d3ee), dx, 2.68, D / 2 + 1.6);
+  box(2.1, 2.2, .04, basic(0x22d3ee, { transparent:true, opacity:.25 }), dx, 1.45, D / 2 + .03);
+  const doorGlow = glowSprite(softT, 0x22d3ee, 5, .35); doorGlow.position.set(dx, 1.4, D / 2 + .5); world.add(doorGlow);
 
+  // sign
+  await document.fonts.load('800 100px Unbounded').catch(() => {});
+  const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 600; const g = cv.getContext('2d');
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '800 270px Unbounded, Arial Black, sans-serif';
+  g.shadowColor = '#4c6fff'; for (const b of [50, 18]) { g.shadowBlur = b; g.fillStyle = '#dfe6ff'; g.fillText(CLUB.name, 1024, 250); }
+  g.font = '700 84px Unbounded, Arial, sans-serif'; if ('letterSpacing' in g) g.letterSpacing = '28px';
+  g.shadowColor = '#22d3ee'; for (const b of [24, 8]) { g.shadowBlur = b; g.fillStyle = '#c9f6ff'; g.fillText(`${CLUB.sub} · ${CLUB.city.toUpperCase()}`, 1024, 490); }
+  const signM = new THREE.MeshBasicMaterial({ map:tex(cv), transparent:true, depthWrite:false, fog:false });
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(13, 3.8), signM); sign.position.set(0, roofY + 2.7, D / 2 - .2); world.add(sign);
+  box(.1, 2.2, .1, frameM, -4.5, roofY + 1.4, D / 2 - .4); box(.1, 2.2, .1, frameM, 4.5, roofY + 1.4, D / 2 - .4);
+  const signGlow = glowSprite(softT, 0x4c6fff, 18, .25); signGlow.position.set(0, roofY + 2.7, D / 2 - .6); world.add(signGlow);
+  for (const [c, x, s] of [[0x22d3ee, -5, 16], [0x8b5cf6, 5, 18]]) {
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(s, s * .6), new THREE.MeshBasicMaterial({ map:softT, color:c, transparent:true, opacity:.5, blending:THREE.AdditiveBlending, depthWrite:false }));
+    p.rotation.x = -Math.PI / 2; p.position.set(x, .05, D / 2 + 3); world.add(p); }
+
+  // city: one instanced draw call
+  const wc = document.createElement('canvas'); wc.width = 64; wc.height = 128; const wg = wc.getContext('2d');
+  wg.fillStyle = '#07080f'; wg.fillRect(0, 0, 64, 128); const wr = rng(42);
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 8; x++) if (wr() < .26) { wg.fillStyle = wr() < .75 ? `rgba(255,${190 + wr() * 40 | 0},120,${.35 + wr() * .5})` : `rgba(150,190,255,${.3 + wr() * .5})`; wg.fillRect(x * 8 + 2, y * 8 + 2, 4, 5); }
+  const wt = tex(wc); wt.wrapS = wt.wrapT = THREE.RepeatWrapping; wt.repeat.set(1, 2); wt.magFilter = THREE.NearestFilter;
+  const N = 80, city = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ map:wt }), N);
+  const cr = rng(9), q = new THREE.Quaternion(), e = new THREE.Euler();
+  for (let k = 0; k < N; k++) {
+    const a = cr() * Math.PI * 2, rr = 40 + cr() * 95, w = 5 + cr() * 9, h = 5 + cr() * (rr > 85 ? 30 : 16), d = 5 + cr() * 8;
+    e.set(0, cr() * Math.PI, 0); q.setFromEuler(e);
+    city.setMatrixAt(k, new THREE.Matrix4().compose(new THREE.Vector3(Math.cos(a) * rr, h / 2, Math.sin(a) * rr), q, new THREE.Vector3(w, h, d)));
+  }
+  scene.add(city);
+  { const n = 1200, p = new Float32Array(n * 3), sr = rng(3);
+    for (let k = 0; k < n; k++) { const th = sr() * Math.PI * 2, ph = sr() * Math.PI * .42, r = 240; p[k * 3] = r * Math.sin(ph) * Math.cos(th); p[k * 3 + 1] = r * Math.cos(ph) + 5; p[k * 3 + 2] = r * Math.sin(ph) * Math.sin(th); }
+    const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(p, 3));
+    scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ color:0xc8ccff, size:1.1, sizeAttenuation:false, fog:false, transparent:true, opacity:.7 }))); }
+
+  // hotspots
+  const ringCv = document.createElement('canvas'); ringCv.width = ringCv.height = 128; const rg = ringCv.getContext('2d');
+  rg.strokeStyle = '#fff'; rg.lineWidth = 6; rg.beginPath(); rg.arc(64, 64, 54, 0, Math.PI * 2); rg.stroke(); const ringT = tex(ringCv);
+  const spots = FLOORS.map((f, i) => {
+    const grp = new THREE.Group(); grp.position.set(i === 0 ? 1.5 : 0, i * H + H / 2 + .2, D / 2 + 1); world.add(grp);
+    const core = new THREE.Mesh(new THREE.SphereGeometry(.2, 16, 16), basic(new THREE.Color(f.color).lerp(new THREE.Color(0xffffff), .55)));
+    const halo = glowSprite(glowT, f.color, 1.6, .7);
+    const ring = glowSprite(ringT, f.color, 1, .6);
+    const hit = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8), basic(0, { transparent:true, opacity:0, depthWrite:false })); hit.userData.f = i;
+    box(.03, .03, 1, basic(f.color), 0, 0, -.5, grp);
+    grp.add(core, halo, ring, hit);
+    return { grp, core, halo, ring, hit };
+  });
+
+  const labels = FLOORS.map((f, i) => { const el = document.createElement('button'); el.className = 'lbl'; el.style.setProperty('--c', f.color);
+    el.innerHTML = `0${i + 1} · ${f.short.toUpperCase()} <small>${freeNow(i)[0]} своб.</small>`;
+    el.onclick = () => openBooking(i); el.onmouseenter = () => setHover(i); el.onmouseleave = () => setHover(null);
+    $('labels').appendChild(el); return el; });
+  setHover = (i) => { hovered = i; canvas.style.cursor = i == null ? '' : 'pointer';
+    document.querySelectorAll('.fcard').forEach(b => b.classList.toggle('on', +b.dataset.f === i)); kick(); };
+
+  let Wd = 1, Ht = 1;
+  const resize = () => { Wd = stage.clientWidth; Ht = stage.clientHeight; renderer.setSize(Wd, Ht, false); camera.aspect = Wd / Ht; camera.updateProjectionMatrix(); kick(); };
+  new ResizeObserver(resize).observe(stage);
+
+  // horizontal drag rotates; vertical swipe keeps scrolling the page
+  let drag = 0, dragV = 0, dragging = false, lastX = 0, downXY = null;
+  const ray = new THREE.Raycaster(), m = new THREE.Vector2();
+  const pick = (e) => { const r = canvas.getBoundingClientRect(); m.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(m, camera); const h = ray.intersectObjects(spots.map(s => s.hit)); return h.length ? h[0].object.userData.f : null; };
+  canvas.addEventListener('pointerdown', (e) => { dragging = true; lastX = e.clientX; downXY = [e.clientX, e.clientY]; kick(); });
+  addEventListener('pointerup', (e) => { if (dragging && downXY && Math.hypot(e.clientX - downXY[0], e.clientY - downXY[1]) < 8) { const p = pick(e); if (p != null) openBooking(p); } dragging = false; downXY = null; });
+  canvas.addEventListener('pointercancel', () => { dragging = false; downXY = null; });
+  canvas.addEventListener('pointermove', (e) => {
+    if (dragging) { const dx = e.clientX - lastX; lastX = e.clientX; dragV = dx * .006; drag = Math.max(-1.1, Math.min(1.1, drag + dragV)); kick(); }
+    else if (e.pointerType === 'mouse') { const p = pick(e); if (p !== hovered) setHover(p); }
+  });
+
+  // render only while the section is on screen
+  let inView = false, paused = false, running = false, last = 0, t = 0;
+  new IntersectionObserver(([en]) => { inView = en.isIntersecting; kick(); }, { rootMargin:'80px' }).observe(stage);
+  document.addEventListener('visibilitychange', kick);
+  pauseScene = () => { paused = true; }; resumeScene = () => { paused = false; kick(); };
+  function kick() { if (!running && inView && !paused && !document.hidden) { running = true; last = performance.now(); requestAnimationFrame(loop); } }
+  const v = new THREE.Vector3(), cam = new THREE.Vector3(), look = new THREE.Vector3();
+  let first = true;
+  function loop(nowT) {
+    if (!inView || paused || document.hidden) { running = false; return; }
+    const dt = Math.min(.05, (nowT - last) / 1000); last = nowT; t += dt;
+    const r = stage.getBoundingClientRect(), vh = innerHeight;
+    const p = Math.max(0, Math.min(1, (vh - r.top) / (vh + r.height)));   // scroll progress through section
+    if (!dragging) { drag += dragV; dragV *= .92; drag *= .985; }
+    world.rotation.y = -.55 + p * .7 + Math.sin(t * .25) * .12 + drag;
+    const mob = Wd < 860, dist = (mob ? 56 : 40) - p * 6, camY = 4 + (1 - p) * 16 + p * 3, offX = mob ? 0 : 5;
+    cam.set(offX, camY, dist); if (first) { camera.position.copy(cam); first = false; } else camera.position.lerp(cam, .12);
+    look.set(offX * .9, 5.6, 0); camera.lookAt(look);
+    spots.forEach((s, i) => {
+      const hv = hovered === i ? 1.4 : 1, pulse = 1 + Math.sin(t * 3 + i) * .15;
+      s.core.scale.setScalar(pulse * hv); s.halo.scale.setScalar(1.6 * pulse * hv);
+      const rr = (t * .7 + i * .33) % 1; s.ring.scale.setScalar(.6 + rr * 2.4); s.ring.material.opacity = (1 - rr) * .55;
+      const fx = floorFx[i]; fx.halo.material.opacity += ((hovered === i ? .45 : .22) - fx.halo.material.opacity) * .1;
+      fx.floorM.color.copy(fx.c).multiplyScalar(hovered === i ? .22 : .1);
+      s.grp.getWorldPosition(v); const front = v.z > 0; v.project(camera);
+      const lw = labels[i].offsetWidth || 160; labels[i].style.transform = `translate(${Math.min((v.x * .5 + .5) * Wd + 20, Wd - lw - 10)}px, ${(-v.y * .5 + .5) * Ht - 14}px)`;
+      labels[i].style.opacity = front ? 1 : 0; labels[i].style.pointerEvents = front ? '' : 'none';
+    });
+    signM.opacity = (t % 7) < .25 && Math.sin(t * 40) > 0 ? .5 : 1;
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+  resize();
+}
+
+/* =================== BOOKING =================== */
+const ICON = { pc:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+  pad:'<svg viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4l-.6 4.2a2.5 2.5 0 0 1-4.5 1.1L15 15H9l-1.9 2.3a2.5 2.5 0 0 1-4.5-1.1L2 12a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18 13.5h.01"/></svg>' };
+const WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+const dateOf = (k) => { const d = new Date(now); d.setDate(d.getDate() + k); return d; };
+const timeOff = (tm, date = S.date) => date === 0 && tm !== 'Ночь' && parseInt(tm) <= now.getHours();
+const fixTime = () => { if (!S.time || timeOff(S.time)) S.time = TIMES.find(t => !timeOff(t)); };
+const bonus = () => S.time === 'Ночь' ? 0 : (PROMO[S.dur] || 0);
+const seatPrice = (s) => S.time === 'Ночь' ? ZONES[s.t].night : ZONES[s.t].hour * S.dur;
+const plural = (n, a, b, c) => n % 10 === 1 && n % 100 !== 11 ? a : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? b : c;
+const hh = (h) => String(h % 24).padStart(2, '0') + ':00';
+const span = () => { if (S.time === 'Ночь') return NIGHT; const st = parseInt(S.time); return `${S.time}–${hh(st + S.dur + bonus())}`; };
+
+function openBooking(i) {
+  S.floor = i; S.sel.clear(); fixTime(); render();
+  $('booking').classList.add('show'); document.body.style.overflow = 'hidden'; pauseScene();
+  $('booking').scrollTop = 0;
+}
+function closeBooking() { $('booking').classList.remove('show'); document.body.style.overflow = ''; resumeScene(); }
+$('close').onclick = closeBooking;
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('booking').classList.contains('show')) closeBooking(); });
+
+function render() {
+  const f = FLOORS[S.floor];
+  document.documentElement.style.setProperty('--accent', f.color);
+  $('fTitle').innerHTML = `<small>0${S.floor + 1} · ${f.name.toUpperCase()}</small>${f.short}`;
+  $('screenLbl').textContent = f.screen;
+  $('tabs').innerHTML = FLOORS.map((x, i) => `<button style="--c:${x.color}" class="${i === S.floor ? 'on' : ''}" data-i="${i}">0${i + 1} · ${x.short}</button>`).join('');
+  $('tabs').querySelectorAll('button').forEach(b => b.onclick = () => { S.floor = +b.dataset.i; S.sel.clear(); render(); });
+  $('dates').innerHTML = [...Array(7)].map((_, k) => { const d = dateOf(k);
+    return `<button class="chip${k === S.date ? ' on' : ''}" data-k="${k}"><small>${k === 0 ? 'Сегодня' : k === 1 ? 'Завтра' : WD[d.getDay()]}</small>${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}</button>`; }).join('');
+  $('dates').querySelectorAll('button').forEach(b => b.onclick = () => { S.date = +b.dataset.k; S.sel.clear(); fixTime(); render(); });
+  $('times').innerHTML = TIMES.map(tm => `<button class="chip${tm === S.time ? ' on' : ''}" data-t="${tm}" ${timeOff(tm) ? 'disabled' : ''}>${tm === 'Ночь' ? 'Ночь ' + NIGHT : tm}</button>`).join('');
+  $('times').querySelectorAll('button').forEach(b => b.onclick = () => { S.time = b.dataset.t; S.sel.clear(); render(); });
+  if (S.time === 'Ночь') $('durs').innerHTML = `<button class="chip on">Ночной пакет · ${NIGHT}</button>`;
+  else { $('durs').innerHTML = DURS.map(d => `<button class="chip${d === S.dur ? ' on' : ''}" data-d="${d}">${d} ч${PROMO[d] ? ` <span class="gift">+${PROMO[d]} 🎁</span>` : ''}</button>`).join('');
+    $('durs').querySelectorAll('button').forEach(b => b.onclick = () => { S.dur = +b.dataset.d; render(); }); }
+  renderSeats(); renderSummary();
+}
 function renderSeats() {
-  const f = FLOORS[S.floor], busy = busyMap(S.floor), list = seatList(S.floor);
-  const el = $('seats'); el.innerHTML = '';
+  const f = FLOORS[S.floor], busy = busyMap(S.floor), list = seatList(S.floor), el = $('seats');
   el.style.gridTemplateColumns = `repeat(${f.layout[0].length}, var(--s))`;
+  el.innerHTML = '';
   f.layout.forEach((row, r) => [...row].forEach((ch, c) => {
-    if (ch === '.') { el.appendChild(Object.assign(document.createElement('div'), {className:'gap'})); return; }
-    const s = list.find(x => x.r===r && x.c===c), ty = TYPES[ch];
-    const b = document.createElement('button'); b.className = 'seat' + (S.sel.has(s.id) ? ' sel' : '');
-    b.style.setProperty('--c', ty.color); b.disabled = busy.has(s.id);
-    b.title = `${ty.name} №${s.n} · ${ty.price} сом/ч` + (b.disabled ? ' — занято' : '');
-    b.innerHTML = ICON[ty.icon] + `<em>${s.n}</em>`;
-    b.onclick = () => { S.sel.has(s.id) ? S.sel.delete(s.id) : S.sel.add(s.id); renderSeats(); renderSummary(); };
+    if (ch === '.') { el.insertAdjacentHTML('beforeend', '<div class="gap"></div>'); return; }
+    const s = list.find(x => x.r === r && x.c === c), z = ZONES[ch], b = document.createElement('button');
+    b.className = 'seat' + (S.sel.has(s.id) ? ' sel' : ''); b.style.setProperty('--c', z.color); b.disabled = busy.has(s.id);
+    b.title = `${z.name}, место ${s.n} · ${z.hour} сом/ч${b.disabled ? ' — занято' : ''}`; b.setAttribute('aria-label', b.title);
+    b.innerHTML = ICON[z.icon] + `<em>${s.n}</em>`;
+    b.onclick = () => { S.sel.has(s.id) ? S.sel.delete(s.id) : S.sel.add(s.id); b.classList.toggle('sel'); renderSummary(); };
     el.appendChild(b);
   }));
-  const free = list.filter(s => !busy.has(s.id)).length;
-  $('sFree').textContent = free; $('sAll').textContent = list.length;
-  const prices = [...new Set(list.map(s => TYPES[s.t].price))];
-  $('sPrice').textContent = prices.length > 1 ? `${Math.min(...prices)}–${Math.max(...prices)}` : prices[0];
-  const types = [...new Set(list.map(s => s.t))];
-  $('legend').innerHTML = `<span><i style="--c:#8a8fb3"></i>Свободно</span><span><i class="busy"></i>Занято</span><span><i class="sel" style="--c:${f.css}"></i>Выбрано</span>` +
-    types.map(t => `<span><i style="--c:${TYPES[t].color}"></i>${TYPES[t].name} · <b>${TYPES[t].price} сом/ч</b></span>`).join('');
+  $('sFree').textContent = list.length - busy.size; $('sAll').textContent = list.length;
+  const pr = [...new Set(list.map(s => ZONES[s.t].hour))]; $('sPrice').textContent = pr.length > 1 ? `${Math.min(...pr)}–${Math.max(...pr)}` : pr[0];
+  $('legend').innerHTML = `<span><i style="--c:#8d94ba"></i>Свободно</span><span><i class="busy"></i>Занято</span><span><i class="sel" style="--c:${f.color}"></i>Ваш выбор</span>` +
+    zonesOf(S.floor).map(t => `<span><i style="--c:${ZONES[t].color}"></i>${ZONES[t].name} · <b>${ZONES[t].hour} сом/ч</b></span>`).join('');
+}
+function message(list, total) {
+  const d = dateOf(S.date), f = FLOORS[S.floor], byZone = {};
+  list.forEach(s => (byZone[s.t] ||= []).push(s));
+  const lines = Object.entries(byZone).map(([t, ss]) => {
+    const z = ZONES[t], each = S.time === 'Ночь' ? z.night : z.hour * S.dur;
+    return `• ${z.name}: ${ss.map(s => '№' + s.n).join(', ')} — ${S.time === 'Ночь' ? `ночной пакет ${z.night} сом` : `${z.hour} сом/ч × ${S.dur} ч`}${ss.length > 1 ? ` × ${ss.length}` : ''} = ${each * ss.length} сом`;
+  });
+  return [
+    `Здравствуйте! Хочу забронировать в ${CLUB.full} 🎮`, '',
+    `📍 Этаж: ${S.floor + 1} — ${f.short}`,
+    `🖥 Места:`, ...lines,
+    `📅 Дата: ${d.toLocaleDateString('ru-RU', { day:'numeric', month:'long' })} (${WD[d.getDay()]})`,
+    `⏰ Время: ${span()}${S.time === 'Ночь' ? ' (ночь)' : ` (${S.dur} ч${bonus() ? ` + ${bonus()} ч в подарок по акции ${S.dur}+${bonus()}` : ''})`}`,
+    `💰 Итого: ${total} сом`,
+    `👤 Имя: ${$('nm').value.trim() || '—'}`, '',
+    'Подтвердите, пожалуйста, бронь.'
+  ].join('\n');
 }
 function renderSummary() {
-  const list = seatList(S.floor).filter(s => S.sel.has(s.id));
-  $('sum').innerHTML = list.length ? `<div class="sum-list">${list.map(s => `<div class="row"><span>${TYPES[s.t].name} · место ${s.n}</span><b>${seatPrice(s)} сом</b></div>`).join('')}</div>`
-    : '<div class="empty">Выберите место на схеме зала</div>';
-  const total = list.reduce((a, s) => a + seatPrice(s), 0);
+  const list = seatList(S.floor).filter(s => S.sel.has(s.id)), total = list.reduce((a, s) => a + seatPrice(s), 0);
+  $('sum').innerHTML = list.length ? `<div class="rows">${list.map(s => `<div><span>${ZONES[s.t].name} · место ${s.n}</span><b>${seatPrice(s)} сом</b></div>`).join('')}</div>`
+    : '<div class="empty">Нажмите на свободное место на схеме</div>';
+  $('totalLbl').textContent = list.length ? `${list.length} ${plural(list.length, 'место', 'места', 'мест')} · ${span()}${bonus() ? ' 🎁' : ''}` : 'Итого';
   $('total').textContent = `${total} сом`;
-  $('totalLbl').textContent = list.length ? `Итого · ${list.length} ${plural(list.length)} · ${S.time === 'Ночь' ? 'ночь' : durTxt()}` : 'Итого';
-  $('cta').disabled = !list.length;
-  $('cta').textContent = list.length ? `Забронировать · ${total} сом` : 'Выберите место';
-}
-const plural = (n) => n%10===1 && n%100!==11 ? 'место' : (n%10>=2 && n%10<=4 && (n%100<10||n%100>=20)) ? 'места' : 'мест';
-function render() {
-  const f = FLOORS[S.floor]; fixTime();
-  $('fTitle').innerHTML = `<small>${f.tag}</small>${f.name}`; $('fDesc').textContent = f.desc; $('screenLbl').textContent = f.screen;
-  renderTabs(); renderPickers(); renderSeats(); renderSummary();
-}
-
-/* confirm */
-const modal = $('modal');
-$('cta').onclick = () => {
-  const nm = $('nm'), ph = $('ph'); let bad = false;
-  [nm, ph].forEach(inp => { inp.classList.remove('err'); if (!inp.value.trim()) { void inp.offsetWidth; inp.classList.add('err'); bad = true; } });
-  if (bad) return;
-  const list = seatList(S.floor).filter(s => S.sel.has(s.id));
-  const code = 'BRK-' + Math.random().toString(36).slice(2, 6).toUpperCase();
-  $('tCode').textContent = code;
-  const d = new Date(now); d.setDate(d.getDate()+S.date);
-  $('tInfo').innerHTML = `<dt>Гость</dt><dd>${nm.value.replace(/[<>&]/g,'')}</dd><dt>Этаж</dt><dd>${FLOORS[S.floor].tag.replace(/^\d+ · /,'0'+(S.floor+1)+' · ')}</dd>
-    <dt>Места</dt><dd>${list.map(s=>'№'+s.n).join(', ')}</dd><dt>Когда</dt><dd>${d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}, ${S.time==='Ночь'?'00:00–08:00':S.time+' · '+durTxt()}</dd>
-    <dt>К оплате</dt><dd>${list.reduce((a,s)=>a+seatPrice(s),0)} сом</dd>`;
-  drawQR(code);
-  const waBtn = $('waBtn');
+  const cta = $('cta'), ok = list.length > 0;
+  cta.classList.toggle('off', !ok);
   if (CLUB.wa) {
-    const txt = `Здравствуйте! Бронь ${code}\nИмя: ${nm.value}\nТелефон: ${ph.value}\nЭтаж: ${S.floor+1} (${FLOORS[S.floor].name})\nМеста: ${list.map(s=>'№'+s.n).join(', ')}\nКогда: ${d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}, ${S.time==='Ночь'?'ночь 00:00–08:00':S.time+', '+durTxt()}`;
-    waBtn.href = 'https://wa.me/' + CLUB.wa + '?text=' + encodeURIComponent(txt); waBtn.style.display = '';
-  } else waBtn.style.display = 'none';
-  list.forEach(s => S.mine.add(`${S.date}|${S.time}#${s.id}`));
-  modal.classList.add('show');
-};
-function closeModal() { modal.classList.remove('show'); S.sel.clear(); render(); }
-$('done').onclick = closeModal;
-modal.onclick = (e) => { if (e.target === modal) closeModal(); };
-function drawQR(code) {
-  const g = $('qr').getContext('2d'), N = 25, r = rng(hash(code));
-  g.fillStyle = '#fff'; g.fillRect(0,0,N,N); g.fillStyle = '#05050c';
-  for (let y=0; y<N; y++) for (let x=0; x<N; x++) if (r() < .5) g.fillRect(x,y,1,1);
-  for (const [x,y] of [[0,0],[N-7,0],[0,N-7]]) { g.fillStyle='#05050c'; g.fillRect(x,y,7,7); g.fillStyle='#fff'; g.fillRect(x+1,y+1,5,5); g.fillStyle='#05050c'; g.fillRect(x+2,y+2,3,3); }
+    cta.innerHTML = ok ? `${WA_ICON}Забронировать в WhatsApp` : 'Выберите место';
+    if (ok) cta.href = waLink(message(list, total)); else cta.removeAttribute('href');
+  } else {
+    cta.innerHTML = ok ? `${WA_ICON}Показать сообщение для WhatsApp` : 'Выберите место'; cta.removeAttribute('href');
+    $('ctaNote').textContent = 'Демо: на сайте клуба здесь откроется его WhatsApp с этим текстом';
+  }
+  $('preview').style.display = 'none';
 }
-
-/* go */
-fixTime(); render(); refreshLabels();
-requestAnimationFrame(() => { frame(); setTimeout(() => $('loader').classList.add('hide'), 300); });
+$('nm').addEventListener('input', renderSummary);
+$('cta').addEventListener('click', (e) => {
+  const list = seatList(S.floor).filter(s => S.sel.has(s.id)); if (!list.length) { e.preventDefault(); return; }
+  if (!CLUB.wa) { e.preventDefault(); const p = $('preview'); p.textContent = message(list, list.reduce((a, s) => a + seatPrice(s), 0)); p.style.display = 'block'; return; }
+  const t = $('toast'); t.textContent = 'Открываем WhatsApp — нажмите «Отправить» в чате'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500);
+});
+fixTime();
 </script>
 </body>
 </html>
