@@ -3,7 +3,13 @@ import { Inter } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { getLocale, getT } from "@/i18n/server";
 import { I18nProvider } from "@/i18n/client";
+import type { Dictionary } from "@/i18n";
 import "./globals.css";
+
+/** В браузер отправляем словарь без длинных текстов, которые рендерятся только на сервере (юр. страницы, «О нас» и т. п.) */
+function clientDictionary(t: Dictionary): Dictionary {
+  return { ...t, legal: { ...t.legal, terms: [], privacy: [] }, advantages: [], about: { ...t.about, lead: "", partnershipText: "" } };
+}
 
 // Один вариативный шрифт вместо двух — меньше загрузки. На iPhone/Mac используется системный SF Pro.
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter", display: "swap" });
@@ -39,7 +45,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
       <body>
-        <I18nProvider locale={locale} t={t}>
+        <I18nProvider locale={locale} t={clientDictionary(t)}>
           {children}
         </I18nProvider>
       </body>

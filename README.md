@@ -95,3 +95,8 @@ src/
 | Телефон | Онлайн-окошко | Меню | Админы и права |
 | --- | --- | --- | --- |
 | ![](docs/screenshots/5-home-phone.png) | ![](docs/screenshots/6-live-widget-phone.png) | ![](docs/screenshots/7-menu-phone.png) | ![](docs/screenshots/9-admin-admins.png) |
+
+## Безопасность и нагрузка
+
+Аудит, чек-листы и порядок проверки: [`docs/SECURITY_AND_LOAD_AUDIT.md`](docs/SECURITY_AND_LOAD_AUDIT.md).
+Сценарии нагрузочного теста k6: `loadtest/`. Пример nginx (rate limit, микрокеш, HTTPS): `deploy/nginx.conf.example`.

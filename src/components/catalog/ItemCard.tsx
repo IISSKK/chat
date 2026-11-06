@@ -4,7 +4,7 @@ import { getT } from "@/i18n/server";
 import { plural } from "@/i18n/format";
 import type { Item } from "@/lib/types";
 import { formatNumber, itemPath, itemUrl, photoUrl } from "@/lib/utils";
-import { docsMessage, priceMessage, waLink } from "@/lib/whatsapp";
+import { waItemHref } from "@/lib/whatsapp";
 import { CarIcon, DocIcon, EngineIcon, EyeIcon, WhatsAppIcon } from "@/components/icons";
 import { ShareMenu } from "./ShareMenu";
 
@@ -98,11 +98,11 @@ export async function ItemCard({ item, index = 0 }: { item: Item; index?: number
         </div>
 
         <div className="mt-auto grid gap-2 pt-1">
-          <a href={waLink(priceMessage(item, t))} target="_blank" rel="noopener" className="btn-wa w-full py-2.5">
+          <a href={waItemHref(item, "price")} target="_blank" rel="noopener nofollow" className="btn-wa w-full py-2.5">
             <WhatsAppIcon className="h-4 w-4" /> {t.actions.askPrice}
           </a>
           <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-            <a href={waLink(docsMessage(item, t))} target="_blank" rel="noopener" className="btn-ghost min-w-0 px-3 py-2.5 text-xs" title={t.actions.docs}>
+            <a href={waItemHref(item, "docs")} target="_blank" rel="noopener nofollow" className="btn-ghost min-w-0 px-3 py-2.5 text-xs" title={t.actions.docs}>
               <DocIcon className="h-4 w-4 shrink-0 text-brand" /> <span className="truncate">{t.actions.docs}</span>
             </a>
             <ShareMenu url={itemUrl(item)} title={item.title} compact />

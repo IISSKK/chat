@@ -1,0 +1,60 @@
+# Пример nginx для Barakat Auto (Ubuntu). Node.js-процессы: 127.0.0.1:3001..3004 (PM2 cluster) или один :3000.
+# Не забудьте в .env: TRUST_PROXY=1, SITE_URL=https://ваш-домен
+
+limit_req_zone $binary_remote_addr zone=bk_api:10m rate=10r/s;     # счётчики, поиск, курсы
+limit_req_zone $binary_remote_addr zone=bk_login:10m rate=5r/m;    # вход в админку
+limit_conn_zone $binary_remote_addr zone=bk_conn:10m;
+
+# Микрокеш HTML для анонимных посетителей (язык — часть ключа)
+proxy_cache_path /var/cache/nginx/bk levels=1:2 keys_zone=bk_cache:50m max_size=500m inactive=10m use_temp_path=off;
+map $http_accept_language $bk_accept_lang { default ru; ~*^en en; ~*^ko ko; ~*^zh zh; }
+map $cookie_bk_lang $bk_lang { "" $bk_accept_lang; default $cookie_bk_lang; }
+
+upstream bk_node {
+  least_conn;
+  server 127.0.0.1:3000;
+  # server 127.0.0.1:3001; server 127.0.0.1:3002; server 127.0.0.1:3003;
+  keepalive 64;
+}
+
+server {
+  listen 443 ssl http2;
+  server_name example.com;
+  # ssl_certificate / ssl_certificate_key — от certbot (Let's Encrypt)
+  client_max_body_size 130m;          # 8 фото × 15 МБ
+  limit_conn bk_conn 50;
+  server_tokens off;
+
+  location /_next/static/ { proxy_pass http://bk_node; expires 1y; add_header Cache-Control "public, immutable"; }
+  location ~ ^/(demo|guides|media)/ { proxy_pass http://bk_node; expires 7d; }
+
+  location = /api/admin/login { limit_req zone=bk_login burst=5 nodelay; proxy_pass http://bk_node; include /etc/nginx/bk_proxy_params; }
+  location /api/admin/ { proxy_pass http://bk_node; include /etc/nginx/bk_proxy_params; }
+  location /admin { proxy_pass http://bk_node; include /etc/nginx/bk_proxy_params; }
+  location /api/ { limit_req zone=bk_api burst=20 nodelay; proxy_pass http://bk_node; include /etc/nginx/bk_proxy_params; }
+
+  # Страницы сайта: кеш 15 секунд — при рекламном всплеске Node рендерит страницу ~4 раза в минуту, а не на каждого
+  location / {
+    proxy_pass http://bk_node;
+    include /etc/nginx/bk_proxy_params;
+    proxy_cache bk_cache;
+    proxy_cache_key "$scheme$host$request_uri|$bk_lang";
+    proxy_cache_valid 200 15s;
+    proxy_ignore_headers Cache-Control Expires;   # Next.js помечает динамические страницы no-store; страницы сайта cookie не ставят
+    proxy_cache_use_stale updating error timeout http_500 http_502 http_503;
+    proxy_cache_lock on;
+    proxy_cache_bypass $cookie_barakat_admin;   # админ видит свежие данные
+    proxy_no_cache $cookie_barakat_admin;
+    add_header X-Cache $upstream_cache_status;
+  }
+}
+
+server { listen 80; server_name example.com; return 301 https://$host$request_uri; }
+
+# /etc/nginx/bk_proxy_params:
+#   proxy_http_version 1.1;
+#   proxy_set_header Connection "";
+#   proxy_set_header Host $host;
+#   proxy_set_header X-Real-IP $remote_addr;
+#   proxy_set_header X-Forwarded-For $remote_addr;   # перезаписываем, а не добавляем — клиент не подделает
+#   proxy_set_header X-Forwarded-Proto $scheme;

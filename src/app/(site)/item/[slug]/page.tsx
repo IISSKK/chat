@@ -5,7 +5,7 @@ import { siteConfig } from "@/config/site";
 import { getT } from "@/i18n/server";
 import { getItem, listItems } from "@/lib/items";
 import { formatNumber, itemPath, itemUrl, parseIdFromParam, photoUrl, typePath } from "@/lib/utils";
-import { docsMessage, priceMessage, waLink } from "@/lib/whatsapp";
+import { waItemHref } from "@/lib/whatsapp";
 import { Gallery } from "@/components/catalog/Gallery";
 import { ItemGrid, SoldBadge, specChips } from "@/components/catalog/ItemCard";
 import { ShareMenu } from "@/components/catalog/ShareMenu";
@@ -13,6 +13,16 @@ import { ItemViews } from "@/components/catalog/ItemViews";
 import { ArrowLeft, DocIcon, WhatsAppIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
+
+/** JSON для <script type="application/ld+json">: экранируем <, >, & и U+2028/2029, иначе "</script>" в названии ломает страницу (XSS). */
+function safeJsonLd(data: unknown) {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}
 type Props = { params: Promise<{ slug: string }> };
 
 async function load(params: Props["params"]) {
@@ -84,7 +94,7 @@ export default async function ItemPage({ params }: Props) {
 
   return (
     <div className="container pt-6 sm:pt-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <nav className="mb-5 flex items-center gap-2 text-sm text-fg/50">
         <Link href={typePath(item.type)} className="inline-flex items-center gap-1.5 rounded-full bg-fg/[0.06] px-3 py-1.5 font-semibold text-fg/80 transition hover:bg-fg/10">
           <ArrowLeft className="h-4 w-4" /> {t.types[item.type]}
@@ -115,11 +125,11 @@ export default async function ItemPage({ params }: Props) {
           <div className="mt-6 rounded-3xl surface p-4 sm:p-5">
             <p className="mb-4 text-sm text-fg/60">{sold ? t.item.soldNote : t.item.contactNote}</p>
             <div className="grid gap-2">
-              <a href={waLink(priceMessage(item, t))} target="_blank" rel="noopener" className="btn-wa w-full py-4 text-base">
+              <a href={waItemHref(item, "price")} target="_blank" rel="noopener nofollow" className="btn-wa w-full py-4 text-base">
                 <WhatsAppIcon /> {t.actions.askPrice}
               </a>
               <div className="grid grid-cols-[1fr_auto] gap-2">
-                <a href={waLink(docsMessage(item, t))} target="_blank" rel="noopener" className="btn-ghost py-3">
+                <a href={waItemHref(item, "docs")} target="_blank" rel="noopener nofollow" className="btn-ghost py-3">
                   <DocIcon className="h-4 w-4" /> {t.actions.docs}
                 </a>
                 <ShareMenu url={itemUrl(item)} title={item.title} />
