@@ -83,7 +83,7 @@ export default async function ResourceList({ params, searchParams }: Props) {
                         {i.photos[0] && <img src={photoUrl(i.photos[0].filename)} alt="" loading="lazy" className="h-full w-full object-cover" />}
                       </span>
                       <div className="min-w-0">
-                        <Link href={`${mod.href}/${i.id}`} className="block max-w-[280px] truncate font-semibold hover:text-violet">{i.title}</Link>
+                        <Link href={`${mod.href}/${i.id}`} className="block max-w-[280px] truncate font-semibold hover:text-ember">{i.title}</Link>
                         <span className="text-xs text-slate-400">
                           #{i.id} · {i.photos.length} фото{i.mileage !== null ? ` · ${formatNumber(i.mileage)} км` : ""}
                         </span>

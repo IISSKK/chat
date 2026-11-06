@@ -22,21 +22,21 @@ export function Footer() {
         <div>
           <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-white/40">{t.footer.catalog}</h3>
           <ul className="space-y-2.5 text-sm text-white/70">
-            <li><Link className="hover:text-lime" href="/catalog/cars">{t.nav.cars}</Link></li>
-            <li><Link className="hover:text-lime" href="/catalog/cars/standby">{t.categoriesLong.standby}</Link></li>
-            <li><Link className="hover:text-lime" href="/catalog/cars/running">{t.categoriesLong.running}</Link></li>
-            <li><Link className="hover:text-lime" href="/catalog/engines">{t.nav.engines}</Link></li>
-            <li><Link className="hover:text-lime" href="/catalog/parts">{t.types.part}</Link></li>
+            <li><Link className="hover:text-brand" href="/catalog/cars">{t.nav.cars}</Link></li>
+            <li><Link className="hover:text-brand" href="/catalog/cars/standby">{t.categoriesLong.standby}</Link></li>
+            <li><Link className="hover:text-brand" href="/catalog/cars/running">{t.categoriesLong.running}</Link></li>
+            <li><Link className="hover:text-brand" href="/catalog/engines">{t.nav.engines}</Link></li>
+            <li><Link className="hover:text-brand" href="/catalog/parts">{t.types.part}</Link></li>
           </ul>
         </div>
 
         <div>
           <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-white/40">{t.footer.about}</h3>
           <ul className="space-y-3 text-sm text-white/70">
-            <li className="flex gap-2"><MailIcon className="mt-0.5 h-4 w-4 shrink-0 text-lime" /><a className="hover:text-lime" href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
-            <li className="flex gap-2"><ClockIcon className="mt-0.5 h-4 w-4 shrink-0 text-lime" />{siteConfig.workHours}</li>
-            <li className="flex gap-2"><PinIcon className="mt-0.5 h-4 w-4 shrink-0 text-lime" />{siteConfig.address}</li>
-            <li><Link className="hover:text-lime" href="/about">{t.nav.about}</Link></li>
+            <li className="flex gap-2"><MailIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand" /><a className="hover:text-brand" href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
+            <li className="flex gap-2"><ClockIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand" />{siteConfig.workHours}</li>
+            <li className="flex gap-2"><PinIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand" />{siteConfig.address}</li>
+            <li><Link className="hover:text-brand" href="/about">{t.nav.about}</Link></li>
           </ul>
         </div>
 

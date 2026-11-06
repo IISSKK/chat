@@ -46,7 +46,7 @@ export function Filters({ brands, years, showType = false }: { brands: string[];
     <div className="relative">
       <button onClick={() => setOpen((o) => !o)} className="btn-ghost w-full justify-between md:hidden" aria-expanded={open}>
         <span className="flex items-center gap-2"><FilterIcon className="h-4 w-4" /> {ru.common.filters}</span>
-        {active > 0 && <span className="rounded-full bg-lime px-2 py-0.5 text-xs text-ink">{active}</span>}
+        {active > 0 && <span className="rounded-full bg-brand px-2 py-0.5 text-xs text-ink">{active}</span>}
       </button>
       <div
         className={`${open ? "mt-3 grid animate-fade-up" : "hidden"} gap-3 rounded-3xl border border-white/[0.07] bg-ink-800/70 p-4 backdrop-blur-xl md:mt-0 md:grid md:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] md:items-end`}

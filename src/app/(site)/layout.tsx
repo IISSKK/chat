@@ -8,9 +8,9 @@ import { t } from "@/i18n";
 function Background() {
   return (
     <div className="blobs" aria-hidden>
-      <div className="blob animate-blob" style={{ width: "42vw", height: "42vw", left: "-10vw", top: "-8vw", background: "#7B5CFF" }} />
-      <div className="blob animate-blob" style={{ width: "36vw", height: "36vw", right: "-8vw", top: "10vh", background: "#FF3D81", animationDelay: "-7s" }} />
-      <div className="blob animate-blob" style={{ width: "30vw", height: "30vw", left: "30vw", top: "55vh", background: "#2EE6D6", opacity: 0.25, animationDelay: "-14s" }} />
+      <div className="blob blob-1 animate-blob" style={{ width: "42vw", height: "42vw", left: "-10vw", top: "-8vw" }} />
+      <div className="blob blob-2 animate-blob" style={{ width: "36vw", height: "36vw", right: "-8vw", top: "10vh", animationDelay: "-7s" }} />
+      <div className="blob blob-3 animate-blob" style={{ width: "30vw", height: "30vw", left: "30vw", top: "55vh", opacity: 0.25, animationDelay: "-14s" }} />
     </div>
   );
 }

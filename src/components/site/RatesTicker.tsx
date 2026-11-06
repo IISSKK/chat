@@ -34,7 +34,7 @@ export function RatesTicker({ className = "" }: { className?: string }) {
 
   const skeleton = <span className="inline-block h-3 w-10 rounded img-skeleton align-middle" />;
   const cell = (code: string, value: React.ReactNode) => (
-    <span className={`tabular-nums transition-colors duration-700 ${flash ? "text-lime" : "text-white/85"}`}>
+    <span className={`tabular-nums transition-colors duration-700 ${flash ? "text-brand" : "text-white/85"}`}>
       <span className="text-white/45">{code}</span> {value}
     </span>
   );
@@ -45,8 +45,8 @@ export function RatesTicker({ className = "" }: { className?: string }) {
       title={rates ? `Курс к корейской воне · ${new Date(rates.updated).toLocaleString("ru-RU")}` : "Курс к корейской воне"}
     >
       <span className="relative flex h-2 w-2">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime opacity-60" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-lime" />
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
       </span>
       {cell("USD", rates ? `₩${fmt(rates.USD)}` : skeleton)}
       {cell("EUR", rates ? `₩${fmt(rates.EUR)}` : skeleton)}

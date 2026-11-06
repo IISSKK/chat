@@ -17,6 +17,10 @@ export const siteConfig = {
     telegram: "https://t.me/",
     facebook: "https://facebook.com/",
   },
+  /** Тема по умолчанию: "amber" | "sunset" | "copper" | "desert" (см. src/config/themes.ts) */
+  defaultTheme: "amber" as const,
+  /** Показывать посетителям переключатель тем (выбор запоминается в браузере) */
+  showThemeSwitcher: true,
   defaultLocale: "ru" as const,
   locales: ["ru"] as const, // добавьте "en" после создания src/i18n/dictionaries/en.ts
 };

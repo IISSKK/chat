@@ -188,7 +188,7 @@ export function ItemForm({
                 addFiles(e.dataTransfer.files);
               }
             }}
-            className={`grid grid-cols-3 gap-2 rounded-xl p-1 transition ${dropActive ? "bg-violet/10 ring-2 ring-violet" : ""}`}
+            className={`grid grid-cols-3 gap-2 rounded-xl p-1 transition ${dropActive ? "bg-ember/10 ring-2 ring-ember" : ""}`}
           >
             {photos.map((p, i) => (
               <div
@@ -200,13 +200,13 @@ export function ItemForm({
                   e.preventDefault();
                   if (dragKey && dragKey !== p.key) move(photos.findIndex((x) => x.key === dragKey), i);
                 }}
-                className={`group relative aspect-square cursor-grab overflow-hidden rounded-lg bg-slate-100 ring-violet transition active:cursor-grabbing ${
+                className={`group relative aspect-square cursor-grab overflow-hidden rounded-lg bg-slate-100 ring-ember transition active:cursor-grabbing ${
                   dragKey === p.key ? "opacity-40 ring-2" : ""
-                } ${i === 0 ? "ring-2 ring-lime-600" : ""}`}
+                } ${i === 0 ? "ring-2 ring-brand-600" : ""}`}
               >
                 <img src={p.url} alt="" className="h-full w-full object-cover" draggable={false} />
-                {i === 0 && <span className="absolute left-1 top-1 rounded bg-lime px-1.5 text-[10px] font-bold text-ink">Обложка</span>}
-                {p.kind === "new" && <span className="absolute right-1 top-1 rounded bg-violet px-1.5 text-[10px] font-bold text-white">new</span>}
+                {i === 0 && <span className="absolute left-1 top-1 rounded bg-brand px-1.5 text-[10px] font-bold text-ink">Обложка</span>}
+                {p.kind === "new" && <span className="absolute right-1 top-1 rounded bg-ember px-1.5 text-[10px] font-bold text-white">new</span>}
                 <div className="absolute inset-x-0 bottom-0 flex justify-between bg-gradient-to-t from-black/70 to-transparent p-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
                   <button type="button" onClick={() => move(i, i - 1)} disabled={i === 0} className="grid h-7 w-7 place-items-center rounded-md bg-white/90 text-slate-800 disabled:opacity-30" aria-label="Левее">
                     <ChevronLeft className="h-4 w-4" />
@@ -224,7 +224,7 @@ export function ItemForm({
               <button
                 type="button"
                 onClick={() => fileInput.current?.click()}
-                className="grid aspect-square place-items-center rounded-lg border-2 border-dashed border-slate-300 text-slate-400 transition hover:border-violet hover:text-violet"
+                className="grid aspect-square place-items-center rounded-lg border-2 border-dashed border-slate-300 text-slate-400 transition hover:border-ember hover:text-ember"
               >
                 <span className="flex flex-col items-center gap-1 text-xs font-semibold">
                   <PlusIcon className="h-6 w-6" /> Добавить

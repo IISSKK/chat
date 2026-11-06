@@ -36,7 +36,7 @@ export function CatalogHeader({ title, subtitle, count }: { title: string; subti
     <div className="mb-8 pt-8 sm:pt-12">
       <h1 className="h-display text-3xl sm:text-5xl">
         {title}
-        {count !== undefined && <sup className="ml-2 align-super font-sans text-base font-bold text-lime sm:text-xl">{count}</sup>}
+        {count !== undefined && <sup className="ml-2 align-super font-sans text-base font-bold text-brand sm:text-xl">{count}</sup>}
       </h1>
       {subtitle && <p className="mt-3 max-w-2xl text-white/60">{subtitle}</p>}
     </div>

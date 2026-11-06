@@ -85,7 +85,7 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
             </button>
             <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
               {photos.map((_, i) => (
-                <span key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === index ? "w-6 bg-lime" : "w-1.5 bg-white/50"}`} />
+                <span key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === index ? "w-6 bg-brand" : "w-1.5 bg-white/50"}`} />
               ))}
             </div>
             <span className="absolute right-3 top-3 rounded-full bg-ink/60 px-2.5 py-1 text-xs font-bold backdrop-blur">
@@ -103,7 +103,7 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
               type="button"
               onClick={() => go(i)}
               className={`aspect-square overflow-hidden rounded-xl border-2 transition-all duration-200 ${
-                i === index ? "scale-[1.03] border-lime" : "border-transparent opacity-60 hover:opacity-100"
+                i === index ? "scale-[1.03] border-brand" : "border-transparent opacity-60 hover:opacity-100"
               }`}
               aria-label={`Показать фото ${i + 1}`}
             >

@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { RatesTicker } from "./RatesTicker";
+import { ThemeSwitcher } from "./ThemeSwitcher";
+import { siteConfig } from "@/config/site";
 import { SearchBox } from "./SearchBox";
 import { CloseIcon, MenuIcon, SearchIcon, WhatsAppIcon } from "@/components/icons";
 import ru from "@/i18n/dictionaries/ru";
@@ -45,9 +47,12 @@ export function Header({ waHref }: { waHref: string }) {
     <header className="sticky top-0 z-40">
       {/* Строка курсов */}
       <div className="border-b border-white/[0.06] bg-ink/70 backdrop-blur-xl">
-        <div className="container flex h-8 items-center justify-between gap-4 overflow-x-auto no-scrollbar">
-          <RatesTicker />
-          <span className="hidden text-xs text-white/40 md:block">{ru.home.heroBadge}</span>
+        <div className="container flex h-8 items-center justify-between gap-3">
+          <div className="min-w-0 flex-1 overflow-x-auto no-scrollbar">
+            <RatesTicker />
+          </div>
+          <span className="hidden text-xs text-white/40 xl:block">{ru.home.heroBadge}</span>
+          {siteConfig.showThemeSwitcher && <ThemeSwitcher />}
         </div>
       </div>
 
@@ -132,12 +137,18 @@ export function Header({ waHref }: { waHref: string }) {
               style={{ transitionDelay: menu ? `${80 + i * 40}ms` : "0ms" }}
               className={`rounded-2xl px-4 py-3.5 font-display text-lg font-bold transition-all duration-300 hover:bg-white/[0.06] ${
                 menu ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0"
-              } ${isActive(n.href) ? "bg-white/[0.08] text-lime" : ""}`}
+              } ${isActive(n.href) ? "bg-white/[0.08] text-brand" : ""}`}
             >
               {n.label}
             </Link>
           ))}
-          <a href={waHref} target="_blank" rel="noopener" className="btn-wa mt-auto w-full py-4 text-base">
+          {siteConfig.showThemeSwitcher && (
+            <div className="mt-auto pt-4">
+              <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-widest text-white/40">Стиль сайта</p>
+              <ThemeSwitcher variant="row" />
+            </div>
+          )}
+          <a href={waHref} target="_blank" rel="noopener" className={`btn-wa w-full py-4 text-base ${siteConfig.showThemeSwitcher ? "mt-3" : "mt-auto"}`}>
             <WhatsAppIcon /> {ru.home.writeWhatsapp}
           </a>
         </div>

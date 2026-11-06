@@ -20,7 +20,7 @@ export default function AboutPage() {
     <div className="container pt-10 sm:pt-16">
       <section className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end">
         <div>
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-lime">{siteConfig.name}</p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-brand">{siteConfig.name}</p>
           <h1 className="h-display text-4xl leading-tight sm:text-6xl">
             Экспорт из Кореи <span className="text-gradient">без лишних шагов</span>
           </h1>
@@ -29,7 +29,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-2 gap-3">
           {stats.map(([n, l], i) => (
             <div key={l} data-reveal style={{ "--d": `${i * 80}ms` } as React.CSSProperties} className="rounded-3xl border border-white/[0.07] bg-ink-800/60 p-5">
-              <div className="font-display text-3xl font-bold text-lime">{n}</div>
+              <div className="font-display text-3xl font-bold text-brand">{n}</div>
               <div className="mt-1 text-sm text-white/55">{l}</div>
             </div>
           ))}
@@ -42,14 +42,14 @@ export default function AboutPage() {
       </section>
 
       <section className="mt-20">
-        <div data-reveal className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-lime via-aqua to-violet p-[1.5px]">
+        <div data-reveal className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-brand via-glow to-ember p-[1.5px]">
           <div className="rounded-4xl bg-ink-800 p-6 sm:p-10">
             <div className="grid gap-6 lg:grid-cols-[1.4fr_auto] lg:items-center">
               <div>
                 <h2 className="h-display text-2xl sm:text-4xl">{t.about.partnershipTitle}</h2>
                 <p className="mt-3 max-w-2xl text-white/65">{t.about.partnershipText}</p>
               </div>
-              <a href={waLink("Здравствуйте! Интересует партнёрство с " + siteConfig.name + ".")} target="_blank" rel="noopener" className="btn-lime px-7 py-4 text-base">
+              <a href={waLink("Здравствуйте! Интересует партнёрство с " + siteConfig.name + ".")} target="_blank" rel="noopener" className="btn-brand px-7 py-4 text-base">
                 <WhatsAppIcon /> {t.about.partnershipCta}
               </a>
             </div>

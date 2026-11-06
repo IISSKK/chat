@@ -31,7 +31,7 @@ function Highlight({ text, q }: { text: string; q: string }) {
   return (
     <>
       {text.slice(0, i)}
-      <mark className="rounded bg-lime/25 px-0.5 text-lime">{text.slice(i, i + q.length)}</mark>
+      <mark className="rounded bg-brand/25 px-0.5 text-brand">{text.slice(i, i + q.length)}</mark>
       {text.slice(i + q.length)}
     </>
   );
@@ -122,12 +122,12 @@ export function SearchBox({
       <form
         onSubmit={submit}
         role="search"
-        className={`group flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] backdrop-blur-xl transition-all duration-300 focus-within:border-lime/60 focus-within:bg-white/[0.09] focus-within:shadow-[0_0_0_6px_rgba(200,255,46,.08)] ${
+        className={`group flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] backdrop-blur-xl transition-all duration-300 focus-within:border-brand/60 focus-within:bg-white/[0.09] focus-within:shadow-[0_0_0_6px_rgb(var(--c-brand)/0.1)] ${
           lg ? "p-1.5 pl-5 sm:p-2 sm:pl-6" : "p-1 pl-4"
         }`}
       >
         <SearchIcon
-          className={`shrink-0 text-white/50 transition-all duration-300 group-focus-within:scale-110 group-focus-within:text-lime ${
+          className={`shrink-0 text-white/50 transition-all duration-300 group-focus-within:scale-110 group-focus-within:text-brand ${
             lg ? "h-5 w-5 sm:h-6 sm:w-6" : "h-4 w-4"
           }`}
         />
@@ -151,8 +151,8 @@ export function SearchBox({
             lg ? "py-2 text-base sm:text-lg" : "py-1.5 text-sm"
           }`}
         />
-        {loading && <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-lime/30 border-t-lime" />}
-        <button type="submit" className={`btn-lime shrink-0 ${lg ? "px-5 py-3 text-sm sm:px-7 sm:text-base" : "px-3 py-2 text-xs"}`}>
+        {loading && <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-brand/30 border-t-brand" />}
+        <button type="submit" className={`btn-brand shrink-0 ${lg ? "px-5 py-3 text-sm sm:px-7 sm:text-base" : "px-3 py-2 text-xs"}`}>
           {lg ? ru.search.button : <SearchIcon className="h-4 w-4" />}
           {!lg && <span className="sr-only">{ru.search.button}</span>}
         </button>
@@ -188,7 +188,7 @@ export function SearchBox({
                   <Highlight text={s.title} q={term} />
                 </span>
                 <span className="flex items-center gap-2 text-xs text-white/50">
-                  <span className="rounded-full bg-violet/20 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-400">
+                  <span className="rounded-full bg-ember/20 px-2 py-0.5 text-[10px] font-bold uppercase text-ember-400">
                     {fieldLabel[s.field]}
                   </span>
                   <span className="truncate font-mono">
@@ -197,7 +197,7 @@ export function SearchBox({
                 </span>
               </span>
               {s.status === "sold" && (
-                <span className="rounded-full bg-hot/20 px-2 py-0.5 text-[10px] font-bold text-hot">SOLD</span>
+                <span className="rounded-full bg-flame/20 px-2 py-0.5 text-[10px] font-bold text-flame">SOLD</span>
               )}
             </button>
           ))}
@@ -205,7 +205,7 @@ export function SearchBox({
             <button
               type="button"
               onClick={() => go(`/search?q=${encodeURIComponent(term)}`)}
-              className="mt-1 w-full rounded-2xl px-3 py-2.5 text-left text-xs font-bold text-lime hover:bg-white/[0.05]"
+              className="mt-1 w-full rounded-2xl px-3 py-2.5 text-left text-xs font-bold text-brand hover:bg-white/[0.05]"
             >
               Все результаты по «{term}» →
             </button>

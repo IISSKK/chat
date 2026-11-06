@@ -6,7 +6,7 @@ export default function NotFound() {
       <div>
         <div className="font-display text-8xl font-extrabold text-gradient">404</div>
         <p className="mt-4 text-white/60">Страница не найдена или товар был удалён.</p>
-        <Link href="/" className="btn-lime mt-8">На главную</Link>
+        <Link href="/" className="btn-brand mt-8">На главную</Link>
       </div>
     </div>
   );

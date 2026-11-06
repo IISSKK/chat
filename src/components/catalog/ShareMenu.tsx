@@ -45,7 +45,7 @@ export function ShareMenu({ url, title, className = "", compact = false }: { url
         aria-expanded={open}
         aria-label={ru.actions.share}
         title={ru.actions.share}
-        className={`btn-ghost h-full w-full px-3 py-2.5 ${open ? "border-lime/50 text-lime" : ""}`}
+        className={`btn-ghost h-full w-full px-3 py-2.5 ${open ? "border-brand/50 text-brand" : ""}`}
       >
         <ShareIcon className={`h-4 w-4 transition-transform duration-300 ${open ? "rotate-12 scale-110" : ""}`} />
         {!compact && <span className="hidden sm:inline">{ru.actions.share}</span>}
@@ -71,7 +71,7 @@ export function ShareMenu({ url, title, className = "", compact = false }: { url
             onClick={copy}
             className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left text-sm font-semibold transition hover:bg-white/[0.08]"
           >
-            <span className={`grid h-7 w-7 place-items-center rounded-full transition-colors ${copied ? "bg-lime text-ink" : "bg-white/10"}`}>
+            <span className={`grid h-7 w-7 place-items-center rounded-full transition-colors ${copied ? "bg-brand text-ink" : "bg-white/10"}`}>
               <LinkIcon className="h-4 w-4" />
             </span>
             {copied ? ru.actions.copied : ru.actions.copyLink}

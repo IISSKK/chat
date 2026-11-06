@@ -99,9 +99,9 @@ export default async function ItemPage({ params }: Props) {
 
         <div className="lg:sticky lg:top-28 lg:self-start">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="chip bg-violet/20 text-violet-400">{t.typeSingle[item.type]}</span>
+            <span className="chip bg-ember/20 text-ember-400">{t.typeSingle[item.type]}</span>
             {item.type === "car" && <span className="chip">{t.categories[item.category]}</span>}
-            <span className={`chip ${sold ? "bg-hot/20 text-hot" : "bg-lime/15 text-lime"}`}>{sold ? "Продано" : t.status.available}</span>
+            <span className={`chip ${sold ? "bg-flame/20 text-flame" : "bg-brand/15 text-brand"}`}>{sold ? "Продано" : t.status.available}</span>
           </div>
           <h1 className="h-display mt-4 text-2xl leading-tight sm:text-4xl">{item.title}</h1>
           <div className="mt-4 flex flex-wrap gap-1.5">

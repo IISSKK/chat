@@ -42,7 +42,7 @@ export function AdminShell({
   const nav = (
     <nav className="flex h-full flex-col">
       <Link href="/admin" className="mb-6 flex items-center gap-2.5 px-2">
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-violet to-hot font-display font-extrabold text-lime">K</span>
+        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-ember to-flame font-display font-extrabold text-brand">K</span>
         <span>
           <span className="block font-display text-sm font-bold text-slate-900">KORIDA</span>
           <span className="block text-[11px] text-slate-500">Панель управления</span>

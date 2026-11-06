@@ -5,13 +5,15 @@ export default {
   theme: {
     container: { center: true, padding: { DEFAULT: "1rem", sm: "1.5rem", lg: "2rem" }, screens: { "2xl": "1320px" } },
     extend: {
+      /* Цвета берутся из CSS-переменных активной темы (src/app/themes.css) */
       colors: {
-        ink: { DEFAULT: "#0A0A12", 900: "#0A0A12", 800: "#11111C", 700: "#181826", 600: "#222234", 500: "#2E2E44" },
-        lime: { DEFAULT: "#C8FF2E", 400: "#D6FF5C", 600: "#A6E000" },
-        hot: { DEFAULT: "#FF3D81", 400: "#FF6A9F" },
-        violet: { DEFAULT: "#7B5CFF", 400: "#9A82FF" },
-        aqua: { DEFAULT: "#2EE6D6" },
-        sun: { DEFAULT: "#FF9F1C" },
+        ink: { DEFAULT: "rgb(var(--c-ink-900) / <alpha-value>)", 900: "rgb(var(--c-ink-900) / <alpha-value>)", 800: "rgb(var(--c-ink-800) / <alpha-value>)", 700: "rgb(var(--c-ink-700) / <alpha-value>)", 600: "rgb(var(--c-ink-600) / <alpha-value>)", 500: "rgb(var(--c-ink-500) / <alpha-value>)" },
+        white: "rgb(var(--c-cream) / <alpha-value>)",
+        brand: { DEFAULT: "rgb(var(--c-brand) / <alpha-value>)", 400: "rgb(var(--c-brand-400) / <alpha-value>)", 600: "rgb(var(--c-brand-600) / <alpha-value>)" },
+        flame: { DEFAULT: "rgb(var(--c-flame) / <alpha-value>)", 400: "rgb(var(--c-flame-400) / <alpha-value>)" },
+        ember: { DEFAULT: "rgb(var(--c-ember) / <alpha-value>)", 400: "rgb(var(--c-ember-400) / <alpha-value>)" },
+        glow: { DEFAULT: "rgb(var(--c-glow) / <alpha-value>)" },
+        sun: { DEFAULT: "rgb(var(--c-sun) / <alpha-value>)" },
       },
       fontFamily: {
         display: ["var(--font-display)", "system-ui", "sans-serif"],
@@ -28,6 +30,10 @@ export default {
         "fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },
         shimmer: { from: { backgroundPosition: "200% 0" }, to: { backgroundPosition: "-200% 0" } },
         marquee: { from: { transform: "translateX(0)" }, to: { transform: "translateX(-50%)" } },
+        ken: { from: { transform: "scale(1.02)" }, to: { transform: "scale(1.14) translate(-1.5%, -1%)" } },
+        progress: { from: { transform: "scaleX(0)" }, to: { transform: "scaleX(1)" } },
+        "slide-in": { from: { opacity: "0", transform: "translateY(40px)", filter: "blur(6px)" }, to: { opacity: "1", transform: "none", filter: "none" } },
+        glow: { "0%,100%": { opacity: ".55" }, "50%": { opacity: ".9" } },
       },
       animation: {
         blob: "blob 22s ease-in-out infinite",
@@ -35,6 +41,10 @@ export default {
         "fade-in": "fade-in .35s ease both",
         shimmer: "shimmer 2.2s linear infinite",
         marquee: "marquee 40s linear infinite",
+        ken: "ken 9s ease-out both",
+        "slide-in": "slide-in .9s cubic-bezier(.2,.7,.2,1) both",
+        glow: "glow 6s ease-in-out infinite",
+        progress: "progress linear both",
       },
     },
   },

@@ -7,14 +7,14 @@ import { CarIcon, DocIcon, EngineIcon, GearIcon, WhatsAppIcon } from "@/componen
 import { ShareMenu } from "./ShareMenu";
 
 const catColor: Record<Item["category"], string> = {
-  standby: "bg-lime text-ink",
-  listing: "bg-violet text-white",
-  running: "bg-aqua text-ink",
+  standby: "bg-brand text-ink",
+  listing: "bg-ember text-white",
+  running: "bg-glow text-ink",
 };
 
 export function SoldBadge({ className = "" }: { className?: string }) {
   return (
-    <span className={`inline-flex -rotate-6 items-center rounded-lg border-2 border-hot bg-ink/80 px-3 py-1 font-display text-sm font-extrabold tracking-widest text-hot backdrop-blur ${className}`}>
+    <span className={`inline-flex -rotate-6 items-center rounded-lg border-2 border-flame bg-ink/80 px-3 py-1 font-display text-sm font-extrabold tracking-widest text-flame backdrop-blur ${className}`}>
       {t.status.sold}
     </span>
   );
@@ -40,7 +40,7 @@ export function ItemCard({ item, index = 0 }: { item: Item; index?: number }) {
     <article
       data-reveal
       style={{ "--d": `${(index % 4) * 70}ms` } as React.CSSProperties}
-      className="group relative flex flex-col rounded-3xl border border-white/[0.07] bg-ink-800/80 transition-all focus-within:z-20 hover:z-10 duration-300 hover:-translate-y-1.5 hover:border-white/15 hover:shadow-[0_20px_60px_-20px_rgba(123,92,255,.45)]"
+      className="group relative flex flex-col rounded-3xl border border-white/[0.07] bg-ink-800/80 transition-all focus-within:z-20 hover:z-10 duration-300 hover:-translate-y-1.5 hover:border-white/15 hover:shadow-[0_20px_60px_-20px_rgb(var(--c-brand)/0.35)]"
     >
       <Link href={href} className="relative block aspect-[4/3] overflow-hidden rounded-t-3xl bg-ink-700" aria-label={item.title}>
         {cover ? (
@@ -73,7 +73,7 @@ export function ItemCard({ item, index = 0 }: { item: Item; index?: number }) {
 
       <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
         <div>
-          <Link href={href} className="line-clamp-2 font-display text-[15px] font-bold leading-snug transition-colors hover:text-lime sm:text-base">
+          <Link href={href} className="line-clamp-2 font-display text-[15px] font-bold leading-snug transition-colors hover:text-brand sm:text-base">
             {item.title}
           </Link>
           {(item.vin || item.serial) && (

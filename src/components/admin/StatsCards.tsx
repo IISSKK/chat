@@ -2,10 +2,10 @@ import type { VisitStats } from "@/lib/visits";
 
 export function StatsCards({ stats }: { stats: VisitStats }) {
   const cells: [string, number, string][] = [
-    ["Сегодня", stats.today, "from-lime/40"],
-    ["За неделю", stats.week, "from-aqua/40"],
-    ["За месяц", stats.month, "from-violet/30"],
-    ["Всего", stats.total, "from-hot/30"],
+    ["Сегодня", stats.today, "from-brand/40"],
+    ["За неделю", stats.week, "from-glow/40"],
+    ["За месяц", stats.month, "from-ember/30"],
+    ["Всего", stats.total, "from-flame/30"],
   ];
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -33,7 +33,7 @@ export function VisitsChart({ data }: { data: { day: string; visitors: number; h
         {data.map((d) => (
           <div key={d.day} className="group relative flex h-full flex-1 items-end">
             <div
-              className="w-full rounded-t bg-violet/80 transition-colors group-hover:bg-violet"
+              className="w-full rounded-t bg-ember/80 transition-colors group-hover:bg-ember"
               style={{ height: `${Math.max(2, (d.visitors / max) * 100)}%` }}
             />
             <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-900 px-2 py-1 text-[11px] text-white group-hover:block">

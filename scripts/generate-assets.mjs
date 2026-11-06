@@ -12,14 +12,14 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..")
 const out = (p) => path.join(root, p);
 
 const palettes = [
-  ["#7B5CFF", "#FF3D81", "#C8FF2E"],
-  ["#0EA5E9", "#7B5CFF", "#2EE6D6"],
-  ["#FF3D81", "#FF9F1C", "#C8FF2E"],
-  ["#111827", "#7B5CFF", "#FF3D81"],
-  ["#2EE6D6", "#0EA5E9", "#C8FF2E"],
-  ["#FF9F1C", "#FF3D81", "#7B5CFF"],
+  ["#FF8A3D", "#D64541", "#FFC857"],
+  ["#B5482F", "#FFB547", "#7A2E3A"],
+  ["#E8467C", "#FF8A5C", "#FFD089"],
+  ["#5A3420", "#D9824B", "#FFB547"],
+  ["#C9A15D", "#8C3B2A", "#FFC857"],
+  ["#FF6B35", "#7A2E3A", "#F2C14E"],
 ];
-const bodyColors = ["#F5F5F7", "#1F2937", "#C8FF2E", "#FF3D81", "#2563EB", "#9CA3AF", "#FFFFFF", "#111827", "#EF4444", "#22D3EE", "#A78BFA", "#F59E0B"];
+const bodyColors = ["#F3E3CF", "#2B211B", "#FFB547", "#D64541", "#8C3B2A", "#B8A99A", "#FAECDA", "#1C130D", "#E8553D", "#C9A15D", "#7A2E3A", "#F2C14E"];
 
 const car = (style, color) => {
   const bodies = {
@@ -69,10 +69,10 @@ const part = (kind, color) => {
 
 const page = (svg, [a, b, c], label) => `<!doctype html><html><body style="margin:0">
 <div style="width:1200px;height:800px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;
-background:radial-gradient(circle at 15% 20%, ${a} 0, transparent 45%),radial-gradient(circle at 85% 30%, ${b} 0, transparent 45%),radial-gradient(circle at 60% 110%, ${c} 0, transparent 50%),#0A0A12;">
-<div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 1px,transparent 1px 80px),repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 80px)"></div>
+background:radial-gradient(circle at 15% 20%, ${a} 0, transparent 45%),radial-gradient(circle at 85% 30%, ${b} 0, transparent 45%),radial-gradient(circle at 60% 110%, ${c} 0, transparent 50%),#120C08;">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,230,200,.04) 0 1px,transparent 1px 80px),repeating-linear-gradient(0deg,rgba(255,230,200,.04) 0 1px,transparent 1px 80px)"></div>
 <div style="position:relative;width:100%;display:flex;justify-content:center">${svg}</div>
-<div style="position:absolute;left:40px;bottom:30px;font:700 28px DejaVu Sans,sans-serif;color:rgba(255,255,255,.65);letter-spacing:4px">DEMO · ${label}</div>
+<div style="position:absolute;left:40px;bottom:30px;font:700 28px DejaVu Sans,sans-serif;color:rgba(250,236,218,.6);letter-spacing:4px">DEMO · ${label}</div>
 </div></body></html>`;
 
 const browser = await chromium.launch();
@@ -92,9 +92,9 @@ for (let i = 0; i < 6; i++) await shot(page(part(i % 3, bodyColors[(i * 5 + 3) %
 
 // OG image по умолчанию
 await shot(`<!doctype html><html><body style="margin:0"><div style="width:1200px;height:630px;display:flex;flex-direction:column;justify-content:center;padding:0 80px;box-sizing:border-box;
-background:radial-gradient(circle at 10% 10%,#7B5CFF 0,transparent 45%),radial-gradient(circle at 90% 20%,#FF3D81 0,transparent 40%),radial-gradient(circle at 70% 120%,#C8FF2E 0,transparent 45%),#0A0A12;color:#fff;font-family:DejaVu Sans,sans-serif">
+background:radial-gradient(circle at 10% 10%,#D64541 0,transparent 45%),radial-gradient(circle at 90% 20%,#FF8A3D 0,transparent 40%),radial-gradient(circle at 70% 120%,#FFB547 0,transparent 45%),#120C08;color:#FAECDA;font-family:DejaVu Sans,sans-serif">
 <div style="font-size:30px;letter-spacing:6px;opacity:.8">B2B EXPORT · SOUTH KOREA</div>
-<div style="font-size:110px;font-weight:800;line-height:1;margin-top:20px">KORIDA<span style="color:#C8FF2E">.</span></div>
+<div style="font-size:110px;font-weight:800;line-height:1;margin-top:20px">KORIDA<span style="color:#FFB547">.</span></div>
 <div style="font-size:42px;margin-top:24px;max-width:900px">Автомобили, двигатели и запчасти из Кореи</div></div></body></html>`, "public/og-default.jpg", 1200, 630);
 
 // PDF-руководства
@@ -132,14 +132,61 @@ fs.mkdirSync(out("public/guides"), { recursive: true });
 for (const [code, g] of Object.entries(guides)) {
   await p.setContent(`<!doctype html><html lang="${g.lang}" dir="${g.dir || "ltr"}"><head><meta charset="utf-8"><style>
   body{font-family:"DejaVu Sans","Noto Sans CJK KR","Noto Sans Arabic",sans-serif;margin:0;color:#111}
-  .hero{background:linear-gradient(120deg,#7B5CFF,#FF3D81);color:#fff;padding:48px 56px}
+  .hero{background:linear-gradient(120deg,#8C3B2A,#FF8A3D);color:#FFF4E6;padding:48px 56px}
   h1{font-size:40px;margin:0 0 8px} .sub{font-size:18px;opacity:.9} .brand{font-weight:800;letter-spacing:3px;margin-bottom:24px}
-  .step{display:flex;gap:18px;padding:18px 56px;border-bottom:1px solid #eee} .n{flex:none;width:44px;height:44px;border-radius:50%;background:#C8FF2E;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .step{display:flex;gap:18px;padding:18px 56px;border-bottom:1px solid #eee} .n{flex:none;width:44px;height:44px;border-radius:50%;background:#FFB547;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:20px}
   h3{margin:4px 0 6px;font-size:20px} p{margin:0;line-height:1.5;color:#333} .foot{padding:28px 56px;color:#555;font-size:14px}</style></head><body>
   <div class="hero"><div class="brand">KORIDA EXPORT</div><h1>${g.title}</h1><div class="sub">${g.sub}</div></div>
   ${g.steps.map(([h, t], i) => `<div class="step"><div class="n">${i + 1}</div><div><h3>${h}</h3><p>${t}</p></div></div>`).join("")}
   <div class="foot">WhatsApp: +82 10-0000-0000 · sales@korida-export.com · Incheon, Republic of Korea</div></body></html>`);
   await p.pdf({ path: out(`public/guides/buyer-guide-${code}.pdf`), format: "A4", printBackground: true });
 }
+
+// Баннеры главной (1920×1000): закат с авто, двигатель в студии, порт отгрузки
+fs.mkdirSync(out("public/banners"), { recursive: true });
+const sky = (a, b, c) => `background:linear-gradient(180deg,${a} 0%,${b} 55%,${c} 100%)`;
+const grain = `<div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,230,200,.025) 0 1px,transparent 1px 6px);mix-blend-mode:overlay"></div>`;
+const hills = (y, color, amp = 60) => `<svg viewBox="0 0 1920 400" preserveAspectRatio="none" style="position:absolute;left:0;right:0;bottom:${y}px;width:100%;height:300px"><path d="M0 ${200 - amp} C 300 ${120 - amp} 520 ${260 - amp} 860 ${170 - amp} S 1500 ${90 - amp} 1920 ${190 - amp} L1920 400 L0 400 Z" fill="${color}"/></svg>`;
+const bannerPage = (inner, style) => `<!doctype html><html><body style="margin:0"><div style="width:1920px;height:1000px;position:relative;overflow:hidden;${style}">${inner}${grain}</div></body></html>`;
+
+// 1. Трасса на закате + большой SUV
+await shot(bannerPage(`
+  <div style="position:absolute;left:1180px;top:330px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,#FFE1A0 0,#FFB547 35%,#FF6B35 60%,transparent 70%);filter:blur(2px)"></div>
+  <div style="position:absolute;left:900px;top:120px;width:1100px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(255,150,60,.45),transparent 60%)"></div>
+  ${hills(250, "#6E2A22", 40)}${hills(190, "#4A1C17", 10)}${hills(120, "#2A120E", -20)}
+  <div style="position:absolute;left:0;right:0;bottom:0;height:260px;background:linear-gradient(180deg,#24120C,#120C08)"></div>
+  <svg viewBox="0 0 1920 260" style="position:absolute;left:0;bottom:0;width:1920px;height:260px"><path d="M760 0 L1160 0 L1920 260 L0 260 Z" fill="#1A0F0A"/>
+    ${[0, 1, 2, 3, 4].map((i) => `<rect x="${955 - i * 6}" y="${20 + i * 48}" width="${10 + i * 6}" height="${18 + i * 8}" fill="#FFB547" opacity="${0.5 + i * 0.1}"/>`).join("")}</svg>
+  <div style="position:absolute;left:880px;bottom:120px;width:1000px;transform:scaleX(-1)">${car("suv", "#2A1A14").replace('width="78%"', 'width="100%"')}</div>
+  <div style="position:absolute;left:880px;bottom:180px;width:1000px;height:120px;background:linear-gradient(90deg,transparent,rgba(255,181,71,.25),transparent);filter:blur(30px)"></div>
+`, sky("#2A0F12", "#8C2F23", "#E06A2C")), "public/banners/banner-1.jpg", 1920, 1000);
+
+// 2. Двигатель в тёплой студии
+await shot(bannerPage(`
+  <div style="position:absolute;left:1000px;top:60px;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(255,170,80,.55),rgba(214,69,65,.25) 45%,transparent 70%)"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:280px;background:linear-gradient(180deg,transparent,#0E0906)"></div>
+  <div style="position:absolute;left:940px;top:190px;width:900px">${engine("#FFB547").replace('width="70%"', 'width="100%"')}</div>
+  ${Array.from({ length: 14 }, (_, i) => `<div style="position:absolute;left:${980 + (i * 137) % 820}px;top:${120 + (i * 89) % 700}px;width:${4 + (i % 3) * 2}px;height:${4 + (i % 3) * 2}px;border-radius:50%;background:#FFC877;opacity:${0.25 + (i % 4) * 0.15};box-shadow:0 0 12px #FFB547"></div>`).join("")}
+`, "background:radial-gradient(ellipse at 70% 40%,#3A1E14 0,#1A0F0A 55%,#0E0906 100%)"), "public/banners/banner-2.jpg", 1920, 1000);
+
+// 3. Порт: контейнеровоз и краны на закате
+const containers = Array.from({ length: 28 }, (_, i) => {
+  const cols = ["#B5482F", "#D9824B", "#8C3B2A", "#C9A15D", "#6E2A22", "#E8553D"];
+  return `<rect x="${1000 + (i % 14) * 56}" y="${560 - Math.floor(i / 14) * 34}" width="52" height="30" rx="2" fill="${cols[(i * 7) % 6]}"/>`;
+}).join("");
+const crane = (x, h) => `<g fill="#1A0D09"><rect x="${x}" y="${640 - h}" width="16" height="${h}"/><rect x="${x + 70}" y="${640 - h}" width="16" height="${h}"/><rect x="${x - 120}" y="${640 - h - 20}" width="380" height="22"/><rect x="${x + 30}" y="${640 - h - 70}" width="12" height="60"/><path d="M${x + 36} ${640 - h - 68} L${x - 110} ${640 - h - 20} M${x + 36} ${640 - h - 68} L${x + 250} ${640 - h - 20}" stroke="#1A0D09" stroke-width="5"/></g>`;
+await shot(bannerPage(`
+  <div style="position:absolute;left:1250px;top:250px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,#FFE3A8 0,#FFB547 40%,#FF7A2F 62%,transparent 72%)"></div>
+  <svg viewBox="0 0 1920 1000" style="position:absolute;inset:0;width:1920px;height:1000px">
+    ${crane(820, 330)}${crane(1680, 300)}
+    <path d="M940 600 L1830 600 L1780 690 L990 690 Z" fill="#2A1510"/>
+    <rect x="1700" y="520" width="90" height="80" fill="#2A1510"/><rect x="1720" y="490" width="20" height="30" fill="#2A1510"/>
+    ${containers}
+    <rect x="0" y="690" width="1920" height="310" fill="#3A1A12"/>
+    ${Array.from({ length: 18 }, (_, i) => `<rect x="${1150 + (i % 6) * 60 - i * 8}" y="${700 + i * 16}" width="${200 - i * 6}" height="3" fill="#FFB547" opacity="${0.6 - i * 0.03}"/>`).join("")}
+  </svg>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:320px;background:linear-gradient(180deg,rgba(18,12,8,0),#120C08)"></div>
+`, sky("#2B1018", "#9A3A25", "#F08A3A")), "public/banners/banner-3.jpg", 1920, 1000);
+
 await browser.close();
 console.log("assets generated");

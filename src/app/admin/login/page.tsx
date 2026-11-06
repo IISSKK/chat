@@ -32,7 +32,7 @@ function LoginForm() {
   return (
     <form onSubmit={submit} className="w-full max-w-sm animate-fade-up rounded-3xl bg-white p-8 shadow-xl shadow-slate-200">
       <div className="mb-8 flex items-center gap-3">
-        <span className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-violet to-hot font-display text-lg font-extrabold text-lime">K</span>
+        <span className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-ember to-flame font-display text-lg font-extrabold text-brand">K</span>
         <div>
           <h1 className="font-display text-lg font-bold">Вход в админку</h1>
           <p className="text-xs text-slate-500">Только для владельца сайта</p>

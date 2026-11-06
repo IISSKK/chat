@@ -8,8 +8,8 @@ export function SectionTitle({ title, href, eyebrow }: { title: string; href?: s
   return (
     <div data-reveal className="mb-6 flex items-end justify-between gap-3 sm:mb-8 sm:gap-4">
       <div className="min-w-0">
-        {eyebrow && <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-lime">{eyebrow}</p>}
-        <h2 className="h-display break-words text-2xl sm:text-4xl">{title}</h2>
+        {eyebrow && <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-brand">{eyebrow}</p>}
+        <h2 className="h-display break-words text-3xl sm:text-5xl lg:text-6xl">{title}</h2>
       </div>
       {href && (
         <Link href={href} className="group btn-ghost shrink-0 px-3 py-2.5 text-xs sm:px-4 sm:text-sm" aria-label={t.common.viewAll}>
@@ -22,7 +22,7 @@ export function SectionTitle({ title, href, eyebrow }: { title: string; href?: s
 }
 
 const advIcons = [CheckBadge, ShieldIcon, ShipIcon, RouteIcon];
-const advColors = ["from-lime/25 text-lime", "from-violet/30 text-violet-400", "from-aqua/25 text-aqua", "from-hot/25 text-hot-400"];
+const advColors = ["from-brand/25 text-brand", "from-ember/30 text-ember-400", "from-glow/25 text-glow", "from-flame/25 text-flame-400"];
 
 export function Advantages() {
   return (
@@ -66,14 +66,14 @@ export function Guides({ wide = false }: { wide?: boolean }) {
           download
           data-reveal
           style={{ "--d": `${i * 70}ms` } as React.CSSProperties}
-          className="group flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 transition-all duration-300 hover:-translate-y-1 hover:border-lime/40 hover:bg-white/[0.07]"
+          className="group flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 transition-all duration-300 hover:-translate-y-1 hover:border-brand/40 hover:bg-white/[0.07]"
         >
           <span className="text-2xl">{g.flag}</span>
           <span className="min-w-0 flex-1">
             <span className="block whitespace-nowrap font-display text-sm font-bold">PDF · {g.code}</span>
             <span className="block truncate text-xs text-white/50">{g.lang}</span>
           </span>
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-lime text-ink transition-transform duration-300 group-hover:translate-y-0.5 group-hover:scale-110">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand text-ink transition-transform duration-300 group-hover:translate-y-0.5 group-hover:scale-110">
             <DownloadIcon className="h-4 w-4" />
           </span>
         </a>
@@ -85,9 +85,9 @@ export function Guides({ wide = false }: { wide?: boolean }) {
 export function ContactCards() {
   const cards = [
     { icon: WhatsAppIcon, label: "WhatsApp", value: siteConfig.whatsappDisplay, href: waLink(t.whatsapp.generic), color: "text-[#25D366]" },
-    { icon: MailIcon, label: "Email", value: siteConfig.email, href: `mailto:${siteConfig.email}`, color: "text-aqua" },
-    { icon: ClockIcon, label: t.footer.hours, value: siteConfig.workHours, color: "text-lime" },
-    { icon: PinIcon, label: "Адрес", value: siteConfig.address, color: "text-hot-400" },
+    { icon: MailIcon, label: "Email", value: siteConfig.email, href: `mailto:${siteConfig.email}`, color: "text-glow" },
+    { icon: ClockIcon, label: t.footer.hours, value: siteConfig.workHours, color: "text-brand" },
+    { icon: PinIcon, label: "Адрес", value: siteConfig.address, color: "text-flame-400" },
   ];
   return (
     <div className="grid gap-3 sm:grid-cols-2">

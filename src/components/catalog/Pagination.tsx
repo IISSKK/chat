@@ -43,7 +43,7 @@ export function Pagination({
             key={n}
             href={href(n)}
             aria-current={n === page ? "page" : undefined}
-            className={`${base} ${n === page ? "bg-lime text-ink shadow-[0_6px_24px_-6px_rgba(200,255,46,.6)]" : "bg-white/[0.06] hover:bg-white/[0.12]"}`}
+            className={`${base} ${n === page ? "bg-brand text-ink shadow-[0_6px_24px_-6px_rgb(var(--c-brand)/0.55)]" : "bg-white/[0.06] hover:bg-white/[0.12]"}`}
           >
             {n}
           </Link>

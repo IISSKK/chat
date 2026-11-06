@@ -7,7 +7,7 @@ export function LegalPage({ title, updated, sections }: { title: string; updated
         {sections.map(([h, body], i) => (
           <section key={h} data-reveal className="rounded-3xl border border-white/[0.07] bg-ink-800/60 p-5 sm:p-7">
             <h2 className="font-display text-lg font-bold">
-              <span className="mr-2 text-lime">{String(i + 1).padStart(2, "0")}</span>
+              <span className="mr-2 text-brand">{String(i + 1).padStart(2, "0")}</span>
               {h}
             </h2>
             <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-white/70">{body}</p>
