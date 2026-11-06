@@ -104,6 +104,7 @@ const zh: Dictionary = {
     link: "链接",
     generic: "您好！我想详细了解你们的车源。",
     partnership: "您好！我有意与 {name} 开展合作。",
+    choose: "请选择联系人",
   },
   home: {
     heroBadge: "韩国 B2B 出口",

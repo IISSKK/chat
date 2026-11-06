@@ -5,7 +5,8 @@ import { siteConfig } from "@/config/site";
 import { getT } from "@/i18n/server";
 import { getItem, listItems } from "@/lib/items";
 import { formatNumber, itemPath, itemUrl, parseIdFromParam, photoUrl, typePath } from "@/lib/utils";
-import { waItemHref } from "@/lib/whatsapp";
+import { waOptions } from "@/lib/contacts";
+import { WaButton } from "@/components/site/WaButton";
 import { Gallery } from "@/components/catalog/Gallery";
 import { ItemGrid, SoldBadge, specChips } from "@/components/catalog/ItemCard";
 import { ShareMenu } from "@/components/catalog/ShareMenu";
@@ -125,13 +126,13 @@ export default async function ItemPage({ params }: Props) {
           <div className="mt-6 rounded-3xl surface p-4 sm:p-5">
             <p className="mb-4 text-sm text-fg/60">{sold ? t.item.soldNote : t.item.contactNote}</p>
             <div className="grid gap-2">
-              <a href={waItemHref(item, "price")} target="_blank" rel="noopener nofollow" className="btn-wa w-full py-4 text-base">
+              <WaButton options={waOptions("price", item.id)} className="btn-wa w-full py-4 text-base">
                 <WhatsAppIcon /> {t.actions.askPrice}
-              </a>
+              </WaButton>
               <div className="grid grid-cols-[1fr_auto] gap-2">
-                <a href={waItemHref(item, "docs")} target="_blank" rel="noopener nofollow" className="btn-ghost py-3">
+                <WaButton options={waOptions("docs", item.id)} className="btn-ghost w-full py-3" wrapperClassName="min-w-0">
                   <DocIcon className="h-4 w-4" /> {t.actions.docs}
-                </a>
+                </WaButton>
                 <ShareMenu url={itemUrl(item)} title={item.title} />
               </div>
             </div>

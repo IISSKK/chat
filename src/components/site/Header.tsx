@@ -9,8 +9,9 @@ import { SearchBox } from "./SearchBox";
 import { CloseIcon, MenuIcon, SearchIcon, WhatsAppIcon } from "@/components/icons";
 import { useT } from "@/i18n/client";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { WaButton, type WaOption } from "./WaButton";
 
-export function Header({ waHref }: { waHref: string }) {
+export function Header({ wa }: { wa: WaOption[] }) {
   const ru = useT();
   const NAV = [
     { href: "/catalog/cars", label: ru.nav.cars },
@@ -73,9 +74,9 @@ export function Header({ waHref }: { waHref: string }) {
           >
             {search ? <CloseIcon /> : <SearchIcon />}
           </button>
-          <a href={waHref} target="_blank" rel="noopener" className="btn-wa hidden px-4 py-2.5 sm:inline-flex">
+          <WaButton options={wa} placement="down" align="right" className="btn-wa px-4 py-2.5" wrapperClassName="hidden sm:block">
             <WhatsAppIcon className="h-4 w-4" /> WhatsApp
-          </a>
+          </WaButton>
           <button
             onClick={() => setMenu(true)}
             className="grid h-10 w-10 place-items-center rounded-full bg-fg/[0.06] text-fg hover:bg-fg/10 lg:hidden"
@@ -131,9 +132,9 @@ export function Header({ waHref }: { waHref: string }) {
             <p className="mb-1.5 px-2 text-[11px] font-bold uppercase tracking-wider text-fg/45">{ru.lang.label}</p>
             <LanguageSwitcher variant="row" />
           </div>
-          <a href={waHref} target="_blank" rel="noopener" className="btn-wa mt-3 w-full py-4 text-base">
+          <WaButton options={wa} placement="up" className="btn-wa w-full py-4 text-base" wrapperClassName="mt-3">
             <WhatsAppIcon /> {ru.home.writeWhatsapp}
-          </a>
+          </WaButton>
         </div>
       </div>
     </>

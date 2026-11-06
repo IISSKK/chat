@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { AdminIcon, AdminModule } from "@/admin/types";
-import { CarIcon, ChartIcon, CloseIcon, EngineIcon, EyeIcon, GridIcon, LogoutIcon, MailIcon, MenuIcon, UsersIcon } from "@/components/icons";
+import { CarIcon, ChartIcon, CloseIcon, EngineIcon, EyeIcon, GridIcon, LogoutIcon, MailIcon, MenuIcon, UsersIcon, WhatsAppIcon } from "@/components/icons";
 
 const ICONS: Record<AdminIcon, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   dashboard: GridIcon, car: CarIcon, engine: EngineIcon, chart: ChartIcon,
-  inbox: MailIcon, image: EyeIcon, text: GridIcon, users: UsersIcon, phone: MailIcon,
+  inbox: MailIcon, image: EyeIcon, text: GridIcon, users: UsersIcon, phone: WhatsAppIcon,
 };
 
 export function AdminShell({

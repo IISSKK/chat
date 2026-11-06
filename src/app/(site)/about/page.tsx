@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 import { getT } from "@/i18n/server";
 import { fmt } from "@/i18n/format";
-import { waLink } from "@/lib/whatsapp";
+import { waOptions } from "@/lib/contacts";
+import { WaButton } from "@/components/site/WaButton";
 import { countBy } from "@/lib/items";
 import { Advantages, ContactCards, Guides, SectionTitle } from "@/components/site/Sections";
 import { WhatsAppIcon } from "@/components/icons";
@@ -54,9 +55,9 @@ export default async function AboutPage() {
                 <h2 className="h-display text-2xl sm:text-4xl">{t.about.partnershipTitle}</h2>
                 <p className="mt-3 max-w-2xl text-fg/65">{t.about.partnershipText}</p>
               </div>
-              <a href={waLink(fmt(t.whatsapp.partnership, { name: siteConfig.name }))} target="_blank" rel="noopener" className="btn-brand px-7 py-4 text-base">
+              <WaButton options={waOptions("partner")} placement="up" align="right" className="btn-brand px-7 py-4 text-base">
                 <WhatsAppIcon /> {t.about.partnershipCta}
-              </a>
+              </WaButton>
             </div>
           </div>
         </div>

@@ -106,6 +106,7 @@ const en: Dictionary = {
     link: "Link",
     generic: "Hello! I'd like to learn more about your inventory.",
     partnership: "Hello! I'm interested in a partnership with {name}.",
+    choose: "Who would you like to message?",
   },
   home: {
     heroBadge: "B2B export from South Korea",

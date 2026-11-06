@@ -17,11 +17,6 @@ function itemLines(item: Item, t: Dictionary) {
   ].filter(Boolean) as string[];
 }
 
-/** Короткая ссылка «Узнать цену» / «Документы» (сервер сам соберёт текст и перенаправит в WhatsApp) */
-export function waItemHref(item: Pick<Item, "id">, kind: "price" | "docs") {
-  return `/api/wa?id=${item.id}&kind=${kind}`;
-}
-
 /** Текст «Узнать цену» на языке посетителя */
 export function priceMessage(item: Item, t: Dictionary) {
   return [t.whatsapp.priceIntro, ...itemLines(item, t)].join("\n");

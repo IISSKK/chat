@@ -77,6 +77,12 @@ function migrate(db: DB) {
       last_login TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE TABLE IF NOT EXISTS visits (
       day TEXT NOT NULL,
       visitor TEXT NOT NULL,

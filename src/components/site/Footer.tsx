@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { getT } from "@/i18n/server";
-import { waLink } from "@/lib/whatsapp";
+import { waOptions } from "@/lib/contacts";
 import { Logo } from "./Logo";
 import { VisitCounter } from "./VisitCounter";
 import { ClockIcon, MailIcon, PinIcon, WhatsAppIcon } from "@/components/icons";
@@ -15,9 +15,17 @@ export async function Footer() {
         <div className="space-y-4">
           <Logo />
           <p className="max-w-xs text-sm leading-relaxed text-fg/55">{t.meta.tagline}. {t.footer.worldwide}</p>
-          <a href={waLink(t.whatsapp.generic)} target="_blank" rel="noopener" className="btn-wa">
-            <WhatsAppIcon className="h-4 w-4" /> {siteConfig.whatsappDisplay}
-          </a>
+          <div className="flex flex-col items-start gap-2">
+            {waOptions("generic").map((o) => (
+              <a key={o.href} href={o.href} target="_blank" rel="noopener nofollow" className="btn-wa justify-start py-2.5 text-left">
+                <WhatsAppIcon className="h-4 w-4 shrink-0" />
+                <span className="flex flex-col leading-tight">
+                  <span>{o.phone}</span>
+                  {o.name && <span className="text-[11px] font-medium opacity-85">{o.name}</span>}
+                </span>
+              </a>
+            ))}
+          </div>
         </div>
 
         <div>

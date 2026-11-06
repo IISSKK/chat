@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { getT } from "@/i18n/server";
-import { waLink } from "@/lib/whatsapp";
+import { waOptions } from "@/lib/contacts";
 import { ArrowRight, CheckBadge, ClockIcon, DownloadIcon, MailIcon, PinIcon, RouteIcon, ShieldIcon, ShipIcon, WhatsAppIcon } from "@/components/icons";
 
 export async function SectionTitle({ title, href, eyebrow }: { title: string; href?: string; eyebrow?: string }) {
@@ -88,8 +88,15 @@ export async function Guides({ wide = false }: { wide?: boolean }) {
 
 export async function ContactCards() {
   const t = await getT();
-  const cards = [
-    { icon: WhatsAppIcon, label: "WhatsApp", value: siteConfig.whatsappDisplay, href: waLink(t.whatsapp.generic), color: "text-[#25D366]" },
+  type Card = { icon: typeof WhatsAppIcon; label: string; value: string; href?: string; color: string };
+  const cards: Card[] = [
+    ...waOptions("generic").map((o) => ({
+      icon: WhatsAppIcon,
+      label: o.name ? `WhatsApp · ${o.name}` : "WhatsApp",
+      value: o.langs ? `${o.phone} · ${o.langs}` : o.phone,
+      href: o.href,
+      color: "text-[#25D366]",
+    })),
     { icon: MailIcon, label: "Email", value: siteConfig.email, href: `mailto:${siteConfig.email}`, color: "text-glow" },
     { icon: ClockIcon, label: t.footer.hours, value: t.meta.workHours, color: "text-brand" },
     { icon: PinIcon, label: t.common.address, value: siteConfig.address, color: "text-flame-400" },
@@ -110,11 +117,11 @@ export async function ContactCards() {
         );
         const cls = "flex items-center gap-4 rounded-2xl surface p-4 transition-all duration-300";
         return c.href ? (
-          <a key={c.label} href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noopener" data-reveal style={{ "--d": `${i * 60}ms` } as React.CSSProperties} className={`${cls} hover:-translate-y-0.5 hover:border-fg/20`}>
+          <a key={c.href} href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noopener" data-reveal style={{ "--d": `${i * 60}ms` } as React.CSSProperties} className={`${cls} hover:-translate-y-0.5 hover:border-fg/20`}>
             {Inner}
           </a>
         ) : (
-          <div key={c.label} data-reveal style={{ "--d": `${i * 60}ms` } as React.CSSProperties} className={cls}>{Inner}</div>
+          <div key={c.label + c.value} data-reveal style={{ "--d": `${i * 60}ms` } as React.CSSProperties} className={cls}>{Inner}</div>
         );
       })}
     </div>

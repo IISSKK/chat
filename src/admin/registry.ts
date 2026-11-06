@@ -12,10 +12,11 @@ import { catalogModules } from "./modules/catalog";
 import { dashboardModule } from "./modules/dashboard";
 import { statsModule } from "./modules/stats";
 import { adminsModule } from "./modules/admins";
+import { contactsModule } from "./modules/contacts";
 import type { Permission } from "./permissions";
 import type { AdminModule, ResourceModule } from "./types";
 
-const modules: AdminModule[] = [dashboardModule, ...catalogModules, statsModule, adminsModule];
+const modules: AdminModule[] = [dashboardModule, ...catalogModules, statsModule, contactsModule, adminsModule];
 
 /** Модули, доступные администратору с данным набором прав */
 export function getAdminModules(perms?: Set<Permission>): AdminModule[] {

@@ -106,6 +106,7 @@ const ko: Dictionary = {
     link: "링크",
     generic: "안녕하세요! 보유 매물에 대해 자세히 알고 싶습니다.",
     partnership: "안녕하세요! {name}와(과)의 파트너십에 관심이 있습니다.",
+    choose: "누구에게 문의하시겠어요?",
   },
   home: {
     heroBadge: "한국발 B2B 수출",

@@ -27,7 +27,7 @@ npm run dev                  # http://localhost:3000
 | Что | Где |
 | --- | --- |
 | Название, email, телефон, график, адрес | `src/config/site.ts` |
-| Номер WhatsApp | `WHATSAPP_NUMBER` в `.env.local` (+ `whatsappDisplay` в `site.ts`) |
+| Номера WhatsApp (один или несколько, с подписями) | **Админка → «Контакты»** (до первого сохранения берётся `WHATSAPP_NUMBER` из `.env`) |
 | Все тексты интерфейса (4 языка) | `src/i18n/dictionaries/*.ts` |
 | Тексты WhatsApp-сообщений («Узнать цену», «Документы / Таможня») | `whatsapp` в `ru.ts`, сборка — `src/lib/whatsapp.ts` |
 | Цвета (стиль iOS: белый, синий, оранжевый) | `src/app/themes.css` |

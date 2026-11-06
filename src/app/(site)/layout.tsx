@@ -4,19 +4,19 @@ import { RevealObserver } from "@/components/site/Reveal";
 import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import { LiveWidget } from "@/components/site/LiveWidget";
 import { siteConfig } from "@/config/site";
-import { waLink } from "@/lib/whatsapp";
+import { waOptions } from "@/lib/contacts";
 import { getT } from "@/i18n/server";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const t = await getT();
-  const wa = waLink(t.whatsapp.generic);
+  const wa = waOptions("generic");
   return (
     <>
       <div className="page-bg" aria-hidden />
-      <Header waHref={wa} />
+      <Header wa={wa} />
       <main className="relative">{children}</main>
       <Footer />
-      <FloatingWhatsApp href={wa} />
+      <FloatingWhatsApp options={wa} label={t.home.writeWhatsapp} />
       {siteConfig.showLiveWidget && <LiveWidget />}
       <RevealObserver />
     </>

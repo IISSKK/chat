@@ -7,6 +7,7 @@ export const PERMISSIONS = [
   { id: "engines", label: "Двигатели", hint: "добавлять, изменять, менять статус" },
   { id: "delete", label: "Удаление объявлений", hint: "в разделах, к которым есть доступ" },
   { id: "stats", label: "Статистика посещений", hint: "просмотр" },
+  { id: "contacts", label: "Контакты", hint: "номера WhatsApp на сайте" },
   { id: "admins", label: "Администраторы", hint: "добавлять админов и менять их права" },
 ] as const;
 

@@ -3,7 +3,8 @@ import { getT } from "@/i18n/server";
 import { countBy, listItems } from "@/lib/items";
 import type { Category, Item } from "@/lib/types";
 import { itemPath, photoUrl } from "@/lib/utils";
-import { waLink } from "@/lib/whatsapp";
+import { waOptions } from "@/lib/contacts";
+import { WaButton } from "@/components/site/WaButton";
 import { ItemCard, ViewsBadge, specChips } from "@/components/catalog/ItemCard";
 import { SearchBox } from "@/components/site/SearchBox";
 import { Advantages, ContactCards, Guides, SectionTitle } from "@/components/site/Sections";
@@ -191,9 +192,9 @@ export default async function HomePage() {
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand">{t.home.eyebrowContacts}</p>
             <h2 className="h-display text-4xl sm:text-5xl">{t.home.contactsTitle}</h2>
             <p className="mt-4 max-w-md text-fg/60">{t.home.contactsText}</p>
-            <a href={waLink(t.whatsapp.generic)} target="_blank" rel="noopener" className="btn-wa mt-6 px-7 py-4 text-base">
+            <WaButton options={waOptions("generic")} placement="up" className="btn-wa mt-6 px-7 py-4 text-base" wrapperClassName="inline-block">
               <WhatsAppIcon /> {t.home.writeWhatsapp}
-            </a>
+            </WaButton>
           </div>
           <ContactCards />
         </div>
