@@ -6,7 +6,7 @@ B2B-сайт-витрина (RU, готов к добавлению EN) + мин
 ## Быстрый старт
 
 ```bash
-npm install                  # нужен Node.js 22.13 или новее (проверено на 22 и совместимо с 24/26)
+npm install                  # нужен Node.js 22.13 или новее
 cp .env.example .env.local   # задайте ADMIN_PASSWORD, SESSION_SECRET, WHATSAPP_NUMBER, SITE_URL
 npm run dev                  # http://localhost:3000
 ```
