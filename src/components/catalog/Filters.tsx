@@ -32,7 +32,7 @@ export function Filters({ brands, years, showType = false }: { brands: string[];
 
   const field = (key: string, label: string, options: [string, string][]) => (
     <label className="block">
-      <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-white/40">{label}</span>
+      <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-fg/40">{label}</span>
       <select className="select" value={params.get(key) ?? ""} onChange={(e) => set(key, e.target.value)}>
         <option value="">{ru.common.any}</option>
         {options.map(([v, l]) => (
@@ -46,16 +46,15 @@ export function Filters({ brands, years, showType = false }: { brands: string[];
     <div className="relative">
       <button onClick={() => setOpen((o) => !o)} className="btn-ghost w-full justify-between md:hidden" aria-expanded={open}>
         <span className="flex items-center gap-2"><FilterIcon className="h-4 w-4" /> {ru.common.filters}</span>
-        {active > 0 && <span className="rounded-full bg-brand px-2 py-0.5 text-xs text-ink">{active}</span>}
+        {active > 0 && <span className="rounded-full bg-brand px-2 py-0.5 text-xs text-white">{active}</span>}
       </button>
       <div
-        className={`${open ? "mt-3 grid animate-fade-up" : "hidden"} gap-3 rounded-3xl border border-white/[0.07] bg-ink-800/70 p-4 backdrop-blur-xl md:mt-0 md:grid md:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] md:items-end`}
+        className={`${open ? "mt-3 grid animate-fade-up" : "hidden"} gap-3 rounded-3xl surface p-4 md:mt-0 md:grid md:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] md:items-end`}
       >
         {showType &&
           field("type", "Раздел", [
             ["car", ru.types.car],
             ["engine", ru.types.engine],
-            ["part", ru.types.part],
           ])}
         {field("brand", ru.fields.brand, brands.map((b) => [b, b]))}
         {field("year", ru.fields.year, years.map((y) => [String(y), String(y)]))}
@@ -66,7 +65,7 @@ export function Filters({ brands, years, showType = false }: { brands: string[];
           ["sold", "Продано"],
         ])}
         <button onClick={reset} disabled={!active} className="btn-ghost h-[46px]">
-          {pending ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : ru.common.reset}
+          {pending ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-fg/30 border-t-fg" /> : ru.common.reset}
         </button>
       </div>
     </div>

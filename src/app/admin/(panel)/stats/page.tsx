@@ -1,7 +1,10 @@
 import { StatsCards, VisitsChart } from "@/components/admin/StatsCards";
 import { getDailyVisits, getVisitStats } from "@/lib/visits";
+import { requirePagePermission } from "@/lib/admin-guard";
+import { onlineCount } from "@/lib/presence";
 
-export default function StatsPage() {
+export default async function StatsPage() {
+  await requirePagePermission("stats");
   const daily = getDailyVisits(30);
   return (
     <div className="space-y-6">
@@ -9,7 +12,7 @@ export default function StatsPage() {
         <h1 className="font-display text-2xl font-bold">Статистика посещений</h1>
         <p className="text-sm text-slate-500">Уникальные посетители (анонимный cookie, боты исключены)</p>
       </div>
-      <StatsCards stats={getVisitStats()} />
+      <StatsCards stats={getVisitStats()} online={onlineCount()} />
       <VisitsChart data={daily} />
       <div className="a-card overflow-x-auto">
         <table className="w-full text-sm">

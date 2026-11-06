@@ -43,10 +43,10 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
   }, [zoom, index, go]);
 
   if (!n) {
-    return <div className="grid aspect-[4/3] place-items-center rounded-3xl bg-ink-700 text-white/40">Фото скоро</div>;
+    return <div className="grid aspect-[4/3] place-items-center rounded-3xl bg-ink-700 text-fg/40">Фото скоро</div>;
   }
 
-  const arrow = "absolute top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-ink/60 text-white backdrop-blur-md transition hover:scale-110 hover:bg-ink/80 active:scale-95";
+  const arrow = "absolute top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-fg shadow-md transition hover:scale-110 hover:bg-ink/80 active:scale-95";
 
   return (
     <div className="space-y-3">
@@ -85,10 +85,10 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
             </button>
             <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
               {photos.map((_, i) => (
-                <span key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === index ? "w-6 bg-brand" : "w-1.5 bg-white/50"}`} />
+                <span key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === index ? "w-6 bg-brand" : "w-1.5 bg-fg/50"}`} />
               ))}
             </div>
-            <span className="absolute right-3 top-3 rounded-full bg-ink/60 px-2.5 py-1 text-xs font-bold backdrop-blur">
+            <span className="absolute right-3 top-3 rounded-full bg-white/85 px-2.5 py-1 text-xs font-bold shadow-sm">
               {index + 1}/{n}
             </span>
           </>
@@ -114,10 +114,10 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
       )}
 
       {zoom && (
-        <div className="fixed inset-0 z-[60] flex animate-fade-in flex-col bg-ink/95 backdrop-blur-xl" onClick={() => setZoom(false)}>
+        <div className="fixed inset-0 z-[60] flex animate-fade-in flex-col bg-ink/95" onClick={() => setZoom(false)}>
           <div className="flex items-center justify-between p-4">
-            <span className="text-sm font-bold text-white/70">{index + 1} / {n}</span>
-            <button className="grid h-11 w-11 place-items-center rounded-full bg-white/10" aria-label="Закрыть">
+            <span className="text-sm font-bold text-fg/70">{index + 1} / {n}</span>
+            <button className="grid h-11 w-11 place-items-center rounded-full bg-fg/10" aria-label="Закрыть">
               <CloseIcon />
             </button>
           </div>

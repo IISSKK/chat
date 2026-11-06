@@ -31,28 +31,28 @@ export function Pagination({
   return (
     <nav className="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination">
       {page > 1 ? (
-        <Link href={href(page - 1)} className={`${base} bg-white/[0.06] hover:bg-white/[0.12]`} aria-label="Назад"><ChevronLeft className="h-4 w-4" /></Link>
+        <Link href={href(page - 1)} className={`${base} bg-fg/[0.06] hover:bg-fg/[0.12]`} aria-label="Назад"><ChevronLeft className="h-4 w-4" /></Link>
       ) : (
-        <span className={`${base} bg-white/[0.03] text-white/20`}><ChevronLeft className="h-4 w-4" /></span>
+        <span className={`${base} bg-fg/[0.03] text-fg/20`}><ChevronLeft className="h-4 w-4" /></span>
       )}
       {nums.map((n, i) =>
         n === "…" ? (
-          <span key={`e${i}`} className="px-1 text-white/40">…</span>
+          <span key={`e${i}`} className="px-1 text-fg/40">…</span>
         ) : (
           <Link
             key={n}
             href={href(n)}
             aria-current={n === page ? "page" : undefined}
-            className={`${base} ${n === page ? "bg-brand text-ink shadow-[0_6px_24px_-6px_rgb(var(--c-brand)/0.55)]" : "bg-white/[0.06] hover:bg-white/[0.12]"}`}
+            className={`${base} ${n === page ? "bg-brand text-white shadow-[0_6px_24px_-6px_rgb(var(--c-brand)/0.55)]" : "bg-fg/[0.06] hover:bg-fg/[0.12]"}`}
           >
             {n}
           </Link>
         ),
       )}
       {page < pages ? (
-        <Link href={href(page + 1)} className={`${base} bg-white/[0.06] hover:bg-white/[0.12]`} aria-label="Вперёд"><ChevronRight className="h-4 w-4" /></Link>
+        <Link href={href(page + 1)} className={`${base} bg-fg/[0.06] hover:bg-fg/[0.12]`} aria-label="Вперёд"><ChevronRight className="h-4 w-4" /></Link>
       ) : (
-        <span className={`${base} bg-white/[0.03] text-white/20`}><ChevronRight className="h-4 w-4" /></span>
+        <span className={`${base} bg-fg/[0.03] text-fg/20`}><ChevronRight className="h-4 w-4" /></span>
       )}
     </nav>
   );

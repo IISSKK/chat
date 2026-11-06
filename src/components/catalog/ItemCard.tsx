@@ -1,20 +1,20 @@
 import Link from "next/link";
 import { t } from "@/i18n";
 import type { Item } from "@/lib/types";
-import { formatNumber, itemPath, itemUrl, photoUrl } from "@/lib/utils";
+import { formatNumber, itemPath, itemUrl, photoUrl, viewsLabel } from "@/lib/utils";
 import { docsMessage, priceMessage, waLink } from "@/lib/whatsapp";
-import { CarIcon, DocIcon, EngineIcon, GearIcon, WhatsAppIcon } from "@/components/icons";
+import { CarIcon, DocIcon, EngineIcon, EyeIcon, WhatsAppIcon } from "@/components/icons";
 import { ShareMenu } from "./ShareMenu";
 
 const catColor: Record<Item["category"], string> = {
-  standby: "bg-brand text-ink",
-  listing: "bg-ember text-white",
-  running: "bg-glow text-ink",
+  standby: "bg-brand/90 text-white",
+  listing: "bg-white/85 text-fg",
+  running: "bg-flame/90 text-white",
 };
 
 export function SoldBadge({ className = "" }: { className?: string }) {
   return (
-    <span className={`inline-flex -rotate-6 items-center rounded-lg border-2 border-flame bg-ink/80 px-3 py-1 font-display text-sm font-extrabold tracking-widest text-flame backdrop-blur ${className}`}>
+    <span className={`inline-flex -rotate-6 items-center rounded-xl border-2 border-[#FF3B30] bg-white/90 px-3 py-1 text-sm font-extrabold tracking-widest text-[#FF3B30] shadow-lg ${className}`}>
       {t.status.sold}
     </span>
   );
@@ -30,56 +30,62 @@ export function specChips(item: Item) {
   return chips;
 }
 
+export function ViewsBadge({ views, className = "" }: { views: number; className?: string }) {
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full bg-white/85 px-2 py-1 text-[11px] font-bold text-fg/75 shadow-sm ${className}`} title={`${views} ${viewsLabel(views)}`}>
+      <EyeIcon className="h-3.5 w-3.5" /> {formatNumber(views)}
+    </span>
+  );
+}
+
 export function ItemCard({ item, index = 0 }: { item: Item; index?: number }) {
   const href = itemPath(item);
   const cover = item.photos[0];
   const sold = item.status === "sold";
-  const TypeIcon = item.type === "car" ? CarIcon : item.type === "engine" ? EngineIcon : GearIcon;
+  const TypeIcon = item.type === "car" ? CarIcon : EngineIcon;
 
   return (
     <article
       data-reveal
-      style={{ "--d": `${(index % 4) * 70}ms` } as React.CSSProperties}
-      className="group relative flex flex-col rounded-3xl border border-white/[0.07] bg-ink-800/80 transition-all focus-within:z-20 hover:z-10 duration-300 hover:-translate-y-1.5 hover:border-white/15 hover:shadow-[0_20px_60px_-20px_rgb(var(--c-brand)/0.35)]"
+      style={{ "--d": `${(index % 4) * 60}ms` } as React.CSSProperties}
+      className="surface group relative flex flex-col rounded-[26px] transition-[transform,box-shadow] duration-300 focus-within:z-20 hover:z-10 hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_rgba(15,40,90,.35)]"
     >
-      <Link href={href} className="relative block aspect-[4/3] overflow-hidden rounded-t-3xl bg-ink-700" aria-label={item.title}>
+      <Link href={href} className="card-press relative m-1.5 block aspect-[4/3] overflow-hidden rounded-[20px] bg-ink-600" aria-label={item.title}>
         {cover ? (
           <img
-            src={photoUrl(cover.filename)}
+            src={photoUrl(cover.filename, "sm")}
             alt={item.title}
             loading="lazy"
             decoding="async"
-            className={`h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.07] ${sold ? "grayscale-[60%]" : ""}`}
+            width={600}
+            height={450}
+            className={`h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] ${sold ? "grayscale" : ""}`}
           />
         ) : (
-          <div className="grid h-full place-items-center text-white/30">
+          <div className="grid h-full place-items-center text-fg/30">
             <TypeIcon className="h-10 w-10" />
             <span className="text-xs">{t.common.noPhoto}</span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-ink-800 via-transparent to-transparent opacity-80" />
-        <div className="absolute left-3 top-3 flex gap-1.5">
+        <div className="absolute left-2.5 top-2.5 flex gap-1.5">
           {item.type === "car" && (
-            <span className={`rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide ${catColor[item.category]}`}>
-              {t.categories[item.category]}
-            </span>
-          )}
-          {item.photos.length > 1 && (
-            <span className="rounded-full bg-ink/70 px-2 py-1 text-[11px] font-bold text-white/80 backdrop-blur">📷 {item.photos.length}</span>
+            <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold shadow-sm ${catColor[item.category]}`}>{t.categories[item.category]}</span>
           )}
         </div>
-        {sold && <SoldBadge className="absolute right-3 top-3" />}
+        <ViewsBadge views={item.views} className="absolute bottom-2.5 right-2.5" />
+        {item.photos.length > 1 && (
+          <span className="absolute bottom-2.5 left-2.5 rounded-full bg-fg/45 px-2 py-1 text-[11px] font-bold text-white">1/{item.photos.length}</span>
+        )}
+        {sold && <SoldBadge className="absolute right-2.5 top-2.5" />}
       </Link>
 
-      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
+      <div className="flex flex-1 flex-col gap-3 px-4 pb-4 pt-2">
         <div>
-          <Link href={href} className="line-clamp-2 font-display text-[15px] font-bold leading-snug transition-colors hover:text-brand sm:text-base">
+          <Link href={href} className="line-clamp-2 text-[16px] font-bold leading-snug tracking-tight transition-colors hover:text-brand">
             {item.title}
           </Link>
           {(item.vin || item.serial) && (
-            <p className="mt-1 truncate font-mono text-[11px] text-white/40">
-              {item.vin ? `VIN ${item.vin}` : `S/N ${item.serial}`}
-            </p>
+            <p className="mt-1 truncate font-mono text-[11px] text-fg/40">{item.vin ? `VIN ${item.vin}` : `S/N ${item.serial}`}</p>
           )}
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -90,11 +96,11 @@ export function ItemCard({ item, index = 0 }: { item: Item; index?: number }) {
 
         <div className="mt-auto grid gap-2 pt-1">
           <a href={waLink(priceMessage(item))} target="_blank" rel="noopener" className="btn-wa w-full py-2.5">
-            <WhatsAppIcon className="h-4 w-4 transition-transform duration-300 group-hover:rotate-[-12deg]" /> {t.actions.askPrice}
+            <WhatsAppIcon className="h-4 w-4" /> {t.actions.askPrice}
           </a>
           <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
             <a href={waLink(docsMessage(item))} target="_blank" rel="noopener" className="btn-ghost min-w-0 px-3 py-2.5 text-xs" title={t.actions.docs}>
-              <DocIcon className="h-4 w-4 shrink-0" /> <span className="truncate">{t.actions.docs}</span>
+              <DocIcon className="h-4 w-4 shrink-0 text-brand" /> <span className="truncate">{t.actions.docs}</span>
             </a>
             <ShareMenu url={itemUrl(item)} title={item.title} compact />
           </div>

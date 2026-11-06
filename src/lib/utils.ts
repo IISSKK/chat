@@ -30,14 +30,26 @@ export function itemUrl(item: Pick<Item, "id" | "slug">) {
   return `${siteConfig.url}${itemPath(item)}`;
 }
 
-export function photoUrl(filename: string) {
+/** URL фото. size "sm" — уменьшенная копия (~640px) для списков и карточек: быстрее грузится на телефоне. */
+export function photoUrl(filename: string, size: "full" | "sm" = "full") {
   if (/^https?:\/\//.test(filename)) return filename;
   if (filename.startsWith("demo/")) return `/${filename}`;
+  if (size === "sm") return `/media/${filename.replace(/\.(\w+)$/, "_sm.$1")}`;
   return `/media/${filename}`;
 }
 
+/** «просмотр / просмотра / просмотров» */
+export function viewsLabel(n: number) {
+  const a = Math.abs(n) % 100;
+  const b = a % 10;
+  if (a > 10 && a < 20) return "просмотров";
+  if (b === 1) return "просмотр";
+  if (b >= 2 && b <= 4) return "просмотра";
+  return "просмотров";
+}
+
 export function typePath(type: ItemType) {
-  return type === "car" ? "/catalog/cars" : type === "engine" ? "/catalog/engines" : "/catalog/parts";
+  return type === "car" ? "/catalog/cars" : "/catalog/engines";
 }
 
 export function formatNumber(n: number | null | undefined) {

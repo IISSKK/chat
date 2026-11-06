@@ -18,7 +18,10 @@ export interface VisitStats {
   today: number;
   week: number;
   month: number;
+  /** сумма уникальных посетителей по дням */
   total: number;
+  /** всего разных людей за всё время */
+  unique: number;
 }
 
 export function getVisitStats(): VisitStats {
@@ -29,7 +32,15 @@ export function getVisitStats(): VisitStats {
         ? db.prepare("SELECT COUNT(*) AS n FROM visits WHERE day >= ?").get(from)
         : db.prepare("SELECT COUNT(*) AS n FROM visits").get()) as { n: number }
     ).n;
-  return { today: count(day()), week: count(day(6)), month: count(day(29)), total: count() };
+  const distinct = (from: string) =>
+    (db.prepare("SELECT COUNT(DISTINCT visitor) AS n FROM visits WHERE day >= ?").get(from) as { n: number }).n;
+  return {
+    today: count(day()),
+    week: distinct(day(6)),
+    month: distinct(day(29)),
+    total: count(),
+    unique: (db.prepare("SELECT COUNT(DISTINCT visitor) AS n FROM visits").get() as { n: number }).n,
+  };
 }
 
 export function getDailyVisits(days = 30) {

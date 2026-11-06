@@ -1,7 +1,7 @@
 import { transaction, type DB } from "./db";
 import { slugify } from "./utils";
 
-/** Демо-данные: 24 автомобиля (по 8 в каждой подкатегории), 8 двигателей, 8 запчастей. */
+/** Демо-данные: 24 автомобиля (по 8 в каждой подкатегории) и 8 двигателей. */
 
 let seed = 7;
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
@@ -53,22 +53,12 @@ const engines: Seed[] = [
   { title: "Двигатель G4NA 2.0 MPi Nu", brand: "Hyundai", model: "Elantra / Tucson", year: 2020, engine_code: "G4NA", displacement: 1999, transmission: "automatic", fuel: "gasoline", mileage: 39000, notes: "Низкий пробег, гарантия на запуск." },
 ];
 
-const parts: Seed[] = [
-  { title: "ГБЦ G4KE 2.4 в сборе", brand: "Hyundai", model: "Sonata / Sportage", year: 2016, engine_code: "G4KE", displacement: 2359, transmission: "", fuel: "gasoline", mileage: 70000, notes: "С распредвалами и клапанами." },
-  { title: "Турбина D4HB 2.2 CRDi", brand: "Kia", model: "Sorento", year: 2019, engine_code: "D4HB", displacement: 2199, transmission: "", fuel: "diesel", mileage: 80000, notes: "Garrett, люфтов нет." },
-  { title: "АКПП A6MF1 6-ступ.", brand: "Hyundai", model: "Sonata / K5", year: 2017, engine_code: "G4KJ", displacement: 2359, transmission: "automatic", fuel: "gasoline", mileage: 65000, notes: "Проверена на стенде." },
-  { title: "Комплект форсунок D4CB", brand: "Hyundai", model: "Porter II", year: 2019, engine_code: "D4CB", displacement: 2497, transmission: "", fuel: "diesel", mileage: 110000, notes: "4 шт., Bosch, проливка." },
-  { title: "ТНВД D4HB Bosch", brand: "Kia", model: "Carnival / Sorento", year: 2020, engine_code: "D4HB", displacement: 2199, transmission: "", fuel: "diesel", mileage: 60000, notes: "CP4, с датчиками." },
-  { title: "Генератор G4FD 1.6", brand: "Hyundai", model: "Tucson / Avante", year: 2018, engine_code: "G4FD", displacement: 1591, transmission: "", fuel: "gasoline", mileage: 50000, notes: "130A, проверен." },
-  { title: "Блок цилиндров G6DH 3.3", brand: "Hyundai", model: "Grandeur", year: 2017, engine_code: "G6DH", displacement: 3342, transmission: "", fuel: "gasoline", mileage: 90000, notes: "Под ремонт, без задиров." },
-  { title: "Впускной коллектор G4NA", brand: "Hyundai", model: "Elantra", year: 2020, engine_code: "G4NA", displacement: 1999, transmission: "", fuel: "gasoline", mileage: 40000, notes: "С дроссельной заслонкой." },
-];
 
 const wmiByBrand: Record<string, string> = {
   Hyundai: "KMH", Kia: "KNA", Genesis: "KMT", SsangYong: "KPT", "Renault Samsung": "KNM",
 };
 
-const IMG = { car: 12, engine: 6, part: 6 } as const;
+const IMG = { car: 12, engine: 6 } as const;
 
 export function seedDemoData(db: DB) {
   seed = 7;
@@ -81,7 +71,7 @@ export function seedDemoData(db: DB) {
   const categories = ["standby", "listing", "running"] as const;
   let minutes = 0;
 
-  const add = (type: "car" | "engine" | "part", s: Seed, index: number) => {
+  const add = (type: "car" | "engine", s: Seed, index: number) => {
     minutes += 37;
     const ts = new Date(Date.now() - minutes * 60000).toISOString().replace("T", " ").slice(0, 19);
     const res = insert.run({
@@ -90,7 +80,7 @@ export function seedDemoData(db: DB) {
       category: type === "car" ? categories[index % 3] : index % 3 === 0 ? "standby" : "listing",
       slug: slugify(s.title),
       first_registration: `${s.year}-${String(1 + Math.floor(rnd() * 12)).padStart(2, "0")}`,
-      vin: type === "part" ? "" : vin(wmiByBrand[s.brand] ?? "KMH"),
+      vin: vin(wmiByBrand[s.brand] ?? "KMH"),
       serial: serial(s.engine_code.slice(0, 2)),
       displacement: s.displacement || null,
       status: index % 7 === 5 ? "sold" : "available",
@@ -104,6 +94,5 @@ export function seedDemoData(db: DB) {
   transaction(db, () => {
     cars.forEach((s, i) => add("car", s, i));
     engines.forEach((s, i) => add("engine", s, i));
-    parts.forEach((s, i) => add("part", s, i));
   });
 }

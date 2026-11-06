@@ -9,6 +9,7 @@ import { docsMessage, priceMessage, waLink } from "@/lib/whatsapp";
 import { Gallery } from "@/components/catalog/Gallery";
 import { ItemGrid, SoldBadge, specChips } from "@/components/catalog/ItemCard";
 import { ShareMenu } from "@/components/catalog/ShareMenu";
+import { ItemViews } from "@/components/catalog/ItemViews";
 import { ArrowLeft, DocIcon, WhatsAppIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
@@ -82,12 +83,12 @@ export default async function ItemPage({ params }: Props) {
   return (
     <div className="container pt-6 sm:pt-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <nav className="mb-5 flex items-center gap-2 text-sm text-white/50">
-        <Link href={typePath(item.type)} className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1.5 font-semibold text-white/80 transition hover:bg-white/10">
+      <nav className="mb-5 flex items-center gap-2 text-sm text-fg/50">
+        <Link href={typePath(item.type)} className="inline-flex items-center gap-1.5 rounded-full bg-fg/[0.06] px-3 py-1.5 font-semibold text-fg/80 transition hover:bg-fg/10">
           <ArrowLeft className="h-4 w-4" /> {t.types[item.type]}
         </Link>
         {item.type === "car" && (
-          <Link href={`/catalog/cars/${item.category}`} className="hidden hover:text-white sm:inline">/ {t.categoriesLong[item.category]}</Link>
+          <Link href={`/catalog/cars/${item.category}`} className="hidden hover:text-fg sm:inline">/ {t.categoriesLong[item.category]}</Link>
         )}
       </nav>
 
@@ -99,17 +100,18 @@ export default async function ItemPage({ params }: Props) {
 
         <div className="lg:sticky lg:top-28 lg:self-start">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="chip bg-ember/20 text-ember-400">{t.typeSingle[item.type]}</span>
+            <span className="chip bg-ember/10 text-ember">{t.typeSingle[item.type]}</span>
             {item.type === "car" && <span className="chip">{t.categories[item.category]}</span>}
-            <span className={`chip ${sold ? "bg-flame/20 text-flame" : "bg-brand/15 text-brand"}`}>{sold ? "Продано" : t.status.available}</span>
+            <span className={`chip ${sold ? "bg-[#FF3B30]/10 text-[#FF3B30]" : "bg-[#34C759]/12 text-[#1F9D45]"}`}>{sold ? "Продано" : t.status.available}</span>
+            <ItemViews id={item.id} initial={item.views} />
           </div>
           <h1 className="h-display mt-4 text-2xl leading-tight sm:text-4xl">{item.title}</h1>
           <div className="mt-4 flex flex-wrap gap-1.5">
             {specChips(item).map((c) => <span key={c} className="chip text-sm">{c}</span>)}
           </div>
 
-          <div className="mt-6 rounded-3xl border border-white/[0.07] bg-ink-800/70 p-4 backdrop-blur-xl sm:p-5">
-            <p className="mb-4 text-sm text-white/60">{sold ? t.item.soldNote : t.item.contactNote}</p>
+          <div className="mt-6 rounded-3xl surface p-4 sm:p-5">
+            <p className="mb-4 text-sm text-fg/60">{sold ? t.item.soldNote : t.item.contactNote}</p>
             <div className="grid gap-2">
               <a href={waLink(priceMessage(item))} target="_blank" rel="noopener" className="btn-wa w-full py-4 text-base">
                 <WhatsAppIcon /> {t.actions.askPrice}
@@ -124,11 +126,11 @@ export default async function ItemPage({ params }: Props) {
           </div>
 
           <div className="mt-6">
-            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-white/40">{t.item.specs}</h2>
-            <dl className="divide-y divide-white/[0.06] overflow-hidden rounded-3xl border border-white/[0.07] bg-ink-800/50">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-fg/40">{t.item.specs}</h2>
+            <dl className="divide-y divide-fg/[0.06] overflow-hidden rounded-3xl surface">
               {specs.filter(([, v]) => v).map(([k, v]) => (
                 <div key={k} className="grid grid-cols-[minmax(110px,40%)_1fr] gap-3 px-4 py-3 text-sm sm:px-5">
-                  <dt className="text-white/50">{k}</dt>
+                  <dt className="text-fg/50">{k}</dt>
                   <dd className={`font-semibold ${k === t.fields.vin || k === t.fields.serial ? "break-all font-mono" : ""}`}>{v}</dd>
                 </div>
               ))}
@@ -137,8 +139,8 @@ export default async function ItemPage({ params }: Props) {
 
           {item.notes && (
             <div className="mt-6">
-              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-white/40">{t.fields.notes}</h2>
-              <p className="whitespace-pre-line rounded-3xl border border-white/[0.07] bg-ink-800/50 p-5 text-sm leading-relaxed text-white/80">{item.notes}</p>
+              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-fg/40">{t.fields.notes}</h2>
+              <p className="whitespace-pre-line rounded-3xl surface p-5 text-sm leading-relaxed text-fg/80">{item.notes}</p>
             </div>
           )}
         </div>

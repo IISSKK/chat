@@ -1,0 +1,126 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import ru from "@/i18n/dictionaries/ru";
+
+type Live = { online: number; unique: number; today: number };
+const HEARTBEAT_MS = 30_000;
+const fmt = (n: number) => new Intl.NumberFormat("ru-RU").format(n);
+
+/**
+ * Небольшое плавающее окошко: сколько людей сейчас на сайте и сколько всего посетили.
+ * Также регистрирует визит (раз за сессию) и шлёт «пульс» раз в 30 секунд, пока вкладка видна.
+ */
+export function LiveWidget() {
+  const [data, setData] = useState<Live | null>(null);
+  const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout>;
+    try {
+      setHidden(sessionStorage.getItem("bk-live-hidden") === "1");
+    } catch {}
+
+    const first = async () => {
+      let sent = false;
+      try {
+        sent = sessionStorage.getItem("bk-visit-sent") === "1";
+        sessionStorage.setItem("bk-visit-sent", "1");
+      } catch {}
+      if (!sent) await fetch("/api/visit", { method: "POST" }).catch(() => {});
+      beat();
+    };
+    const beat = async () => {
+      if (!document.hidden) {
+        const d = await fetch("/api/presence", { method: "POST" }).then((r) => r.json()).catch(() => null);
+        if (alive && d) setData(d);
+      }
+      if (alive) timer = setTimeout(beat, HEARTBEAT_MS);
+    };
+    const onVis = () => {
+      if (!document.hidden) {
+        clearTimeout(timer);
+        beat();
+      }
+    };
+    first();
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, []);
+
+  const toggleHidden = (v: boolean) => {
+    setHidden(v);
+    setOpen(false);
+    try {
+      sessionStorage.setItem("bk-live-hidden", v ? "1" : "0");
+    } catch {}
+  };
+
+  if (!data) return null;
+
+  if (hidden) {
+    return (
+      <button
+        onClick={() => toggleHidden(false)}
+        aria-label={ru.live.title}
+        className="glass fixed bottom-5 left-4 z-30 grid h-11 w-11 place-items-center rounded-full pb-[env(safe-area-inset-bottom)] sm:left-5"
+      >
+        <span className="relative flex h-2.5 w-2.5">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34C759] opacity-60" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#34C759]" />
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <div className="fixed bottom-5 left-4 z-30 sm:left-5" style={{ marginBottom: "env(safe-area-inset-bottom)" }}>
+      {open && (
+        <div className="glass absolute bottom-full left-0 mb-2 w-60 origin-bottom-left animate-pop-in rounded-3xl p-3">
+          <div className="mb-2 flex items-center justify-between px-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-fg/45">{ru.live.title}</span>
+            <button onClick={() => toggleHidden(true)} className="rounded-full px-2 py-0.5 text-[11px] font-semibold text-fg/50 hover:bg-fg/[0.06]">
+              {ru.live.hide}
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5 text-center">
+            {[
+              [data.online, "онлайн", "text-[#34C759]"],
+              [data.today, ru.live.today, "text-brand"],
+              [data.unique, "всего", "text-flame"],
+            ].map(([n, l, c]) => (
+              <div key={l as string} className="rounded-2xl bg-white/70 px-1 py-2">
+                <div className={`text-lg font-bold tabular-nums ${c}`}>{fmt(n as number)}</div>
+                <div className="text-[10px] font-semibold text-fg/45">{l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="glass flex items-center gap-2.5 rounded-full py-2 pl-3 pr-3.5 text-xs font-semibold"
+      >
+        <span className="relative flex h-2.5 w-2.5">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34C759] opacity-60" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#34C759]" />
+        </span>
+        <span className="tabular-nums">
+          <b className="text-fg">{fmt(data.online)}</b> <span className="text-fg/55">{ru.live.online}</span>
+        </span>
+        <span className="h-3.5 w-px bg-fg/15" />
+        <span className="tabular-nums">
+          <b className="text-fg">{fmt(data.unique)}</b> <span className="hidden text-fg/55 min-[400px]:inline">{ru.live.total}</span>
+          <span className="text-fg/55 min-[400px]:hidden">всего</span>
+        </span>
+      </button>
+    </div>
+  );
+}

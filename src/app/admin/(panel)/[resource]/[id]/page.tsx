@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getResource } from "@/admin/registry";
+import { requirePagePermission } from "@/lib/admin-guard";
 import { ItemForm } from "@/components/admin/ItemForm";
 import { ArrowLeft, EyeIcon } from "@/components/icons";
 import { getItem } from "@/lib/items";
@@ -11,6 +12,7 @@ export default async function EditItemPage({ params }: { params: Promise<{ resou
   const mod = getResource(resource);
   const item = mod ? getItem(Number(id)) : null;
   if (!mod || !item || item.type !== mod.itemType) notFound();
+  await requirePagePermission(mod.permission);
   return (
     <div className="space-y-5">
       <Link href={mod.href} className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-900">

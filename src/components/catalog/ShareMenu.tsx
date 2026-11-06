@@ -51,7 +51,7 @@ export function ShareMenu({ url, title, className = "", compact = false }: { url
         {!compact && <span className="hidden sm:inline">{ru.actions.share}</span>}
       </button>
       {open && (
-        <div className="absolute bottom-full right-0 z-30 mb-2 w-52 origin-bottom-right animate-fade-up rounded-2xl border border-white/10 bg-ink-700/95 p-1.5 shadow-2xl backdrop-blur-xl">
+        <div className="absolute bottom-full right-0 z-30 mb-2 w-52 origin-bottom-right animate-fade-up glass rounded-2xl p-1.5">
           {links.map((l, i) => (
             <a
               key={l.label}
@@ -60,7 +60,7 @@ export function ShareMenu({ url, title, className = "", compact = false }: { url
               rel="noopener"
               onClick={() => setOpen(false)}
               style={{ animationDelay: `${i * 40}ms` }}
-              className="flex animate-fade-up items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-semibold transition hover:bg-white/[0.08]"
+              className="flex animate-fade-up items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-semibold transition hover:bg-fg/[0.08]"
             >
               <span className={`grid h-7 w-7 place-items-center rounded-full text-white ${l.color}`}>{l.icon}</span>
               {l.label}
@@ -69,9 +69,9 @@ export function ShareMenu({ url, title, className = "", compact = false }: { url
           <button
             type="button"
             onClick={copy}
-            className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left text-sm font-semibold transition hover:bg-white/[0.08]"
+            className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left text-sm font-semibold transition hover:bg-fg/[0.08]"
           >
-            <span className={`grid h-7 w-7 place-items-center rounded-full transition-colors ${copied ? "bg-brand text-ink" : "bg-white/10"}`}>
+            <span className={`grid h-7 w-7 place-items-center rounded-full transition-colors ${copied ? "bg-brand text-white" : "bg-fg/10"}`}>
               <LinkIcon className="h-4 w-4" />
             </span>
             {copied ? ru.actions.copied : ru.actions.copyLink}

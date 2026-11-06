@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { AdminIcon, AdminModule } from "@/admin/types";
-import { CarIcon, ChartIcon, CloseIcon, EngineIcon, EyeIcon, GearIcon, GridIcon, LogoutIcon, MailIcon, MenuIcon } from "@/components/icons";
+import { CarIcon, ChartIcon, CloseIcon, EngineIcon, EyeIcon, GridIcon, LogoutIcon, MailIcon, MenuIcon, UsersIcon } from "@/components/icons";
 
 const ICONS: Record<AdminIcon, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
-  dashboard: GridIcon, car: CarIcon, engine: EngineIcon, part: GearIcon, chart: ChartIcon,
-  inbox: MailIcon, image: EyeIcon, text: GridIcon, users: GridIcon, phone: MailIcon,
+  dashboard: GridIcon, car: CarIcon, engine: EngineIcon, chart: ChartIcon,
+  inbox: MailIcon, image: EyeIcon, text: GridIcon, users: UsersIcon, phone: MailIcon,
 };
 
 export function AdminShell({
@@ -42,9 +42,9 @@ export function AdminShell({
   const nav = (
     <nav className="flex h-full flex-col">
       <Link href="/admin" className="mb-6 flex items-center gap-2.5 px-2">
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-ember to-flame font-display font-extrabold text-brand">K</span>
+        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-ember font-display font-extrabold text-white">B</span>
         <span>
-          <span className="block font-display text-sm font-bold text-slate-900">KORIDA</span>
+          <span className="block font-display text-sm font-bold text-slate-900">Barakat Auto</span>
           <span className="block text-[11px] text-slate-500">Панель управления</span>
         </span>
       </Link>
@@ -104,7 +104,7 @@ export function AdminShell({
           <button onClick={() => setOpen(true)} className="grid h-9 w-9 place-items-center rounded-lg hover:bg-slate-100" aria-label="Меню">
             <MenuIcon />
           </button>
-          <span className="font-display text-sm font-bold">KORIDA Admin</span>
+          <span className="font-display text-sm font-bold">Barakat Admin</span>
         </header>
         <main className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">{children}</main>
       </div>

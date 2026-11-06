@@ -51,3 +51,4 @@ export const FacebookIcon = (p: P) => (
     <path d="M14 8V6.5c0-.7.2-1.2 1.2-1.2H17V2.1C16.6 2 15.6 2 14.4 2 11.9 2 10.3 3.5 10.3 6.3V8H7.5v3.6h2.8V22H14V11.6h2.8l.4-3.6z" />
   </svg>
 );
+export const UsersIcon = (p: P) => (<svg {...base(p)}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5" /></svg>);

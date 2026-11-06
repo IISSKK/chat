@@ -60,6 +60,23 @@ function migrate(db: DB) {
     );
     CREATE INDEX IF NOT EXISTS idx_photos_item ON photos(item_id, position);
 
+    CREATE TABLE IF NOT EXISTS item_views (
+      item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+      visitor TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (item_id, visitor)
+    );
+
+    CREATE TABLE IF NOT EXISTS admins (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      password_hash TEXT NOT NULL,
+      permissions TEXT NOT NULL DEFAULT '[]',
+      active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      last_login TEXT
+    );
+
     CREATE TABLE IF NOT EXISTS visits (
       day TEXT NOT NULL,
       visitor TEXT NOT NULL,
@@ -67,6 +84,11 @@ function migrate(db: DB) {
       PRIMARY KEY (day, visitor)
     );
   `);
+  // Миграции для существующих баз
+  const cols = (db.prepare("PRAGMA table_info(items)").all() as { name: string }[]).map((c) => c.name);
+  if (!cols.includes("views")) db.exec("ALTER TABLE items ADD COLUMN views INTEGER NOT NULL DEFAULT 0");
+  // Раздел «Запчасти» удалён — убираем его позиции
+  db.exec("DELETE FROM items WHERE type NOT IN ('car', 'engine')");
 }
 
 export function getDb(): DB {

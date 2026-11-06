@@ -1,5 +1,5 @@
 /** Подписанная cookie-сессия (HMAC-SHA256 через Web Crypto) — работает и в middleware, и в Node. */
-export const SESSION_COOKIE = "korida_admin";
+export const SESSION_COOKIE = "barakat_admin";
 const MAX_AGE = 60 * 60 * 24 * 7; // 7 дней
 
 function secret() {
@@ -28,9 +28,15 @@ function safeEqual(a: string, b: string) {
   return r === 0;
 }
 
-export async function createSessionToken(user: string) {
-  const payload = b64url(enc.encode(JSON.stringify({ u: user, exp: Date.now() + MAX_AGE * 1000 })));
+/** id = 0 — владелец (логин из .env), иначе id администратора в БД */
+export async function createSessionToken(user: string, id = 0) {
+  const payload = b64url(enc.encode(JSON.stringify({ u: user, id, exp: Date.now() + MAX_AGE * 1000 })));
   return `${payload}.${await hmac(payload)}`;
+}
+
+/** В продакшене без SESSION_SECRET подпись сессии можно подделать — вход запрещён для всех. */
+export function sessionSecretOk() {
+  return process.env.NODE_ENV !== "production" || !!process.env.SESSION_SECRET;
 }
 
 export async function verifySessionToken(token: string | undefined | null) {
@@ -38,7 +44,7 @@ export async function verifySessionToken(token: string | undefined | null) {
   const [payload, sig] = token.split(".");
   if (!payload || !sig || !safeEqual(sig, await hmac(payload))) return null;
   try {
-    const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))) as { u: string; exp: number };
+    const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))) as { u: string; id?: number; exp: number };
     return json.exp > Date.now() ? json : null;
   } catch {
     return null;

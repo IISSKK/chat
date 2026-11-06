@@ -12,12 +12,14 @@ export function RowActions({
   editHref,
   viewHref,
   title,
+  canDelete = true,
 }: {
   id: number;
   status: "available" | "sold";
   editHref: string;
   viewHref: string;
   title: string;
+  canDelete?: boolean;
 }) {
   const router = useRouter();
   const [status, setStatus] = useState(initial);
@@ -71,9 +73,11 @@ export function RowActions({
         <Link href={editHref} className="a-btn-ghost px-3 py-2 text-xs">
           <EditIcon className="h-4 w-4" /> Изменить
         </Link>
-        <button onClick={() => setConfirm(true)} className="a-btn px-3 py-2 text-xs text-red-600 hover:bg-red-50">
-          <TrashIcon className="h-4 w-4" /> Удалить
-        </button>
+        {canDelete && (
+          <button onClick={() => setConfirm(true)} className="a-btn px-3 py-2 text-xs text-red-600 hover:bg-red-50">
+            <TrashIcon className="h-4 w-4" /> Удалить
+          </button>
+        )}
       </div>
       <ConfirmDialog
         open={confirm}

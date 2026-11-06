@@ -24,13 +24,13 @@ export default function AboutPage() {
           <h1 className="h-display text-4xl leading-tight sm:text-6xl">
             Экспорт из Кореи <span className="text-gradient">без лишних шагов</span>
           </h1>
-          <p className="mt-6 max-w-2xl text-lg text-white/65">{t.about.lead}</p>
+          <p className="mt-6 max-w-2xl text-lg text-fg/65">{t.about.lead}</p>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {stats.map(([n, l], i) => (
-            <div key={l} data-reveal style={{ "--d": `${i * 80}ms` } as React.CSSProperties} className="rounded-3xl border border-white/[0.07] bg-ink-800/60 p-5">
+            <div key={l} data-reveal style={{ "--d": `${i * 80}ms` } as React.CSSProperties} className="rounded-3xl surface p-5">
               <div className="font-display text-3xl font-bold text-brand">{n}</div>
-              <div className="mt-1 text-sm text-white/55">{l}</div>
+              <div className="mt-1 text-sm text-fg/55">{l}</div>
             </div>
           ))}
         </div>
@@ -47,7 +47,7 @@ export default function AboutPage() {
             <div className="grid gap-6 lg:grid-cols-[1.4fr_auto] lg:items-center">
               <div>
                 <h2 className="h-display text-2xl sm:text-4xl">{t.about.partnershipTitle}</h2>
-                <p className="mt-3 max-w-2xl text-white/65">{t.about.partnershipText}</p>
+                <p className="mt-3 max-w-2xl text-fg/65">{t.about.partnershipText}</p>
               </div>
               <a href={waLink("Здравствуйте! Интересует партнёрство с " + siteConfig.name + ".")} target="_blank" rel="noopener" className="btn-brand px-7 py-4 text-base">
                 <WhatsAppIcon /> {t.about.partnershipCta}
@@ -59,7 +59,7 @@ export default function AboutPage() {
 
       <section className="mt-20">
         <SectionTitle title={t.home.guidesTitle} />
-        <p data-reveal className="-mt-3 mb-6 max-w-2xl text-white/60">{t.home.guidesText}</p>
+        <p data-reveal className="-mt-3 mb-6 max-w-2xl text-fg/60">{t.home.guidesText}</p>
         <Guides wide />
       </section>
 

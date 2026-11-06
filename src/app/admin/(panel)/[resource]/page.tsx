@@ -6,13 +6,17 @@ import { t } from "@/i18n";
 import { listItems } from "@/lib/items";
 import { CATEGORIES, STATUSES, type Category, type Status } from "@/lib/types";
 import { formatNumber, itemPath, photoUrl } from "@/lib/utils";
-import { PlusIcon, SearchIcon } from "@/components/icons";
+import { EyeIcon, PlusIcon, SearchIcon } from "@/components/icons";
+import { requirePagePermission } from "@/lib/admin-guard";
+import { can } from "@/lib/admins";
 
 type Props = { params: Promise<{ resource: string }>; searchParams: Promise<Record<string, string | undefined>> };
 
 export default async function ResourceList({ params, searchParams }: Props) {
   const mod = getResource((await params).resource);
   if (!mod) notFound();
+  const admin = await requirePagePermission(mod.permission);
+  const canDelete = can(admin, "delete");
   const sp = await searchParams;
   const category = CATEGORIES.includes(sp.category as Category) ? (sp.category as Category) : undefined;
   const status = STATUSES.includes(sp.status as Status) ? (sp.status as Status) : undefined;
@@ -70,6 +74,7 @@ export default async function ResourceList({ params, searchParams }: Props) {
                 <th className="px-4 py-3">Категория</th>
                 <th className="px-4 py-3">Год</th>
                 <th className="px-4 py-3">VIN / S/N</th>
+                <th className="px-4 py-3">Просмотры</th>
                 <th className="px-4 py-3">Статус</th>
                 <th className="px-4 py-3 text-right">Действия</th>
               </tr>
@@ -93,11 +98,14 @@ export default async function ResourceList({ params, searchParams }: Props) {
                   <td className="px-4 py-3"><span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold">{t.categories[i.category]}</span></td>
                   <td className="px-4 py-3">{i.year ?? "—"}</td>
                   <td className="px-4 py-3 font-mono text-xs text-slate-500">{i.vin || i.serial || "—"}</td>
-                  <RowActions id={i.id} status={i.status} editHref={`${mod.href}/${i.id}`} viewHref={itemPath(i)} title={i.title} />
+                  <td className="px-4 py-3 text-slate-500">
+                    <span className="inline-flex items-center gap-1 tabular-nums"><EyeIcon className="h-4 w-4" />{formatNumber(i.views)}</span>
+                  </td>
+                  <RowActions id={i.id} status={i.status} editHref={`${mod.href}/${i.id}`} viewHref={itemPath(i)} title={i.title} canDelete={canDelete} />
                 </tr>
               ))}
               {!items.length && (
-                <tr><td colSpan={6} className="px-4 py-16 text-center text-slate-400">Ничего не найдено</td></tr>
+                <tr><td colSpan={7} className="px-4 py-16 text-center text-slate-400">Ничего не найдено</td></tr>
               )}
             </tbody>
           </table>

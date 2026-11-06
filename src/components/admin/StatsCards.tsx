@@ -1,20 +1,21 @@
 import type { VisitStats } from "@/lib/visits";
 
-export function StatsCards({ stats }: { stats: VisitStats }) {
-  const cells: [string, number, string][] = [
-    ["Сегодня", stats.today, "from-brand/40"],
-    ["За неделю", stats.week, "from-glow/40"],
-    ["За месяц", stats.month, "from-ember/30"],
-    ["Всего", stats.total, "from-flame/30"],
+export function StatsCards({ stats, online }: { stats: VisitStats; online?: number }) {
+  const cells: [string, number, string, string][] = [
+    ...(online !== undefined ? ([["Сейчас онлайн", online, "from-emerald-400/40", "на сайте прямо сейчас"]] as [string, number, string, string][]) : []),
+    ["Сегодня", stats.today, "from-brand/40", "уникальных посетителей"],
+    ["За неделю", stats.week, "from-glow/40", "уникальных посетителей"],
+    ["За месяц", stats.month, "from-ember/30", "уникальных посетителей"],
+    ["Всего", stats.unique, "from-flame/30", "разных людей за всё время"],
   ];
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-      {cells.map(([label, n, g]) => (
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      {cells.map(([label, n, g, hint]) => (
         <div key={label} className="a-card relative overflow-hidden p-5">
           <div className={`absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br ${g} to-transparent blur-xl`} />
           <p className="relative text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</p>
           <p className="relative mt-2 font-display text-3xl font-bold tabular-nums">{new Intl.NumberFormat("ru-RU").format(n)}</p>
-          <p className="relative text-xs text-slate-400">уникальных посетителей</p>
+          <p className="relative text-xs text-slate-400">{hint}</p>
         </div>
       ))}
     </div>

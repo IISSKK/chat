@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getResource } from "@/admin/registry";
+import { requirePagePermission } from "@/lib/admin-guard";
 import { ItemForm } from "@/components/admin/ItemForm";
 import { ArrowLeft } from "@/components/icons";
 
 export default async function NewItemPage({ params }: { params: Promise<{ resource: string }> }) {
   const mod = getResource((await params).resource);
   if (!mod) notFound();
+  await requirePagePermission(mod.permission);
   return (
     <div className="space-y-5">
       <Link href={mod.href} className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-900">

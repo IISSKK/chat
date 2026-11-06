@@ -170,3 +170,12 @@ export function deleteItem(id: number): string[] {
 export function isPhotoUsed(filename: string) {
   return !!getDb().prepare("SELECT 1 FROM photos WHERE filename = ? LIMIT 1").get(filename);
 }
+
+/** Учитывает просмотр объявления уникальным посетителем. Возвращает актуальное число просмотров. */
+export function recordItemView(itemId: number, visitor: string): number {
+  const db = getDb();
+  const res = db.prepare("INSERT OR IGNORE INTO item_views (item_id, visitor) VALUES (?, ?)").run(itemId, visitor);
+  if (res.changes) db.prepare("UPDATE items SET views = views + 1 WHERE id = ?").run(itemId);
+  const row = db.prepare("SELECT views FROM items WHERE id = ?").get(itemId) as { views: number } | undefined;
+  return row?.views ?? 0;
+}

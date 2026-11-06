@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url;
-  const pages = ["", "/catalog/cars", "/catalog/cars/standby", "/catalog/cars/listing", "/catalog/cars/running", "/catalog/engines", "/catalog/parts", "/about", "/terms", "/privacy"];
+  const pages = ["", "/catalog/cars", "/catalog/cars/standby", "/catalog/cars/listing", "/catalog/cars/running", "/catalog/engines", "/about", "/terms", "/privacy"];
   const items = listItems({}, 1, 5000).items;
   return [
     ...pages.map((p) => ({ url: `${base}${p}`, changeFrequency: "daily" as const })),

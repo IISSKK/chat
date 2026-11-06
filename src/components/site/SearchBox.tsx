@@ -10,7 +10,7 @@ type Suggestion = {
   id: number;
   slug: string;
   title: string;
-  type: "car" | "engine" | "part";
+  type: "car" | "engine";
   match: string;
   field: "vin" | "serial" | "model" | "year" | "engine_code";
   photo?: string;
@@ -122,12 +122,12 @@ export function SearchBox({
       <form
         onSubmit={submit}
         role="search"
-        className={`group flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] backdrop-blur-xl transition-all duration-300 focus-within:border-brand/60 focus-within:bg-white/[0.09] focus-within:shadow-[0_0_0_6px_rgb(var(--c-brand)/0.1)] ${
+        className={`group flex items-center gap-2 rounded-full border border-white/80 bg-white/70 shadow-[0_1px_2px_rgba(15,40,90,.06)] ring-1 ring-fg/[0.06] transition-all duration-300 focus-within:border-brand/60 focus-within:bg-white focus-within:shadow-[0_0_0_6px_rgb(var(--c-brand)/0.1)] ${
           lg ? "p-1.5 pl-5 sm:p-2 sm:pl-6" : "p-1 pl-4"
         }`}
       >
         <SearchIcon
-          className={`shrink-0 text-white/50 transition-all duration-300 group-focus-within:scale-110 group-focus-within:text-brand ${
+          className={`shrink-0 text-fg/50 transition-all duration-300 group-focus-within:scale-110 group-focus-within:text-brand ${
             lg ? "h-5 w-5 sm:h-6 sm:w-6" : "h-4 w-4"
           }`}
         />
@@ -147,7 +147,7 @@ export function SearchBox({
           aria-controls={listId}
           aria-autocomplete="list"
           enterKeyHint="search"
-          className={`min-w-0 flex-1 bg-transparent text-white outline-none placeholder:text-white/40 ${
+          className={`min-w-0 flex-1 bg-transparent text-fg outline-none placeholder:text-fg/40 ${
             lg ? "py-2 text-base sm:text-lg" : "py-1.5 text-sm"
           }`}
         />
@@ -162,10 +162,10 @@ export function SearchBox({
         <div
           id={listId}
           role="listbox"
-          className="absolute left-0 right-0 top-full z-50 mt-2 origin-top animate-fade-up overflow-hidden rounded-3xl border border-white/10 bg-ink-800/95 p-2 text-left shadow-2xl backdrop-blur-2xl"
+          className="absolute left-0 right-0 top-full z-50 mt-2 origin-top animate-fade-up overflow-hidden glass rounded-3xl p-2 text-left shadow-2xl backdrop-blur-2xl"
         >
           {!loading && items.length === 0 && (
-            <div className="px-4 py-6 text-center text-sm text-white/50">{ru.common.noResults}</div>
+            <div className="px-4 py-6 text-center text-sm text-fg/50">{ru.common.noResults}</div>
           )}
           {items.map((s, i) => (
             <button
@@ -177,17 +177,17 @@ export function SearchBox({
               onClick={() => go(`/item/${s.id}-${s.slug}`)}
               style={{ animationDelay: `${i * 30}ms` }}
               className={`flex w-full animate-fade-up items-center gap-3 rounded-2xl p-2 text-left transition-colors ${
-                i === active ? "bg-white/[0.08]" : ""
+                i === active ? "bg-fg/[0.08]" : ""
               }`}
             >
-              <span className="h-11 w-14 shrink-0 overflow-hidden rounded-xl bg-white/5">
+              <span className="h-11 w-14 shrink-0 overflow-hidden rounded-xl bg-fg/5">
                 {s.photo && <img src={photoUrl(s.photo)} alt="" className="h-full w-full object-cover" loading="lazy" />}
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold">
                   <Highlight text={s.title} q={term} />
                 </span>
-                <span className="flex items-center gap-2 text-xs text-white/50">
+                <span className="flex items-center gap-2 text-xs text-fg/50">
                   <span className="rounded-full bg-ember/20 px-2 py-0.5 text-[10px] font-bold uppercase text-ember-400">
                     {fieldLabel[s.field]}
                   </span>
@@ -205,7 +205,7 @@ export function SearchBox({
             <button
               type="button"
               onClick={() => go(`/search?q=${encodeURIComponent(term)}`)}
-              className="mt-1 w-full rounded-2xl px-3 py-2.5 text-left text-xs font-bold text-brand hover:bg-white/[0.05]"
+              className="mt-1 w-full rounded-2xl px-3 py-2.5 text-left text-xs font-bold text-brand hover:bg-fg/[0.05]"
             >
               Все результаты по «{term}» →
             </button>

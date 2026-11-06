@@ -7,10 +7,10 @@ export function FloatingWhatsApp({ href }: { href: string }) {
       target="_blank"
       rel="noopener"
       aria-label="WhatsApp"
-      className="group fixed bottom-5 right-5 z-30 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-ink shadow-[0_10px_40px_-8px_rgba(37,211,102,.7)] transition-transform duration-300 hover:scale-110 active:scale-95"
+      style={{ marginBottom: "env(safe-area-inset-bottom)" }}
+      className="press fixed bottom-5 right-4 z-30 grid h-14 w-14 place-items-center rounded-full border border-white/40 bg-[#25D366]/90 text-white shadow-[0_12px_32px_-10px_rgba(37,211,102,.8),inset_0_1px_0_rgba(255,255,255,.4)] hover:bg-[#25D366] sm:right-5"
     >
-      <span className="absolute inset-0 animate-ping rounded-full bg-[#25D366] opacity-30 [animation-duration:2.4s]" />
-      <WhatsAppIcon className="relative h-7 w-7" />
+      <WhatsAppIcon className="h-7 w-7" />
     </a>
   );
 }

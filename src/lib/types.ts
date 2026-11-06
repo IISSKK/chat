@@ -1,4 +1,4 @@
-export const ITEM_TYPES = ["car", "engine", "part"] as const;
+export const ITEM_TYPES = ["car", "engine"] as const;
 export type ItemType = (typeof ITEM_TYPES)[number];
 
 export const CATEGORIES = ["standby", "listing", "running"] as const;
@@ -41,12 +41,13 @@ export interface Item {
   fuel: string;
   notes: string;
   status: Status;
+  views: number;
   created_at: string;
   updated_at: string;
   photos: Photo[];
 }
 
-export type ItemInput = Omit<Item, "id" | "slug" | "created_at" | "updated_at" | "photos">;
+export type ItemInput = Omit<Item, "id" | "slug" | "created_at" | "updated_at" | "photos" | "views">;
 
 export interface ItemFilters {
   type?: ItemType;

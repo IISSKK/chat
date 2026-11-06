@@ -18,10 +18,14 @@ export async function saveUpload(file: File): Promise<string> {
   await fs.mkdir(UPLOAD_DIR, { recursive: true });
   try {
     const sharp = (await import("sharp")).default;
-    const out = await sharp(buf).rotate().resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
-      .flatten({ background: "#ffffff" }).jpeg({ quality: 82, mozjpeg: true }).toBuffer();
+    const base = sharp(buf).rotate().flatten({ background: "#ffffff" });
+    const [full, small] = await Promise.all([
+      base.clone().resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 82, mozjpeg: true }).toBuffer(),
+      base.clone().resize({ width: 640, height: 640, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 76, mozjpeg: true }).toBuffer(),
+    ]);
     const name = `${id}.jpg`;
-    await fs.writeFile(path.join(UPLOAD_DIR, name), out);
+    await fs.writeFile(path.join(UPLOAD_DIR, name), full);
+    await fs.writeFile(path.join(UPLOAD_DIR, `${id}_sm.jpg`), small); // уменьшенная копия для списков
     return name;
   } catch {
     const ext = file.type.split("/")[1].replace("jpeg", "jpg");
@@ -36,10 +40,11 @@ export async function removeUploads(filenames: string[]) {
     if (f.startsWith("demo/") || f.includes("/") || f.includes("..")) continue;
     if (isPhotoUsed(f)) continue;
     await fs.unlink(path.join(UPLOAD_DIR, f)).catch(() => {});
+    await fs.unlink(path.join(UPLOAD_DIR, f.replace(/\.(\w+)$/, "_sm.$1"))).catch(() => {});
   }
 }
 
 export function safeUploadPath(name: string) {
-  if (!/^[a-f0-9]{24}\.(webp|jpg|png|avif|gif)$/.test(name)) return null;
+  if (!/^[a-f0-9]{24}(_sm)?\.(webp|jpg|png|avif|gif)$/.test(name)) return null;
   return path.join(UPLOAD_DIR, name);
 }
