@@ -1,5 +1,5 @@
 import "server-only";
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
 import { seedDemoData } from "./seed";
@@ -7,9 +7,24 @@ import { seedDemoData } from "./seed";
 const DB_PATH = path.resolve(process.env.DATABASE_PATH || "./data/app.db");
 export const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || "./data/uploads");
 
-const globalForDb = globalThis as unknown as { __db?: Database.Database };
+export type DB = DatabaseSync;
 
-function migrate(db: Database.Database) {
+const globalForDb = globalThis as unknown as { __db?: DB };
+
+/** Выполняет fn в транзакции (встроенный node:sqlite не имеет db.transaction). */
+export function transaction<T>(db: DB, fn: () => T): T {
+  db.exec("BEGIN");
+  try {
+    const r = fn();
+    db.exec("COMMIT");
+    return r;
+  } catch (e) {
+    db.exec("ROLLBACK");
+    throw e;
+  }
+}
+
+function migrate(db: DB) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,13 +69,12 @@ function migrate(db: Database.Database) {
   `);
 }
 
-export function getDb(): Database.Database {
+export function getDb(): DB {
   if (globalForDb.__db) return globalForDb.__db;
   fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-  const db = new Database(DB_PATH);
-  db.pragma("journal_mode = WAL");
-  db.pragma("foreign_keys = ON");
+  const db = new DatabaseSync(DB_PATH);
+  db.exec("PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;");
   migrate(db);
   const { n } = db.prepare("SELECT COUNT(*) AS n FROM items").get() as { n: number };
   if (n === 0 && process.env.SEED_DEMO !== "false") seedDemoData(db);

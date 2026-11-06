@@ -1,4 +1,4 @@
-import type Database from "better-sqlite3";
+import { transaction, type DB } from "./db";
 import { slugify } from "./utils";
 
 /** Демо-данные: 24 автомобиля (по 8 в каждой подкатегории), 8 двигателей, 8 запчастей. */
@@ -70,7 +70,7 @@ const wmiByBrand: Record<string, string> = {
 
 const IMG = { car: 12, engine: 6, part: 6 } as const;
 
-export function seedDemoData(db: Database.Database) {
+export function seedDemoData(db: DB) {
   seed = 7;
   const insert = db.prepare(`INSERT INTO items
     (type, category, slug, title, brand, model, year, first_registration, vin, serial, engine_code, displacement,
@@ -101,9 +101,9 @@ export function seedDemoData(db: Database.Database) {
     for (let k = 0; k < 3; k++) photo.run(id, `demo/${type}-${((index + k * 5) % n) + 1}.jpg`, k);
   };
 
-  db.transaction(() => {
+  transaction(db, () => {
     cars.forEach((s, i) => add("car", s, i));
     engines.forEach((s, i) => add("engine", s, i));
     parts.forEach((s, i) => add("part", s, i));
-  })();
+  });
 }

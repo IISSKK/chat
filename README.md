@@ -1,12 +1,12 @@
 # KORIDA Export — витрина экспорта авто, двигателей и запчастей из Южной Кореи
 
 B2B-сайт-витрина (RU, готов к добавлению EN) + минималистичная админка.
-Стек: **Next.js 15 (App Router) · React 19 · Tailwind CSS · SQLite (better-sqlite3) · sharp**. Без 3D-библиотек.
+Стек: **Next.js 15 (App Router) · React 19 · Tailwind CSS · SQLite (встроенный в Node.js `node:sqlite`, без компиляции) · sharp**. Без 3D-библиотек.
 
 ## Быстрый старт
 
 ```bash
-npm install
+npm install                  # нужен Node.js 22.13 или новее (проверено на 22 и совместимо с 24/26)
 cp .env.example .env.local   # задайте ADMIN_PASSWORD, SESSION_SECRET, WHATSAPP_NUMBER, SITE_URL
 npm run dev                  # http://localhost:3000
 ```

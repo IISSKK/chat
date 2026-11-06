@@ -1,5 +1,5 @@
 import "server-only";
-import { getDb } from "./db";
+import { getDb, transaction } from "./db";
 import { slugify } from "./utils";
 import type { Item, ItemFilters, ItemInput, Photo } from "./types";
 
@@ -11,11 +11,11 @@ function attachPhotos(rows: Row[]): Item[] {
   const ids = rows.map((r) => r.id);
   const photos = db
     .prepare(`SELECT * FROM photos WHERE item_id IN (${ids.map(() => "?").join(",")}) ORDER BY position, id`)
-    .all(...ids) as Photo[];
+    .all(...ids) as unknown as Photo[];
   const byItem = new Map<number, Photo[]>();
   for (const p of photos) {
     const list = byItem.get(p.item_id) ?? [];
-    list.push(p);
+    list.push({ ...p }); // node:sqlite возвращает объекты без прототипа — делаем обычные
     byItem.set(p.item_id, list);
   }
   return rows.map((r) => ({ ...r, photos: byItem.get(r.id) ?? [] }));
@@ -127,7 +127,7 @@ const COLUMNS = [
 
 export function createItem(input: ItemInput, photos: string[] = []): number {
   const db = getDb();
-  const tx = db.transaction(() => {
+  return transaction(db, () => {
     const res = db
       .prepare(`INSERT INTO items (${COLUMNS.join(",")}, slug) VALUES (${COLUMNS.map(() => "?").join(",")}, ?)`)
       .run(...COLUMNS.map((c) => input[c] ?? null), slugify(input.title));
@@ -135,17 +135,16 @@ export function createItem(input: ItemInput, photos: string[] = []): number {
     setPhotos(id, photos);
     return id;
   });
-  return tx();
 }
 
 export function updateItem(id: number, input: ItemInput, photos?: string[]) {
   const db = getDb();
-  db.transaction(() => {
+  transaction(db, () => {
     db.prepare(
       `UPDATE items SET ${COLUMNS.map((c) => `${c} = ?`).join(", ")}, slug = ?, updated_at = datetime('now') WHERE id = ?`,
     ).run(...COLUMNS.map((c) => input[c] ?? null), slugify(input.title), id);
     if (photos) setPhotos(id, photos);
-  })();
+  });
 }
 
 export function setPhotos(itemId: number, filenames: string[]) {
