@@ -77,3 +77,13 @@ src/
 подключите его в `src/i18n/index.ts` и добавьте `"en"` в `siteConfig.locales`; выбор языка — в `getLocale()`
 (cookie, заголовок `Accept-Language` или префикс URL `/en`). Клиентские компоненты сейчас импортируют `ru` напрямую —
 при добавлении языка передайте им словарь через props/контекст.
+
+## Скриншоты
+
+| Главная | Каталог | Карточка |
+| --- | --- | --- |
+| ![](docs/screenshots/1-home-desktop.png) | ![](docs/screenshots/2-catalog-desktop.png) | ![](docs/screenshots/3-item-desktop.png) |
+
+| Телефон | Телефон: карточка | Админка | Админка: редактирование |
+| --- | --- | --- | --- |
+| ![](docs/screenshots/4-home-phone.png) | ![](docs/screenshots/5-item-phone.png) | ![](docs/screenshots/6-admin-list.png) | ![](docs/screenshots/7-admin-edit.png) |
