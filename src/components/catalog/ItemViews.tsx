@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { EyeIcon } from "@/components/icons";
-import { viewsLabel } from "@/lib/utils";
+import { useT } from "@/i18n/client";
+import { plural } from "@/i18n/format";
 
 /** Засчитывает просмотр объявления (один раз на посетителя) и показывает, сколько людей его посмотрели. */
 export function ItemViews({ id, initial }: { id: number; initial: number }) {
+  const t = useT();
   const [views, setViews] = useState(initial);
   const [bump, setBump] = useState(false);
 
@@ -22,9 +24,9 @@ export function ItemViews({ id, initial }: { id: number; initial: number }) {
   }, [id, initial]);
 
   return (
-    <span className={`chip gap-1.5 bg-brand/10 text-brand ${bump ? "animate-pop-in" : ""}`} title="Сколько людей посмотрели объявление">
+    <span className={`chip gap-1.5 bg-brand/10 text-brand ${bump ? "animate-pop-in" : ""}`} title={t.views.title}>
       <EyeIcon className="h-3.5 w-3.5" />
-      <b className="tabular-nums">{new Intl.NumberFormat("ru-RU").format(views)}</b> {viewsLabel(views)}
+      <b className="tabular-nums">{new Intl.NumberFormat(t.meta.intl).format(views)}</b> {plural(views, t.views, t.meta.intl)}
     </span>
   );
 }

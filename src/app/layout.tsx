@@ -1,39 +1,48 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { siteConfig } from "@/config/site";
-import { getLocale } from "@/i18n";
+import { getLocale, getT } from "@/i18n/server";
+import { I18nProvider } from "@/i18n/client";
 import "./globals.css";
 
 // Один вариативный шрифт вместо двух — меньше загрузки. На iPhone/Mac используется системный SF Pro.
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter", display: "swap" });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  title: { default: `${siteConfig.name} — ${siteConfig.tagline}`, template: `%s · ${siteConfig.name}` },
-  description:
-    "B2B экспорт автомобилей и контрактных двигателей из Южной Кореи. Проверенный инвентарь, документы, таможня и отгрузка под ключ.",
-  applicationName: siteConfig.name,
-  openGraph: {
-    type: "website",
-    siteName: siteConfig.name,
-    locale: "ru_RU",
-    images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
-  },
-  twitter: { card: "summary_large_image" },
-  icons: { icon: "/icon.svg", apple: "/icon.svg" },
-  appleWebApp: { title: siteConfig.name, statusBarStyle: "default" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return {
+    metadataBase: new URL(siteConfig.url),
+    title: { default: `${siteConfig.name} — ${t.meta.tagline}`, template: `%s · ${siteConfig.name}` },
+    description: t.meta.description,
+    applicationName: siteConfig.name,
+    openGraph: {
+      type: "website",
+      siteName: siteConfig.name,
+      locale: t.meta.ogLocale,
+      images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
+    },
+    twitter: { card: "summary_large_image" },
+    icons: { icon: "/icon.svg", apple: "/icon.svg" },
+    appleWebApp: { title: siteConfig.name, statusBarStyle: "default" },
+  };
+}
 
 export const viewport: Viewport = { themeColor: "#F0F4FA", width: "device-width", initialScale: 1, viewportFit: "cover" };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
+  const t = await getT();
   return (
-    <html lang={getLocale()} className={inter.variable} suppressHydrationWarning>
+    <html lang={locale === "zh" ? "zh-CN" : locale} className={inter.variable} suppressHydrationWarning>
       <head>
         {/* Включает анимации появления только при работающем JS */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
-      <body>{children}</body>
+      <body>
+        <I18nProvider locale={locale} t={t}>
+          {children}
+        </I18nProvider>
+      </body>
     </html>
   );
 }

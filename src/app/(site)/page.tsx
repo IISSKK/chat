@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { t } from "@/i18n";
+import { getT } from "@/i18n/server";
 import { countBy, listItems } from "@/lib/items";
 import type { Category, Item } from "@/lib/types";
 import { itemPath, photoUrl } from "@/lib/utils";
@@ -26,15 +26,16 @@ function Rail({ items }: { items: Item[] }) {
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const t = await getT();
   const counts = { car: countBy({ type: "car" }), engine: countBy({ type: "engine" }) };
   const featured = listItems({ type: "car", status: "available" }, 1, 1).items[0];
   const engineCover = listItems({ type: "engine", status: "available" }, 1, 1).items[0];
 
   const sections: { cat: Category; eyebrow: string }[] = [
-    { cat: "standby", eyebrow: "Готовы к отгрузке" },
-    { cat: "listing", eyebrow: "Свежие поступления" },
-    { cat: "running", eyebrow: "Проверено на ходу" },
+    { cat: "standby", eyebrow: t.home.eyebrowStandby },
+    { cat: "listing", eyebrow: t.home.eyebrowListing },
+    { cat: "running", eyebrow: t.home.eyebrowRunning },
   ];
 
   const categories = [
@@ -78,11 +79,11 @@ export default function HomePage() {
                     <img src={photoUrl(featured.photos[0].filename)} alt={featured.title} fetchPriority="high" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
                   )}
                   <span className="absolute left-3 top-3 rounded-full bg-brand/90 px-3 py-1 text-xs font-bold text-white shadow-sm">{t.categories[featured.category]}</span>
-                  <ViewsBadge views={featured.views} className="absolute right-3 top-3" />
+                  <ViewsBadge views={featured.views} t={t} className="absolute right-3 top-3" />
                   <div className="glass absolute inset-x-3 bottom-3 flex items-center gap-3 rounded-2xl p-3">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[15px] font-bold">{featured.title}</p>
-                      <p className="truncate text-xs text-fg/55">{specChips(featured).slice(0, 3).join(" · ")}</p>
+                      <p className="truncate text-xs text-fg/55">{specChips(featured, t).slice(0, 3).join(" · ")}</p>
                     </div>
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand text-white transition-transform group-hover:translate-x-0.5">
                       <ArrowRight className="h-4 w-4" />
@@ -155,7 +156,7 @@ export default function HomePage() {
         const engines = listItems({ type: "engine" }, 1, 8).items;
         return engines.length ? (
           <section className="cv-auto container mt-20 sm:mt-24">
-            <SectionTitle eyebrow="Контрактные моторы" title={t.types.engine} href="/catalog/engines" />
+            <SectionTitle eyebrow={t.home.eyebrowEngines} title={t.types.engine} href="/catalog/engines" />
             <Rail items={engines} />
           </section>
         ) : null;
@@ -187,7 +188,7 @@ export default function HomePage() {
       <section id="contacts" className="container mt-20 scroll-mt-28 sm:mt-24">
         <div className="grid gap-8 lg:grid-cols-[1fr_1.3fr] lg:items-center">
           <div data-reveal>
-            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand">На связи</p>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand">{t.home.eyebrowContacts}</p>
             <h2 className="h-display text-4xl sm:text-5xl">{t.home.contactsTitle}</h2>
             <p className="mt-4 max-w-md text-fg/60">{t.home.contactsText}</p>
             <a href={waLink(t.whatsapp.generic)} target="_blank" rel="noopener" className="btn-wa mt-6 px-7 py-4 text-base">

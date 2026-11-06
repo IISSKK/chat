@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ru from "@/i18n/dictionaries/ru";
+import { useT } from "@/i18n/client";
 
 type Live = { online: number; unique: number; today: number };
 const HEARTBEAT_MS = 30_000;
-const fmt = (n: number) => new Intl.NumberFormat("ru-RU").format(n);
 
 /**
  * Небольшое плавающее окошко: сколько людей сейчас на сайте и сколько всего посетили.
  * Также регистрирует визит (раз за сессию) и шлёт «пульс» раз в 30 секунд, пока вкладка видна.
  */
 export function LiveWidget() {
+  const ru = useT();
+  const fmt = (n: number) => new Intl.NumberFormat(ru.meta.intl).format(n);
   const [data, setData] = useState<Live | null>(null);
   const [open, setOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -91,9 +92,9 @@ export function LiveWidget() {
           </div>
           <div className="grid grid-cols-3 gap-1.5 text-center">
             {[
-              [data.online, "онлайн", "text-[#34C759]"],
+              [data.online, ru.live.onlineShort, "text-[#34C759]"],
               [data.today, ru.live.today, "text-brand"],
-              [data.unique, "всего", "text-flame"],
+              [data.unique, ru.live.totalShort, "text-flame"],
             ].map(([n, l, c]) => (
               <div key={l as string} className="rounded-2xl bg-white/70 px-1 py-2">
                 <div className={`text-lg font-bold tabular-nums ${c}`}>{fmt(n as number)}</div>
@@ -118,7 +119,7 @@ export function LiveWidget() {
         <span className="h-3.5 w-px bg-fg/15" />
         <span className="tabular-nums">
           <b className="text-fg">{fmt(data.unique)}</b> <span className="hidden text-fg/55 min-[400px]:inline">{ru.live.total}</span>
-          <span className="text-fg/55 min-[400px]:hidden">всего</span>
+          <span className="text-fg/55 min-[400px]:hidden">{ru.live.totalShort}</span>
         </span>
       </button>
     </div>

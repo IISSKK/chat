@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { t } from "@/i18n";
+import { getT } from "@/i18n/server";
 import { CatalogHeader, CatalogListing, CategoryTabs, type SearchParams } from "@/components/catalog/CatalogListing";
 import { CATEGORIES, type Category } from "@/lib/types";
 import { countBy } from "@/lib/items";
@@ -11,12 +11,14 @@ type Props = { params: Promise<{ category: string }>; searchParams: Promise<Sear
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params;
   if (!CATEGORIES.includes(category as Category)) return {};
+  const t = await getT();
   return { title: t.categoriesLong[category as Category] };
 }
 
 export default async function CarsCategoryPage({ params, searchParams }: Props) {
   const { category } = await params;
   if (!CATEGORIES.includes(category as Category)) notFound();
+  const t = await getT();
   const c = category as Category;
   return (
     <div className="container">

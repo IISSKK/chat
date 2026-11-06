@@ -3,11 +3,12 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { FilterIcon } from "@/components/icons";
-import ru from "@/i18n/dictionaries/ru";
+import { useT } from "@/i18n/client";
 import { FUELS, TRANSMISSIONS } from "@/lib/types";
 
 export function Filters({ brands, years, showType = false }: { brands: string[]; years: number[]; showType?: boolean }) {
   const router = useRouter();
+  const ru = useT();
   const pathname = usePathname();
   const params = useSearchParams();
   const [pending, start] = useTransition();
@@ -52,7 +53,7 @@ export function Filters({ brands, years, showType = false }: { brands: string[];
         className={`${open ? "mt-3 grid animate-fade-up" : "hidden"} gap-3 rounded-3xl surface p-4 md:mt-0 md:grid md:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] md:items-end`}
       >
         {showType &&
-          field("type", "Раздел", [
+          field("type", ru.fields.section, [
             ["car", ru.types.car],
             ["engine", ru.types.engine],
           ])}
@@ -62,7 +63,7 @@ export function Filters({ brands, years, showType = false }: { brands: string[];
         {field("transmission", ru.fields.transmission, TRANSMISSIONS.map((f) => [f, ru.transmission[f]]))}
         {field("status", ru.fields.status, [
           ["available", ru.status.available],
-          ["sold", "Продано"],
+          ["sold", ru.status.soldShort],
         ])}
         <button onClick={reset} disabled={!active} className="btn-ghost h-[46px]">
           {pending ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-fg/30 border-t-fg" /> : ru.common.reset}

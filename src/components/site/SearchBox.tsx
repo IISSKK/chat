@@ -4,7 +4,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SearchIcon } from "@/components/icons";
 import { photoUrl } from "@/lib/utils";
-import ru from "@/i18n/dictionaries/ru";
+import { useT } from "@/i18n/client";
+import { fmt } from "@/i18n/format";
 
 type Suggestion = {
   id: number;
@@ -17,13 +18,6 @@ type Suggestion = {
   status: string;
 };
 
-const fieldLabel: Record<Suggestion["field"], string> = {
-  vin: "VIN",
-  serial: "S/N",
-  model: "Модель",
-  year: "Год",
-  engine_code: "Код ДВС",
-};
 
 function Highlight({ text, q }: { text: string; q: string }) {
   const i = text.toLowerCase().indexOf(q.toLowerCase());
@@ -49,6 +43,14 @@ export function SearchBox({
   onDone?: () => void;
 }) {
   const router = useRouter();
+  const ru = useT();
+  const fieldLabel: Record<Suggestion["field"], string> = {
+    vin: ru.search.fieldVin,
+    serial: ru.search.fieldSerial,
+    model: ru.search.fieldModel,
+    year: ru.search.fieldYear,
+    engine_code: ru.search.fieldEngine,
+  };
   const [q, setQ] = useState(defaultValue);
   const [items, setItems] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
@@ -162,7 +164,7 @@ export function SearchBox({
         <div
           id={listId}
           role="listbox"
-          className="absolute left-0 right-0 top-full z-50 mt-2 origin-top animate-fade-up overflow-hidden glass rounded-3xl p-2 text-left shadow-2xl backdrop-blur-2xl"
+          className="absolute left-0 right-0 top-full z-50 mt-2 origin-top animate-fade-up overflow-hidden glass rounded-3xl !bg-white p-2 text-left shadow-2xl backdrop-blur-2xl"
         >
           {!loading && items.length === 0 && (
             <div className="px-4 py-6 text-center text-sm text-fg/50">{ru.common.noResults}</div>
@@ -207,7 +209,7 @@ export function SearchBox({
               onClick={() => go(`/search?q=${encodeURIComponent(term)}`)}
               className="mt-1 w-full rounded-2xl px-3 py-2.5 text-left text-xs font-bold text-brand hover:bg-fg/[0.05]"
             >
-              Все результаты по «{term}» →
+              {fmt(ru.search.allResults, { q: term })}
             </button>
           )}
         </div>

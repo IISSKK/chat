@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "@/components/icons";
+import { getT } from "@/i18n/server";
 
-export function Pagination({
+export async function Pagination({
   page,
   pages,
   basePath,
@@ -12,6 +13,7 @@ export function Pagination({
   basePath: string;
   params: Record<string, string | undefined>;
 }) {
+  const t = await getT();
   if (pages <= 1) return null;
   const href = (p: number) => {
     const sp = new URLSearchParams();
@@ -31,7 +33,7 @@ export function Pagination({
   return (
     <nav className="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination">
       {page > 1 ? (
-        <Link href={href(page - 1)} className={`${base} bg-fg/[0.06] hover:bg-fg/[0.12]`} aria-label="Назад"><ChevronLeft className="h-4 w-4" /></Link>
+        <Link href={href(page - 1)} className={`${base} bg-fg/[0.06] hover:bg-fg/[0.12]`} aria-label={t.common.prev}><ChevronLeft className="h-4 w-4" /></Link>
       ) : (
         <span className={`${base} bg-fg/[0.03] text-fg/20`}><ChevronLeft className="h-4 w-4" /></span>
       )}
@@ -50,7 +52,7 @@ export function Pagination({
         ),
       )}
       {page < pages ? (
-        <Link href={href(page + 1)} className={`${base} bg-fg/[0.06] hover:bg-fg/[0.12]`} aria-label="Вперёд"><ChevronRight className="h-4 w-4" /></Link>
+        <Link href={href(page + 1)} className={`${base} bg-fg/[0.06] hover:bg-fg/[0.12]`} aria-label={t.common.next}><ChevronRight className="h-4 w-4" /></Link>
       ) : (
         <span className={`${base} bg-fg/[0.03] text-fg/20`}><ChevronRight className="h-4 w-4" /></span>
       )}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { t } from "@/i18n";
+import { getT } from "@/i18n/server";
 import { facetValues, listItems } from "@/lib/items";
 import { CATEGORIES, FUELS, ITEM_TYPES, STATUSES, TRANSMISSIONS, type Category, type ItemFilters, type ItemType } from "@/lib/types";
 import { Filters } from "./Filters";
@@ -31,7 +31,8 @@ export function parseFilters(sp: SearchParams, fixed: Partial<ItemFilters> = {})
   return { filters, page, plain };
 }
 
-export function CatalogHeader({ title, subtitle, count }: { title: string; subtitle?: string; count?: number }) {
+export async function CatalogHeader({ title, subtitle, count }: { title: string; subtitle?: string; count?: number }) {
+  const t = await getT();
   return (
     <div className="mb-8 pt-8 sm:pt-12">
       <h1 className="h-display text-3xl sm:text-5xl">
@@ -43,7 +44,8 @@ export function CatalogHeader({ title, subtitle, count }: { title: string; subti
   );
 }
 
-export function CategoryTabs({ active }: { active?: Category }) {
+export async function CategoryTabs({ active }: { active?: Category }) {
+  const t = await getT();
   const tabs: { href: string; label: string; key?: Category }[] = [
     { href: "/catalog/cars", label: t.common.all },
     ...CATEGORIES.map((c) => ({ href: `/catalog/cars/${c}`, label: t.categoriesLong[c], key: c })),
@@ -68,7 +70,7 @@ export function CategoryTabs({ active }: { active?: Category }) {
   );
 }
 
-export function CatalogListing({
+export async function CatalogListing({
   sp,
   fixed,
   basePath,
@@ -79,6 +81,7 @@ export function CatalogListing({
   basePath: string;
   showType?: boolean;
 }) {
+  const t = await getT();
   const { filters, page, plain } = parseFilters(sp, fixed);
   const { items, total, pages, page: current } = listItems(filters, page, 12);
   const facets = facetValues(filters);

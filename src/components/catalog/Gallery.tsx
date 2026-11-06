@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, CloseIcon } from "@/components/icons";
+import { useT } from "@/i18n/client";
+import { fmt } from "@/i18n/format";
 
 /** Галерея до 8 фото: свайп на телефоне, стрелки, миниатюры, полноэкранный просмотр. */
 export function Gallery({ photos, title, sold }: { photos: string[]; title: string; sold?: boolean }) {
+  const t = useT();
   const [index, setIndex] = useState(0);
   const [zoom, setZoom] = useState(false);
   const track = useRef<HTMLDivElement>(null);
@@ -43,7 +46,7 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
   }, [zoom, index, go]);
 
   if (!n) {
-    return <div className="grid aspect-[4/3] place-items-center rounded-3xl bg-ink-700 text-fg/40">Фото скоро</div>;
+    return <div className="grid aspect-[4/3] place-items-center rounded-3xl bg-ink-700 text-fg/40">{t.common.noPhoto}</div>;
   }
 
   const arrow = "absolute top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-fg shadow-md transition hover:scale-110 hover:bg-ink/80 active:scale-95";
@@ -62,11 +65,11 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
               type="button"
               onClick={() => setZoom(true)}
               className="img-skeleton relative h-full w-full shrink-0 snap-center cursor-zoom-in"
-              aria-label={`Фото ${i + 1}`}
+              aria-label={fmt(t.gallery.photo, { n: i + 1 })}
             >
               <img
                 src={src}
-                alt={`${title} — фото ${i + 1}`}
+                alt={`${title} — ${fmt(t.gallery.photo, { n: i + 1 })}`}
                 loading={i === 0 ? "eager" : "lazy"}
                 fetchPriority={i === 0 ? "high" : "auto"}
                 decoding="async"
@@ -77,10 +80,10 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
         </div>
         {n > 1 && (
           <>
-            <button type="button" onClick={() => go(index - 1)} className={`${arrow} left-3 opacity-0 group-hover:opacity-100 max-md:opacity-100`} aria-label="Предыдущее фото">
+            <button type="button" onClick={() => go(index - 1)} className={`${arrow} left-3 opacity-0 group-hover:opacity-100 max-md:opacity-100`} aria-label={t.gallery.prev}>
               <ChevronLeft />
             </button>
-            <button type="button" onClick={() => go(index + 1)} className={`${arrow} right-3 opacity-0 group-hover:opacity-100 max-md:opacity-100`} aria-label="Следующее фото">
+            <button type="button" onClick={() => go(index + 1)} className={`${arrow} right-3 opacity-0 group-hover:opacity-100 max-md:opacity-100`} aria-label={t.gallery.next}>
               <ChevronRight />
             </button>
             <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
@@ -105,7 +108,7 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
               className={`aspect-square overflow-hidden rounded-xl border-2 transition-all duration-200 ${
                 i === index ? "scale-[1.03] border-brand" : "border-transparent opacity-60 hover:opacity-100"
               }`}
-              aria-label={`Показать фото ${i + 1}`}
+              aria-label={fmt(t.gallery.showPhoto, { n: i + 1 })}
             >
               <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
             </button>
@@ -117,7 +120,7 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
         <div className="fixed inset-0 z-[60] flex animate-fade-in flex-col bg-ink/95" onClick={() => setZoom(false)}>
           <div className="flex items-center justify-between p-4">
             <span className="text-sm font-bold text-fg/70">{index + 1} / {n}</span>
-            <button className="grid h-11 w-11 place-items-center rounded-full bg-fg/10" aria-label="Закрыть">
+            <button className="grid h-11 w-11 place-items-center rounded-full bg-fg/10" aria-label={t.nav.close}>
               <CloseIcon />
             </button>
           </div>
@@ -125,8 +128,8 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
             <img key={index} src={photos[index]} alt={title} className="max-h-full max-w-full animate-fade-in rounded-2xl object-contain" />
             {n > 1 && (
               <>
-                <button onClick={() => go(index - 1)} className={`${arrow} left-3`} aria-label="Предыдущее"><ChevronLeft /></button>
-                <button onClick={() => go(index + 1)} className={`${arrow} right-3`} aria-label="Следующее"><ChevronRight /></button>
+                <button onClick={() => go(index - 1)} className={`${arrow} left-3`} aria-label={t.gallery.prev}><ChevronLeft /></button>
+                <button onClick={() => go(index + 1)} className={`${arrow} right-3`} aria-label={t.gallery.next}><ChevronRight /></button>
               </>
             )}
           </div>

@@ -43,14 +43,14 @@ const cars: Seed[] = [
 ];
 
 const engines: Seed[] = [
-  { title: "Двигатель G4KE 2.4 Theta II", brand: "Hyundai", model: "Sonata / Santa Fe", year: 2016, engine_code: "G4KE", displacement: 2359, transmission: "automatic", fuel: "gasoline", mileage: 68000, notes: "В сборе с навесным, компрессия проверена." },
-  { title: "Двигатель G4FD 1.6 GDI Gamma", brand: "Hyundai", model: "Avante / Tucson", year: 2018, engine_code: "G4FD", displacement: 1591, transmission: "automatic", fuel: "gasoline", mileage: 54000, notes: "Без навесного, видео работы." },
-  { title: "Двигатель D4HB 2.2 CRDi R-line", brand: "Kia", model: "Sorento / Santa Fe", year: 2019, engine_code: "D4HB", displacement: 2199, transmission: "automatic", fuel: "diesel", mileage: 82000, notes: "С ТНВД и форсунками." },
-  { title: "Двигатель G6DH 3.3 Lambda II", brand: "Hyundai", model: "Grandeur / K7", year: 2017, engine_code: "G6DH", displacement: 3342, transmission: "automatic", fuel: "gasoline", mileage: 91000, notes: "V6, в сборе." },
-  { title: "Двигатель D4CB 2.5 A2 CRDi", brand: "Hyundai", model: "Porter / Bongo / Starex", year: 2019, engine_code: "D4CB", displacement: 2497, transmission: "manual", fuel: "diesel", mileage: 120000, notes: "Euro 5, с турбиной." },
-  { title: "Двигатель L4KA 2.0 LPi", brand: "Kia", model: "K5 / Sonata LPi", year: 2018, engine_code: "L4KA", displacement: 1999, transmission: "automatic", fuel: "lpg", mileage: 140000, notes: "Газовый, после такси, проверен." },
-  { title: "Двигатель G4KJ 2.4 GDI", brand: "Kia", model: "Optima / Sportage", year: 2017, engine_code: "G4KJ", displacement: 2359, transmission: "automatic", fuel: "gasoline", mileage: 73000, notes: "Прямой впрыск, в сборе." },
-  { title: "Двигатель G4NA 2.0 MPi Nu", brand: "Hyundai", model: "Elantra / Tucson", year: 2020, engine_code: "G4NA", displacement: 1999, transmission: "automatic", fuel: "gasoline", mileage: 39000, notes: "Низкий пробег, гарантия на запуск." },
+  { title: "G4KE 2.4 Theta II", brand: "Hyundai", model: "Sonata / Santa Fe", year: 2016, engine_code: "G4KE", displacement: 2359, transmission: "automatic", fuel: "gasoline", mileage: 68000, notes: "В сборе с навесным, компрессия проверена." },
+  { title: "G4FD 1.6 GDI Gamma", brand: "Hyundai", model: "Avante / Tucson", year: 2018, engine_code: "G4FD", displacement: 1591, transmission: "automatic", fuel: "gasoline", mileage: 54000, notes: "Без навесного, видео работы." },
+  { title: "D4HB 2.2 CRDi R-line", brand: "Kia", model: "Sorento / Santa Fe", year: 2019, engine_code: "D4HB", displacement: 2199, transmission: "automatic", fuel: "diesel", mileage: 82000, notes: "С ТНВД и форсунками." },
+  { title: "G6DH 3.3 Lambda II", brand: "Hyundai", model: "Grandeur / K7", year: 2017, engine_code: "G6DH", displacement: 3342, transmission: "automatic", fuel: "gasoline", mileage: 91000, notes: "V6, в сборе." },
+  { title: "D4CB 2.5 A2 CRDi", brand: "Hyundai", model: "Porter / Bongo / Starex", year: 2019, engine_code: "D4CB", displacement: 2497, transmission: "manual", fuel: "diesel", mileage: 120000, notes: "Euro 5, с турбиной." },
+  { title: "L4KA 2.0 LPi", brand: "Kia", model: "K5 / Sonata LPi", year: 2018, engine_code: "L4KA", displacement: 1999, transmission: "automatic", fuel: "lpg", mileage: 140000, notes: "Газовый, после такси, проверен." },
+  { title: "G4KJ 2.4 GDI", brand: "Kia", model: "Optima / Sportage", year: 2017, engine_code: "G4KJ", displacement: 2359, transmission: "automatic", fuel: "gasoline", mileage: 73000, notes: "Прямой впрыск, в сборе." },
+  { title: "G4NA 2.0 MPi Nu", brand: "Hyundai", model: "Elantra / Tucson", year: 2020, engine_code: "G4NA", displacement: 1999, transmission: "automatic", fuel: "gasoline", mileage: 39000, notes: "Низкий пробег, гарантия на запуск." },
 ];
 
 

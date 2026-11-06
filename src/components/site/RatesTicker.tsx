@@ -1,30 +1,29 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/i18n/client";
+import { fmt as tpl } from "@/i18n/format";
 
 const CODES = ["USD", "EUR", "KGS", "KRW"] as const;
 type Code = (typeof CODES)[number];
 type Rates = Record<Code, number>; // единиц валюты за 1 USD
 
-const BASES: { code: Code; label: string }[] = [
-  { code: "KRW", label: "₩" },
-  { code: "KGS", label: "сом" },
-  { code: "USD", label: "$" },
-];
+const BASES: Code[] = ["KRW", "KGS", "USD"];
 const FLAG: Record<Code, string> = { USD: "🇺🇸", EUR: "🇪🇺", KGS: "🇰🇬", KRW: "🇰🇷" };
-const SYMBOL: Record<Code, string> = { USD: "$", EUR: "€", KGS: "сом", KRW: "₩" };
 /** Для «мелких» валют показываем курс за 100/1000 единиц */
 const UNIT: Record<Code, number> = { USD: 1, EUR: 1, KGS: 100, KRW: 1000 };
 const POLL_MS = 60_000;
 const STORAGE = "bk-rates-base";
 
-function fmt(n: number) {
+function fmt(n: number, intl: string) {
   const digits = n >= 100 ? 1 : n >= 10 ? 2 : 3;
-  return new Intl.NumberFormat("ru-RU", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
+  return new Intl.NumberFormat(intl, { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
 }
 
 /** Курсы USD / EUR / сом / вона онлайн: обновление каждую минуту, подсветка роста и падения, выбор валюты отображения. */
 export function RatesTicker({ className = "" }: { className?: string }) {
+  const t = useT();
+  const SYMBOL: Record<Code, string> = { USD: "$", EUR: "€", KGS: t.rates.som, KRW: "₩" };
   const [rates, setRates] = useState<Rates | null>(null);
   const [updated, setUpdated] = useState<number>(0);
   const [base, setBase] = useState<Code>("KRW");
@@ -75,7 +74,7 @@ export function RatesTicker({ className = "" }: { className?: string }) {
 
   return (
     <div className={`flex items-center gap-2.5 whitespace-nowrap text-xs font-semibold ${className}`}>
-      <span className="relative flex h-2 w-2 shrink-0" title={updated ? `Обновлено ${new Date(updated).toLocaleTimeString("ru-RU")}` : "Загрузка курсов"}>
+      <span className="relative flex h-2 w-2 shrink-0" title={updated ? tpl(t.rates.updated, { time: new Date(updated).toLocaleTimeString(t.meta.intl) }) : t.rates.title}>
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34C759] opacity-50" />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-[#34C759]" />
       </span>
@@ -91,7 +90,7 @@ export function RatesTicker({ className = "" }: { className?: string }) {
               <span className="inline-block h-3 w-10 rounded img-skeleton align-middle" />
             ) : (
               <span className="text-fg/85">
-                {fmt(value)} {SYMBOL[base]}
+                {fmt(value, t.meta.intl)} {SYMBOL[base]}
               </span>
             )}
             {tr === 1 && <span className="text-[#34C759]">▲</span>}
@@ -99,16 +98,16 @@ export function RatesTicker({ className = "" }: { className?: string }) {
           </span>
         );
       })}
-      <span className="ml-0.5 flex shrink-0 items-center rounded-full bg-fg/[0.06] p-0.5" role="radiogroup" aria-label="Валюта отображения">
+      <span className="ml-0.5 flex shrink-0 items-center rounded-full bg-fg/[0.06] p-0.5" role="radiogroup" aria-label={t.rates.base}>
         {BASES.map((b) => (
           <button
-            key={b.code}
+            key={b}
             role="radio"
-            aria-checked={base === b.code}
-            onClick={() => choose(b.code)}
-            className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${base === b.code ? "bg-white text-brand shadow-sm" : "text-fg/50 hover:text-fg"}`}
+            aria-checked={base === b}
+            onClick={() => choose(b)}
+            className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${base === b ? "bg-white text-brand shadow-sm" : "text-fg/50 hover:text-fg"}`}
           >
-            {b.label}
+            {SYMBOL[b]}
           </button>
         ))}
       </span>

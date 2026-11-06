@@ -38,23 +38,15 @@ export function photoUrl(filename: string, size: "full" | "sm" = "full") {
   return `/media/${filename}`;
 }
 
-/** «просмотр / просмотра / просмотров» */
-export function viewsLabel(n: number) {
-  const a = Math.abs(n) % 100;
-  const b = a % 10;
-  if (a > 10 && a < 20) return "просмотров";
-  if (b === 1) return "просмотр";
-  if (b >= 2 && b <= 4) return "просмотра";
-  return "просмотров";
-}
+
 
 export function typePath(type: ItemType) {
   return type === "car" ? "/catalog/cars" : "/catalog/engines";
 }
 
-export function formatNumber(n: number | null | undefined) {
+export function formatNumber(n: number | null | undefined, intl = "ru-RU") {
   if (n === null || n === undefined) return "";
-  return new Intl.NumberFormat("ru-RU").format(n);
+  return new Intl.NumberFormat(intl).format(n);
 }
 
 export function parseIdFromParam(param: string): number | null {

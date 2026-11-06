@@ -1,5 +1,5 @@
 import { siteConfig } from "@/config/site";
-import { t } from "@/i18n";
+import type { Dictionary } from "@/i18n";
 import type { Item } from "./types";
 import { itemUrl } from "./utils";
 
@@ -7,7 +7,7 @@ export function waLink(text: string, phone = siteConfig.whatsapp) {
   return `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
 }
 
-function itemLines(item: Item) {
+function itemLines(item: Item, t: Dictionary) {
   const w = t.whatsapp;
   return [
     `${w.model}: ${item.title}${item.year ? ` (${item.year})` : ""}`,
@@ -17,10 +17,12 @@ function itemLines(item: Item) {
   ].filter(Boolean) as string[];
 }
 
-export function priceMessage(item: Item) {
-  return [t.whatsapp.priceIntro, ...itemLines(item)].join("\n");
+/** Текст «Узнать цену» на языке посетителя */
+export function priceMessage(item: Item, t: Dictionary) {
+  return [t.whatsapp.priceIntro, ...itemLines(item, t)].join("\n");
 }
 
-export function docsMessage(item: Item) {
-  return [t.whatsapp.docsIntro, ...itemLines(item), "", t.whatsapp.docsQuestions].join("\n");
+/** Текст «Документы / Таможня» на языке посетителя */
+export function docsMessage(item: Item, t: Dictionary) {
+  return [t.whatsapp.docsIntro, ...itemLines(item, t), "", t.whatsapp.docsQuestions].join("\n");
 }

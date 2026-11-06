@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { t } from "@/i18n";
+import type { Dictionary } from "@/i18n";
+import { getT } from "@/i18n/server";
+import { plural } from "@/i18n/format";
 import type { Item } from "@/lib/types";
-import { formatNumber, itemPath, itemUrl, photoUrl, viewsLabel } from "@/lib/utils";
+import { formatNumber, itemPath, itemUrl, photoUrl } from "@/lib/utils";
 import { docsMessage, priceMessage, waLink } from "@/lib/whatsapp";
 import { CarIcon, DocIcon, EngineIcon, EyeIcon, WhatsAppIcon } from "@/components/icons";
 import { ShareMenu } from "./ShareMenu";
@@ -12,33 +14,34 @@ const catColor: Record<Item["category"], string> = {
   running: "bg-flame/90 text-white",
 };
 
-export function SoldBadge({ className = "" }: { className?: string }) {
+export function SoldBadge({ className = "", label = "SOLDOUT" }: { className?: string; label?: string }) {
   return (
     <span className={`inline-flex -rotate-6 items-center rounded-xl border-2 border-[#FF3B30] bg-white/90 px-3 py-1 text-sm font-extrabold tracking-widest text-[#FF3B30] shadow-lg ${className}`}>
-      {t.status.sold}
+      {label}
     </span>
   );
 }
 
-export function specChips(item: Item) {
+export function specChips(item: Item, t: Dictionary) {
   const chips: string[] = [];
   if (item.year) chips.push(String(item.year));
-  if (item.mileage !== null) chips.push(`${formatNumber(item.mileage)} ${t.units.km}`);
+  if (item.mileage !== null) chips.push(`${formatNumber(item.mileage, t.meta.intl)} ${t.units.km}`);
   if (item.fuel) chips.push(t.fuel[item.fuel as keyof typeof t.fuel] ?? item.fuel);
   if (item.transmission) chips.push(t.transmission[item.transmission as keyof typeof t.transmission] ?? item.transmission);
   if (item.displacement) chips.push(`${(item.displacement / 1000).toFixed(1)} L`);
   return chips;
 }
 
-export function ViewsBadge({ views, className = "" }: { views: number; className?: string }) {
+export function ViewsBadge({ views, t, className = "" }: { views: number; t: Dictionary; className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full bg-white/85 px-2 py-1 text-[11px] font-bold text-fg/75 shadow-sm ${className}`} title={`${views} ${viewsLabel(views)}`}>
-      <EyeIcon className="h-3.5 w-3.5" /> {formatNumber(views)}
+    <span className={`inline-flex items-center gap-1 rounded-full bg-white/85 px-2 py-1 text-[11px] font-bold text-fg/75 shadow-sm ${className}`} title={`${formatNumber(views, t.meta.intl)} ${plural(views, t.views, t.meta.intl)}`}>
+      <EyeIcon className="h-3.5 w-3.5" /> {formatNumber(views, t.meta.intl)}
     </span>
   );
 }
 
-export function ItemCard({ item, index = 0 }: { item: Item; index?: number }) {
+export async function ItemCard({ item, index = 0 }: { item: Item; index?: number }) {
+  const t = await getT();
   const href = itemPath(item);
   const cover = item.photos[0];
   const sold = item.status === "sold";
@@ -72,11 +75,11 @@ export function ItemCard({ item, index = 0 }: { item: Item; index?: number }) {
             <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold shadow-sm ${catColor[item.category]}`}>{t.categories[item.category]}</span>
           )}
         </div>
-        <ViewsBadge views={item.views} className="absolute bottom-2.5 right-2.5" />
+        <ViewsBadge views={item.views} t={t} className="absolute bottom-2.5 right-2.5" />
         {item.photos.length > 1 && (
           <span className="absolute bottom-2.5 left-2.5 rounded-full bg-fg/45 px-2 py-1 text-[11px] font-bold text-white">1/{item.photos.length}</span>
         )}
-        {sold && <SoldBadge className="absolute right-2.5 top-2.5" />}
+        {sold && <SoldBadge label={t.status.sold} className="absolute right-2.5 top-2.5" />}
       </Link>
 
       <div className="flex flex-1 flex-col gap-3 px-4 pb-4 pt-2">
@@ -89,17 +92,17 @@ export function ItemCard({ item, index = 0 }: { item: Item; index?: number }) {
           )}
         </div>
         <div className="flex flex-wrap gap-1.5">
-          {specChips(item).map((c) => (
+          {specChips(item, t).map((c) => (
             <span key={c} className="chip">{c}</span>
           ))}
         </div>
 
         <div className="mt-auto grid gap-2 pt-1">
-          <a href={waLink(priceMessage(item))} target="_blank" rel="noopener" className="btn-wa w-full py-2.5">
+          <a href={waLink(priceMessage(item, t))} target="_blank" rel="noopener" className="btn-wa w-full py-2.5">
             <WhatsAppIcon className="h-4 w-4" /> {t.actions.askPrice}
           </a>
           <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-            <a href={waLink(docsMessage(item))} target="_blank" rel="noopener" className="btn-ghost min-w-0 px-3 py-2.5 text-xs" title={t.actions.docs}>
+            <a href={waLink(docsMessage(item, t))} target="_blank" rel="noopener" className="btn-ghost min-w-0 px-3 py-2.5 text-xs" title={t.actions.docs}>
               <DocIcon className="h-4 w-4 shrink-0 text-brand" /> <span className="truncate">{t.actions.docs}</span>
             </a>
             <ShareMenu url={itemUrl(item)} title={item.title} compact />

@@ -5,9 +5,10 @@ import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import { LiveWidget } from "@/components/site/LiveWidget";
 import { siteConfig } from "@/config/site";
 import { waLink } from "@/lib/whatsapp";
-import { t } from "@/i18n";
+import { getT } from "@/i18n/server";
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const t = await getT();
   const wa = waLink(t.whatsapp.generic);
   return (
     <>

@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getResource } from "@/admin/registry";
 import { RowActions } from "@/components/admin/RowActions";
-import { t } from "@/i18n";
+import { getDictionary } from "@/i18n";
+
+const t = getDictionary("ru"); // админка на русском
 import { listItems } from "@/lib/items";
 import { CATEGORIES, STATUSES, type Category, type Status } from "@/lib/types";
 import { formatNumber, itemPath, photoUrl } from "@/lib/utils";

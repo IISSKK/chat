@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
-import { t } from "@/i18n";
+import { getT } from "@/i18n/server";
 import { waLink } from "@/lib/whatsapp";
 import { ArrowRight, CheckBadge, ClockIcon, DownloadIcon, MailIcon, PinIcon, RouteIcon, ShieldIcon, ShipIcon, WhatsAppIcon } from "@/components/icons";
 
-export function SectionTitle({ title, href, eyebrow }: { title: string; href?: string; eyebrow?: string }) {
+export async function SectionTitle({ title, href, eyebrow }: { title: string; href?: string; eyebrow?: string }) {
+  const t = await getT();
   return (
     <div data-reveal className="mb-6 flex items-end justify-between gap-3 sm:mb-8 sm:gap-4">
       <div className="min-w-0">
@@ -13,7 +14,7 @@ export function SectionTitle({ title, href, eyebrow }: { title: string; href?: s
       </div>
       {href && (
         <Link href={href} className="group btn-ghost shrink-0 px-3 py-2.5 text-xs sm:px-4 sm:text-sm" aria-label={t.common.viewAll}>
-          <span className="hidden min-[420px]:inline">{t.common.viewAll}</span><span className="min-[420px]:hidden">Все</span>
+          <span className="hidden min-[420px]:inline">{t.common.viewAll}</span><span className="min-[420px]:hidden">{t.common.allShort}</span>
           <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
         </Link>
       )}
@@ -24,7 +25,8 @@ export function SectionTitle({ title, href, eyebrow }: { title: string; href?: s
 const advIcons = [CheckBadge, ShieldIcon, ShipIcon, RouteIcon];
 const advColors = ["from-brand/25 text-brand", "from-ember/30 text-ember-400", "from-glow/25 text-glow", "from-flame/25 text-flame-400"];
 
-export function Advantages() {
+export async function Advantages() {
+  const t = await getT();
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {t.advantages.map((a, i) => {
@@ -53,12 +55,14 @@ export const GUIDES = [
   { code: "RU", lang: "Русский", file: "/guides/buyer-guide-ru.pdf", flag: "🇷🇺" },
   { code: "EN", lang: "English", file: "/guides/buyer-guide-en.pdf", flag: "🇬🇧" },
   { code: "KO", lang: "한국어", file: "/guides/buyer-guide-ko.pdf", flag: "🇰🇷" },
+  { code: "ZH", lang: "中文", file: "/guides/buyer-guide-zh.pdf", flag: "🇨🇳" },
   { code: "AR", lang: "العربية", file: "/guides/buyer-guide-ar.pdf", flag: "🇦🇪" },
 ];
 
-export function Guides({ wide = false }: { wide?: boolean }) {
+export async function Guides({ wide = false }: { wide?: boolean }) {
+  const t = await getT();
   return (
-    <div className={`grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 ${wide ? "lg:grid-cols-4" : ""}`}>
+    <div className={`grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 ${wide ? "sm:grid-cols-3 lg:grid-cols-5" : ""}`}>
       {GUIDES.map((g, i) => (
         <a
           key={g.code}
@@ -82,12 +86,13 @@ export function Guides({ wide = false }: { wide?: boolean }) {
   );
 }
 
-export function ContactCards() {
+export async function ContactCards() {
+  const t = await getT();
   const cards = [
     { icon: WhatsAppIcon, label: "WhatsApp", value: siteConfig.whatsappDisplay, href: waLink(t.whatsapp.generic), color: "text-[#25D366]" },
     { icon: MailIcon, label: "Email", value: siteConfig.email, href: `mailto:${siteConfig.email}`, color: "text-glow" },
-    { icon: ClockIcon, label: t.footer.hours, value: siteConfig.workHours, color: "text-brand" },
-    { icon: PinIcon, label: "Адрес", value: siteConfig.address, color: "text-flame-400" },
+    { icon: ClockIcon, label: t.footer.hours, value: t.meta.workHours, color: "text-brand" },
+    { icon: PinIcon, label: t.common.address, value: siteConfig.address, color: "text-flame-400" },
   ];
   return (
     <div className="grid gap-3 sm:grid-cols-2">

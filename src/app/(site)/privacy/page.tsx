@@ -1,22 +1,16 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
+import { getT } from "@/i18n/server";
+import { fmt } from "@/i18n/format";
 import { LegalPage } from "@/components/site/LegalPage";
 
-export const metadata: Metadata = { title: "Политика конфиденциальности (Privacy Policy)" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t.legal.privacyTitle };
+}
 
-export default function PrivacyPage() {
-  return (
-    <LegalPage
-      title="Политика конфиденциальности"
-      updated="01.11.2026"
-      sections={[
-        ["Какие данные мы собираем", "Сайт не требует регистрации. Мы не собираем имена, телефоны или адреса через формы на Сайте. Общение происходит в WhatsApp, Telegram или по email — на условиях соответствующих сервисов."],
-        ["Статистика посещений", "Для подсчёта посещений мы сохраняем в браузере случайный анонимный идентификатор (cookie) и учитываем дату визита. Этот идентификатор не связан с вашей личностью и используется только для агрегированной статистики (сегодня / неделя / месяц / всего)."],
-        ["Cookies", "Используются только технически необходимые cookies: анонимный идентификатор посещения и cookie сессии администратора. Рекламные и сторонние трекинговые cookies не используются."],
-        ["Сторонние сервисы", "При нажатии кнопок «Узнать цену», «Документы / Таможня» и «Поделиться» вы переходите на сайты WhatsApp, Facebook или Telegram, которые обрабатывают данные по своим политикам. Курсы валют загружаются с публичного API без передачи ваших данных."],
-        ["Хранение и защита", "Данные статистики хранятся на защищённом сервере и используются только внутри компании."],
-        ["Ваши права", `Вы можете удалить cookies в настройках браузера в любой момент. По вопросам обработки данных пишите на ${siteConfig.email}.`],
-      ]}
-    />
-  );
+export default async function PrivacyPage() {
+  const t = await getT();
+  const vars = { name: siteConfig.name, email: siteConfig.email, whatsapp: siteConfig.whatsappDisplay };
+  return <LegalPage title={t.legal.privacyTitle} updated="01.11.2026" sections={t.legal.privacy.map((s) => ({ h: s.h, p: fmt(s.p, vars) }))} />;
 }

@@ -7,16 +7,17 @@ import { Logo } from "./Logo";
 import { RatesTicker } from "./RatesTicker";
 import { SearchBox } from "./SearchBox";
 import { CloseIcon, MenuIcon, SearchIcon, WhatsAppIcon } from "@/components/icons";
-import ru from "@/i18n/dictionaries/ru";
-
-const NAV = [
-  { href: "/catalog/cars", label: ru.nav.cars },
-  { href: "/catalog/engines", label: ru.nav.engines },
-  { href: "/about", label: ru.nav.about },
-  { href: "/#contacts", label: ru.nav.contacts },
-];
+import { useT } from "@/i18n/client";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Header({ waHref }: { waHref: string }) {
+  const ru = useT();
+  const NAV = [
+    { href: "/catalog/cars", label: ru.nav.cars },
+    { href: "/catalog/engines", label: ru.nav.engines },
+    { href: "/about", label: ru.nav.about },
+    { href: "/#contacts", label: ru.nav.contacts },
+  ];
   const pathname = usePathname();
   const [menu, setMenu] = useState(false);
   const [search, setSearch] = useState(false);
@@ -64,6 +65,7 @@ export function Header({ waHref }: { waHref: string }) {
         </div>
 
         <div className="ml-auto flex items-center gap-2 md:ml-0">
+          <LanguageSwitcher />
           <button
             onClick={() => setSearch((s) => !s)}
             className="grid h-10 w-10 place-items-center rounded-full bg-fg/[0.06] text-fg/80 hover:bg-fg/10 md:hidden"
@@ -77,7 +79,7 @@ export function Header({ waHref }: { waHref: string }) {
           <button
             onClick={() => setMenu(true)}
             className="grid h-10 w-10 place-items-center rounded-full bg-fg/[0.06] text-fg hover:bg-fg/10 lg:hidden"
-            aria-label="Меню"
+            aria-label={ru.nav.menu}
           >
             <MenuIcon />
           </button>
@@ -106,7 +108,7 @@ export function Header({ waHref }: { waHref: string }) {
           <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-fg/15" />
           <div className="mb-2 flex items-center justify-between px-2">
             <Logo />
-            <button onClick={() => setMenu(false)} className="grid h-9 w-9 place-items-center rounded-full bg-fg/[0.06]" aria-label="Закрыть">
+            <button onClick={() => setMenu(false)} className="grid h-9 w-9 place-items-center rounded-full bg-fg/[0.06]" aria-label={ru.nav.close}>
               <CloseIcon className="h-4 w-4" />
             </button>
           </div>
@@ -124,6 +126,10 @@ export function Header({ waHref }: { waHref: string }) {
                 <span className="text-fg/25">›</span>
               </Link>
             ))}
+          </div>
+          <div className="mt-3">
+            <p className="mb-1.5 px-2 text-[11px] font-bold uppercase tracking-wider text-fg/45">{ru.lang.label}</p>
+            <LanguageSwitcher variant="row" />
           </div>
           <a href={waHref} target="_blank" rel="noopener" className="btn-wa mt-3 w-full py-4 text-base">
             <WhatsAppIcon /> {ru.home.writeWhatsapp}

@@ -1,21 +1,15 @@
-import { siteConfig, type Locale } from "@/config/site";
 import ru, { type Dictionary } from "./dictionaries/ru";
+import en from "./dictionaries/en";
+import ko from "./dictionaries/ko";
+import zh from "./dictionaries/zh";
+import { DEFAULT_LOCALE, type Locale } from "./config";
 
-/**
- * Простая i18n-прослойка. Чтобы добавить английский:
- * 1) создайте src/i18n/dictionaries/en.ts с тем же набором ключей (тип Dictionary);
- * 2) добавьте его в `dictionaries` ниже и "en" в siteConfig.locales;
- * 3) выберите локаль по cookie/заголовку или префиксу URL в getLocale().
- */
-const dictionaries: Partial<Record<Locale, Dictionary>> = { ru };
+/** Все словари интерфейса. Тексты переводов — в src/i18n/dictionaries/*.ts */
+export const dictionaries: Record<Locale, Dictionary> = { ru, en, ko, zh };
 
-export function getLocale(): Locale {
-  return siteConfig.defaultLocale;
-}
-
-export function getDictionary(locale: Locale = getLocale()): Dictionary {
+export function getDictionary(locale: Locale = DEFAULT_LOCALE): Dictionary {
   return dictionaries[locale] ?? ru;
 }
 
-export const t = getDictionary();
-export type { Dictionary };
+export type { Dictionary, Locale };
+export { fmt, plural, formatNum } from "./format";

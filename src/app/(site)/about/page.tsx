@@ -1,20 +1,25 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
-import { t } from "@/i18n";
+import { getT } from "@/i18n/server";
+import { fmt } from "@/i18n/format";
 import { waLink } from "@/lib/whatsapp";
 import { countBy } from "@/lib/items";
 import { Advantages, ContactCards, Guides, SectionTitle } from "@/components/site/Sections";
 import { WhatsAppIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: t.about.title, description: t.about.lead };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t.about.title, description: t.about.lead };
+}
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const t = await getT();
   const stats = [
-    [String(countBy({}) ), "позиций в каталоге"],
-    ["40+", "стран отгрузки"],
-    ["10 лет", "на рынке экспорта"],
-    ["15 мин", "среднее время ответа"],
+    [String(countBy({})), t.about.statItems],
+    ["40+", t.about.statCountries],
+    [t.about.statYearsValue, t.about.statYears],
+    [t.about.statResponseValue, t.about.statResponse],
   ];
   return (
     <div className="container pt-10 sm:pt-16">
@@ -22,7 +27,7 @@ export default function AboutPage() {
         <div>
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-brand">{siteConfig.name}</p>
           <h1 className="h-display text-4xl leading-tight sm:text-6xl">
-            Экспорт из Кореи <span className="text-gradient">без лишних шагов</span>
+            {t.about.heroA} <span className="text-gradient">{t.about.heroB}</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-fg/65">{t.about.lead}</p>
         </div>
@@ -49,7 +54,7 @@ export default function AboutPage() {
                 <h2 className="h-display text-2xl sm:text-4xl">{t.about.partnershipTitle}</h2>
                 <p className="mt-3 max-w-2xl text-fg/65">{t.about.partnershipText}</p>
               </div>
-              <a href={waLink("Здравствуйте! Интересует партнёрство с " + siteConfig.name + ".")} target="_blank" rel="noopener" className="btn-brand px-7 py-4 text-base">
+              <a href={waLink(fmt(t.whatsapp.partnership, { name: siteConfig.name }))} target="_blank" rel="noopener" className="btn-brand px-7 py-4 text-base">
                 <WhatsAppIcon /> {t.about.partnershipCta}
               </a>
             </div>

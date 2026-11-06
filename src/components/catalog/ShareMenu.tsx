@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FacebookIcon, LinkIcon, ShareIcon, TelegramIcon, WhatsAppIcon } from "@/components/icons";
-import ru from "@/i18n/dictionaries/ru";
+import { useT } from "@/i18n/client";
 
 export function ShareMenu({ url, title, className = "", compact = false }: { url: string; title: string; className?: string; compact?: boolean }) {
+  const ru = useT();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
