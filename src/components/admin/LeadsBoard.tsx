@@ -1,6 +1,7 @@
 "use client";
 
 import { Select } from "@/components/ui/Select";
+import { clientLangLabel } from "@/i18n/config";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { TrashIcon, WhatsAppIcon, MailIcon } from "@/components/icons";
@@ -49,11 +50,13 @@ export function LeadsBoard({ leads, canDelete }: { leads: Lead[]; canDelete: boo
                 </p>
                 <p className="text-xs text-slate-500">
                   {l.created_at.slice(0, 16)} · {l.country || "страна не указана"}
-                  {l.lang && ` · ${l.lang.toUpperCase()}`}
                   {l.source && ` · ${l.source}`}
                 </p>
               </div>
-              <span className={`rounded-full px-3 py-1 text-xs font-bold ${st.cls}`}>{st.label}</span>
+              <div className="flex flex-wrap items-center gap-2">
+                {l.lang && <span title="Язык, на котором покупатель пользовался сайтом: на нём лучше отвечать" className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">🌐 {clientLangLabel(l.lang)}</span>}
+                <span className={`rounded-full px-3 py-1 text-xs font-bold ${st.cls}`}>{st.label}</span>
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <a href={link.href} target="_blank" rel="noopener" className="a-btn-ghost px-3 py-2 text-xs">

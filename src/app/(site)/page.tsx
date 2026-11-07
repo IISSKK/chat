@@ -1,3 +1,4 @@
+import { getCover } from "@/lib/covers";
 import Link from "@/components/site/LocLink";
 import { getLocale, getT } from "@/i18n/server";
 import type { Metadata } from "next";
@@ -51,8 +52,8 @@ export default async function HomePage() {
   ];
 
   const categories = [
-    { href: "/catalog/cars", title: t.types.car, text: t.home.categoryCars, count: counts.car, Icon: CarIcon, tint: "from-brand/85 via-brand/40", cover: featured },
-    { href: "/catalog/engines", title: t.types.engine, text: t.home.categoryEngines, count: counts.engine, Icon: EngineIcon, tint: "from-flame/85 via-flame/40", cover: engineCover },
+    { href: "/catalog/cars", title: t.types.car, text: t.home.categoryCars, count: counts.car, Icon: CarIcon, tint: "from-brand/85 via-brand/40", coverFile: getCover("car") ?? featured?.photos[0]?.filename },
+    { href: "/catalog/engines", title: t.types.engine, text: t.home.categoryEngines, count: counts.engine, Icon: EngineIcon, tint: "from-flame/85 via-flame/40", coverFile: getCover("engine") ?? engineCover?.photos[0]?.filename },
   ];
 
   const brandChips = publicBrandIndex().slice(0, 10);
@@ -92,12 +93,12 @@ export default async function HomePage() {
               <span className="block animate-fade-up text-gradient [animation-delay:120ms]">{t.home.heroTitle2}</span>
               <span className="block animate-fade-up [animation-delay:180ms]">{t.home.heroTitle3}</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-xl animate-fade-up text-[17px] leading-relaxed text-fg/70 [animation-delay:240ms] lg:mx-0">{t.home.heroText}</p>
+            <p className="mx-auto mt-5 max-w-xl animate-fade-up text-[17px] leading-relaxed text-fg/80 [animation-delay:240ms] lg:mx-0">{t.home.heroText}</p>
             <div className="relative z-20 mx-auto mt-7 max-w-xl animate-fade-up [animation-delay:300ms] lg:mx-0">
               <SearchBox size="lg" />
               <div className="mt-3.5 flex flex-wrap justify-center gap-2 lg:justify-start">
                 {QUICK.map((q) => (
-                  <Link key={q} href={`/search?q=${encodeURIComponent(q)}`} className="press rounded-full bg-white/60 px-3 py-1.5 text-xs font-semibold text-fg/70 ring-1 ring-fg/[0.06] hover:bg-white hover:text-brand">
+                  <Link key={q} href={`/search?q=${encodeURIComponent(q)}`} className="press rounded-full bg-white/60 px-3 py-1.5 text-xs font-semibold text-fg/80 ring-1 ring-fg/[0.06] hover:bg-white hover:text-brand">
                     {q}
                   </Link>
                 ))}
@@ -118,7 +119,7 @@ export default async function HomePage() {
                   <div className="glass absolute inset-x-3 bottom-3 flex items-center gap-3 rounded-2xl p-3">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[15px] font-bold">{featured.title}</p>
-                      <p className="truncate text-xs text-fg/66">{specChips(featured, t).slice(0, 3).join(" · ")}</p>
+                      <p className="truncate text-xs text-fg/76">{specChips(featured, t).slice(0, 3).join(" · ")}</p>
                     </div>
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand text-white transition-transform group-hover:translate-x-0.5">
                       <ArrowRight className="h-4 w-4" />
@@ -129,13 +130,13 @@ export default async function HomePage() {
             )}
             <div className="mt-3 grid grid-cols-2 gap-3">
               {categories.map((c) => (
-                <Link key={c.href} href={c.href} className="card-press surface flex items-center gap-3 rounded-3xl p-3.5 transition-shadow hover:shadow-lg">
+                <Link key={c.href} href={c.href} className="card-press surface flex items-center gap-3 rounded-3xl p-3.5 transition-all hover:border-brand/30 hover:bg-brand/[0.07] hover:shadow-lg">
                   <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${c.Icon === CarIcon ? "bg-brand/10 text-brand" : "bg-flame/10 text-flame"}`}>
                     <c.Icon className="h-6 w-6" />
                   </span>
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-bold">{c.title}</span>
-                    <span className="block text-xs text-fg/62">{c.count} {t.home.items}</span>
+                    <span className="block text-xs text-fg/72">{c.count} {t.home.items}</span>
                   </span>
                 </Link>
               ))}
@@ -146,11 +147,11 @@ export default async function HomePage() {
 
       {brandChips.length > 0 && (
         <section className="container mt-10 sm:mt-14">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-fg/55">{t.brandPage.popular}</p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-fg/68">{t.brandPage.popular}</p>
           <div className="-mx-4 flex gap-2 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:flex-wrap sm:px-0">
             {brandChips.map(({ brand, count }) => (
               <Link key={brand.id} href={`/brand/${brand.slug}`} className="press shrink-0 rounded-full bg-white/70 px-4 py-2 text-sm font-semibold ring-1 ring-fg/10 hover:bg-white hover:text-brand">
-                {brand.name} <span className="text-fg/55">{count}</span>
+                {brand.name} <span className="text-fg/68">{count}</span>
               </Link>
             ))}
           </div>
@@ -169,10 +170,11 @@ export default async function HomePage() {
               style={{ "--d": `${i * 90}ms` } as React.CSSProperties}
               className="card-press group relative flex min-h-[260px] flex-col justify-end overflow-hidden rounded-[32px] p-6 text-white shadow-[0_20px_50px_-25px_rgba(15,40,90,.5)] sm:min-h-[340px] sm:p-8"
             >
-              {c.cover?.photos[0] && (
-                <img src={photoUrl(c.cover.photos[0].filename, "sm")} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              {c.coverFile && (
+                <img src={photoUrl(c.coverFile, "sm")} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
               )}
               <div className={`absolute inset-0 bg-gradient-to-t ${c.tint} to-transparent`} />
+              <div className="pointer-events-none absolute inset-0 bg-[#3B9BFF]/0 transition-colors duration-300 group-hover:bg-[#3B9BFF]/25" />
               <span className="absolute right-5 top-5 rounded-full border border-white/40 bg-white/25 px-3 py-1 text-xs font-bold">{c.count} {t.home.items}</span>
               <div className="relative">
                 <span className="mb-4 grid h-12 w-12 place-items-center rounded-2xl border border-white/40 bg-white/25">
@@ -231,7 +233,7 @@ export default async function HomePage() {
             <div>
               <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-flame">PDF</p>
               <h2 className="h-display text-3xl sm:text-4xl">{t.home.guidesTitle}</h2>
-              <p className="mt-3 text-fg/70">{t.home.guidesText}</p>
+              <p className="mt-3 text-fg/80">{t.home.guidesText}</p>
             </div>
             <Guides />
           </div>
@@ -244,7 +246,7 @@ export default async function HomePage() {
           <div data-reveal>
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand">{t.home.eyebrowContacts}</p>
             <h2 className="h-display text-4xl sm:text-5xl">{t.home.contactsTitle}</h2>
-            <p className="mt-4 max-w-md text-fg/70">{t.home.contactsText}</p>
+            <p className="mt-4 max-w-md text-fg/80">{t.home.contactsText}</p>
             <div className="mt-6 flex flex-wrap gap-3">
             <LeadButton className="btn-brand px-7 py-4 text-base" />
             <WaButton options={waOptions("generic", undefined, t.meta.code)} placement="up" className="btn-wa px-7 py-4 text-base" wrapperClassName="inline-block">

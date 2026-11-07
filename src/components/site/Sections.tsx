@@ -39,11 +39,11 @@ export async function Advantages({ dark = false }: { dark?: boolean }) {
             className={`group relative overflow-hidden rounded-3xl p-6 transition-all duration-300 hover:-translate-y-1 ${dark ? "border border-white/10 bg-white/[0.06] hover:bg-white/[0.09]" : "surface hover:border-fg/15"}`}
           >
             <div className={`absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-to-br to-transparent opacity-60 blur-2xl transition-transform duration-500 group-hover:scale-125 ${advColors[i]}`} />
-            <div className={`relative mb-5 grid h-12 w-12 place-items-center rounded-2xl ${dark ? "bg-white/10" : "bg-fg/[0.06]"} ${advColors[i].split(" ")[1]}`}>
+            <div className={`relative mb-5 grid h-12 w-12 place-items-center rounded-2xl ${dark ? "bg-white/10" : "bg-fg/[0.09]"} ${advColors[i].split(" ")[1]}`}>
               <Icon className="h-6 w-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-6deg]" />
             </div>
             <h3 className={`relative font-display text-lg font-bold ${dark ? "text-white" : ""}`}>{a.title}</h3>
-            <p className={`relative mt-2 text-sm leading-relaxed ${dark ? "text-white/70" : "text-fg/70"}`}>{a.text}</p>
+            <p className={`relative mt-2 text-sm leading-relaxed ${dark ? "text-white/70" : "text-fg/80"}`}>{a.text}</p>
           </div>
         );
       })}
@@ -74,7 +74,7 @@ export async function Guides({ wide = false }: { wide?: boolean }) {
           <span className="text-2xl">{g.flag}</span>
           <span className="min-w-0 flex-1">
             <span className="block whitespace-nowrap font-display text-sm font-bold">PDF · {g.code}</span>
-            <span className="block truncate text-xs text-fg/62">{g.lang}</span>
+            <span className="block truncate text-xs text-fg/72">{g.lang}</span>
           </span>
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand text-white transition-transform duration-300 group-hover:translate-y-0.5 group-hover:scale-110">
             <DownloadIcon className="h-4 w-4" />
@@ -105,11 +105,11 @@ export async function ContactCards() {
       {cards.map((c, i) => {
         const Inner = (
           <>
-            <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-fg/[0.06] ${c.color}`}>
+            <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-fg/[0.09] ${c.color}`}>
               <c.icon className="h-5 w-5" />
             </span>
             <span className="min-w-0">
-              <span className="block text-xs font-bold uppercase tracking-wider text-fg/55">{c.label}</span>
+              <span className="block text-xs font-bold uppercase tracking-wider text-fg/68">{c.label}</span>
               <span className="block break-words font-semibold">{c.value}</span>
             </span>
           </>

@@ -46,7 +46,7 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
   }, [zoom, index, go]);
 
   if (!n) {
-    return <div className="grid aspect-[4/3] place-items-center rounded-3xl bg-ink-700 text-fg/55">{t.common.noPhoto}</div>;
+    return <div className="grid aspect-[4/3] place-items-center rounded-3xl bg-ink-700 text-fg/68">{t.common.noPhoto}</div>;
   }
 
   const arrow = "absolute top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-fg shadow-md transition hover:scale-110 hover:bg-ink/80 active:scale-95";
@@ -119,7 +119,7 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
       {zoom && (
         <div className="fixed inset-0 z-[60] flex animate-fade-in flex-col bg-ink/95" onClick={() => setZoom(false)}>
           <div className="flex items-center justify-between p-4">
-            <span className="text-sm font-bold text-fg/70">{index + 1} / {n}</span>
+            <span className="text-sm font-bold text-fg/80">{index + 1} / {n}</span>
             <button className="grid h-11 w-11 place-items-center rounded-full bg-fg/10" aria-label={t.nav.close}>
               <CloseIcon />
             </button>

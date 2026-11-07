@@ -51,7 +51,7 @@ export async function CatalogHeader({ title, subtitle, count }: { title: string;
         {title}
         {count !== undefined && <sup className="ml-2 align-super font-sans text-base font-bold text-brand sm:text-xl">{count}</sup>}
       </h1>
-      {subtitle && <p className="mt-3 max-w-2xl text-fg/70">{subtitle}</p>}
+      {subtitle && <p className="mt-3 max-w-2xl text-fg/80">{subtitle}</p>}
     </div>
   );
 }
@@ -71,7 +71,7 @@ export async function CategoryTabs({ active }: { active?: Category }) {
             key={tab.href}
             href={tab.href}
             className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-bold transition-all duration-200 ${
-              on ? "bg-fg text-white shadow-lg" : "bg-fg/[0.06] text-fg/70 hover:bg-fg/[0.12] hover:text-fg"
+              on ? "bg-fg text-white shadow-lg" : "bg-fg/[0.09] text-fg/80 hover:bg-fg/[0.12] hover:text-fg"
             }`}
           >
             {tab.label}
@@ -112,7 +112,7 @@ export async function CatalogListing({
           showType={showType}
         />
       </Suspense>
-      <p className="mb-5 mt-6 text-sm text-fg/62">
+      <p className="mb-5 mt-6 text-sm text-fg/72">
         {t.common.found}: <b className="text-fg">{total}</b>
       </p>
       {items.length ? (
@@ -121,7 +121,7 @@ export async function CatalogListing({
         <div className="rounded-3xl border border-dashed border-fg/10 py-20 text-center">
           <div className="mb-3 text-5xl">🔍</div>
           <p className="font-display text-xl font-bold">{t.common.noResults}</p>
-          <p className="mt-2 text-sm text-fg/62">{t.common.noResultsHint}</p>
+          <p className="mt-2 text-sm text-fg/72">{t.common.noResultsHint}</p>
         </div>
       )}
       <Pagination page={current} pages={pages} basePath={basePath} params={plain} />

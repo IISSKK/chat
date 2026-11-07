@@ -87,8 +87,8 @@ export function LiveWidget() {
       {open && (
         <div className="glass absolute bottom-full left-0 mb-2 w-60 origin-bottom-left animate-pop-in rounded-3xl p-3">
           <div className="mb-2 flex items-center justify-between px-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-fg/58">{ru.live.title}</span>
-            <button onClick={() => toggleHidden(true)} className="rounded-full px-2 py-0.5 text-[11px] font-semibold text-fg/62 hover:bg-fg/[0.06]">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-fg/70">{ru.live.title}</span>
+            <button onClick={() => toggleHidden(true)} className="rounded-full px-2 py-0.5 text-[11px] font-semibold text-fg/72 hover:bg-fg/[0.09]">
               {ru.live.hide}
             </button>
           </div>
@@ -100,7 +100,7 @@ export function LiveWidget() {
             ].map(([n, l, c]) => (
               <div key={l as string} className="rounded-2xl bg-white/70 px-1 py-2">
                 <div className={`text-lg font-bold tabular-nums ${c}`}>{fmt(n as number)}</div>
-                <div className="text-[10px] font-semibold text-fg/58">{l}</div>
+                <div className="text-[10px] font-semibold text-fg/70">{l}</div>
               </div>
             ))}
           </div>
@@ -116,12 +116,12 @@ export function LiveWidget() {
           <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#34C759]" />
         </span>
         <span className="tabular-nums">
-          <b className="text-fg">{fmt(data.online)}</b> <span className="text-fg/66">{ru.live.online}</span>
+          <b className="text-fg">{fmt(data.online)}</b> <span className="text-fg/76">{ru.live.online}</span>
         </span>
         <span className="h-3.5 w-px bg-fg/15" />
         <span className="tabular-nums">
-          <b className="text-fg">{fmt(data.unique)}</b> <span className="hidden text-fg/66 min-[400px]:inline">{ru.live.total}</span>
-          <span className="text-fg/66 min-[400px]:hidden">{ru.live.totalShort}</span>
+          <b className="text-fg">{fmt(data.unique)}</b> <span className="hidden text-fg/76 min-[400px]:inline">{ru.live.total}</span>
+          <span className="text-fg/76 min-[400px]:hidden">{ru.live.totalShort}</span>
         </span>
       </button>
     </div>

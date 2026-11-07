@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { siteConfig } from "@/config/site";
 import { getItem } from "@/lib/items";
 import { getDictionary } from "@/i18n";
-import { DEFAULT_LOCALE, isLocale } from "@/i18n/config";
+import { DEFAULT_LOCALE, isLocale, waLangLine } from "@/i18n/config";
 import { fmt } from "@/i18n/format";
 import { getWhatsAppContacts } from "@/lib/contacts";
 import { docsMessage, priceMessage, waLink } from "@/lib/whatsapp";
@@ -22,17 +22,20 @@ export async function GET(req: NextRequest) {
   const n = Math.max(0, Math.min(20, Number(sp.get("n")) || 0));
   const l = sp.get("l");
   const locale = isLocale(l) ? l : DEFAULT_LOCALE;
-  const t = getDictionary(locale);
+  // Текст сообщения всегда по-русски (отвечает русскоязычный сотрудник); язык покупателя указывается отдельной строкой
+  const t = getDictionary(DEFAULT_LOCALE);
   const contacts = getWhatsAppContacts();
   const contact = contacts[n] ?? contacts[0];
   const item = Number.isInteger(id) && id > 0 ? getItem(id) : null;
 
   let text = t.whatsapp.generic;
-  if (item && kind === "docs") text = docsMessage(item, t);
-  else if (item && kind === "price") text = priceMessage(item, t);
+  if (item && kind === "docs") text = docsMessage(item, t, locale);
+  else if (item && kind === "price") text = priceMessage(item, t, locale);
   else if (kind === "body") text = t.parts.waBody;
   else if (kind === "chassis") text = t.parts.waChassis;
   else if (kind === "partner") text = fmt(t.whatsapp.partnership, { name: siteConfig.name });
+
+  text = [text, "", waLangLine(locale)].join("\n");
 
   if (!getVisitor(req).isBot && !(await isAdminRequest(req))) recordEvent(req, { type: "wa_click", itemId: item?.id ?? null, detail: kind, lang: locale });
 

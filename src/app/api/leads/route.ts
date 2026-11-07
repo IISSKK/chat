@@ -4,7 +4,7 @@ import { createLead, validateLead } from "@/lib/leads";
 import { allowRequest } from "@/lib/ratelimit";
 import { classifySource, isBot, recordEvent } from "@/lib/events";
 import { sendTelegram, tgEscape } from "@/lib/telegram";
-import { isLocale } from "@/i18n/config";
+import { clientLangLabel, isLocale } from "@/i18n/config";
 import { siteConfig } from "@/config/site";
 import { itemUrl } from "@/lib/utils";
 
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     v.data.country && `Страна: ${tgEscape(v.data.country)}`,
     item && `Объявление: ${tgEscape(item.title)}\n${itemUrl(item)}`,
     v.data.message && `Сообщение: ${tgEscape(v.data.message.slice(0, 500))}`,
-    lang && `Язык сайта: ${lang.toUpperCase()}`,
+    lang && `🌐 Язык клиента: <b>${clientLangLabel(lang)}</b>${lang === "ru" ? "" : " — ответьте на нём"}`,
     `${siteConfig.url}/admin/leads`,
   ].filter(Boolean);
   void sendTelegram(lines.join("\n"));

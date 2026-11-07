@@ -11,6 +11,7 @@ const ACTION: Record<string, string> = {
   brand_add: "Добавлена марка", model_add: "Добавлена модель", renameBrand: "Марка переименована", renameModel: "Модель переименована", deleteBrand: "Марка удалена", deleteModel: "Модель удалена",
   block_unlock: "Снята блокировка входа",
   addGeneration: "Добавлено поколение", updateGeneration: "Изменено поколение", deleteGeneration: "Удалено поколение",
+  cover_set: "Изменена обложка главной", cover_clear: "Обложка главной сброшена",
   backup_download: "Скачана резервная копия", translate: "Перевод объявления", translate_all: "Перевод всех объявлений",
 };
 const danger = (a: string) => /failed|purge|delete|reset|disabled|trash/.test(a);

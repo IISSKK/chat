@@ -49,7 +49,7 @@ export function LanguageSwitcher({ variant = "menu" }: { variant?: "menu" | "row
 
   if (variant === "row") {
     return (
-      <div className="grid grid-cols-4 gap-1 rounded-2xl bg-fg/[0.05] p-1" role="radiogroup" aria-label={t.lang.label}>
+      <div className="grid grid-cols-4 gap-1 rounded-2xl bg-fg/[0.08] p-1" role="radiogroup" aria-label={t.lang.label}>
         {LOCALES.map((l) => (
           <button
             key={l}
@@ -57,7 +57,7 @@ export function LanguageSwitcher({ variant = "menu" }: { variant?: "menu" | "row
             aria-checked={l === locale}
             onClick={() => choose(l)}
             className={`flex flex-col items-center gap-0.5 rounded-xl py-2 text-xs font-semibold ${
-              l === locale ? "bg-white text-brand shadow-[0_1px_4px_rgba(15,40,90,.12)]" : "text-fg/70"
+              l === locale ? "bg-white text-brand shadow-[0_1px_4px_rgba(15,40,90,.12)]" : "text-fg/80"
             }`}
           >
             <span className="text-base leading-none">{LOCALE_INFO[l].flag}</span>
@@ -75,7 +75,7 @@ export function LanguageSwitcher({ variant = "menu" }: { variant?: "menu" | "row
         aria-expanded={open}
         aria-haspopup="listbox"
         aria-label={t.lang.label}
-        className="flex h-10 items-center gap-1.5 rounded-full bg-fg/[0.06] px-3 text-sm font-bold text-fg/80 hover:bg-fg/10"
+        className="flex h-10 items-center gap-1.5 rounded-full bg-fg/[0.09] px-3 text-sm font-bold text-fg/80 hover:bg-fg/10"
       >
         {pending ? (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand/30 border-t-brand" />
@@ -92,7 +92,7 @@ export function LanguageSwitcher({ variant = "menu" }: { variant?: "menu" | "row
               role="option"
               aria-selected={l === locale}
               onClick={() => choose(l)}
-              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold hover:bg-fg/[0.06] ${
+              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold hover:bg-fg/[0.09] ${
                 l === locale ? "text-brand" : ""
               }`}
             >

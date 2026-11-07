@@ -22,7 +22,7 @@ export function FavoriteButton({ id, className = "", withLabel = false }: { id: 
       aria-label={label}
       title={label}
       className={`press grid place-items-center rounded-full transition-colors ${withLabel ? "h-auto gap-2 px-4 py-3 text-sm font-semibold sm:grid-flow-col" : "h-9 w-9"} ${
-        on ? "bg-flame/15 text-flame" : "bg-white/85 text-fg/70 hover:text-flame"
+        on ? "bg-flame/15 text-flame" : "bg-white/85 text-fg/80 hover:text-flame"
       } shadow-sm ${className}`}
     >
       <HeartIcon className={`h-[18px] w-[18px] transition-transform duration-300 ${on ? "scale-110" : ""}`} fill={on ? "currentColor" : "none"} />

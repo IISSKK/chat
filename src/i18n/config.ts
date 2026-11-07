@@ -12,6 +12,21 @@ export const LOCALE_INFO: Record<Locale, { native: string; short: string; flag: 
   zh: { native: "中文", short: "中文", flag: "🇨🇳" },
 };
 
+/** Названия языков по-русски: для сотрудников, которые отвечают клиентам (WhatsApp, заявки, Telegram) */
+export const LANG_NAME_RU: Record<Locale, string> = { ru: "русский", en: "английский", ko: "корейский", zh: "китайский" };
+
+/** «English (английский)»: язык, который выбрал покупатель, и как это сказать по-русски */
+export function clientLangLabel(locale: string): string {
+  if (!isLocale(locale)) return "";
+  return locale === "ru" ? "Русский" : `${LOCALE_INFO[locale].native} (${LANG_NAME_RU[locale]})`;
+}
+
+/** Строка в конце сообщения в WhatsApp: на каком языке отвечать покупателю */
+export function waLangLine(locale: string): string {
+  const label = clientLangLabel(locale);
+  return label ? `🌐 Язык клиента: ${label}${locale === "ru" ? "" : ". Ответьте, пожалуйста, на этом языке"}` : "";
+}
+
 export function isLocale(v: unknown): v is Locale {
   return typeof v === "string" && (LOCALES as readonly string[]).includes(v);
 }

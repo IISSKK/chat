@@ -35,7 +35,7 @@ export function specChips(item: Item, t: Dictionary) {
 
 export function ViewsBadge({ views, t, className = "" }: { views: number; t: Dictionary; className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full bg-white/85 px-2 py-1 text-[11px] font-bold text-fg/75 shadow-sm ${className}`} title={`${formatNumber(views, t.meta.intl)} ${plural(views, t.views, t.meta.intl)}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full bg-white/85 px-2 py-1 text-[11px] font-bold text-fg/84 shadow-sm ${className}`} title={`${formatNumber(views, t.meta.intl)} ${plural(views, t.views, t.meta.intl)}`}>
       <EyeIcon className="h-3.5 w-3.5" /> {formatNumber(views, t.meta.intl)}
     </span>
   );
@@ -94,7 +94,7 @@ export function ItemCardView({ item, t, price, docs, index = 0, origin }: { item
             {item.title}
           </Link>
           {(item.vin || item.serial) && (
-            <p className="mt-1 truncate font-mono text-[11px] text-fg/55">{item.vin ? `VIN ${item.vin}` : `S/N ${item.serial}`}</p>
+            <p className="mt-1 truncate font-mono text-[11px] text-fg/68">{item.vin ? `VIN ${item.vin}` : `S/N ${item.serial}`}</p>
           )}
         </div>
         <div className="flex flex-wrap gap-1.5">

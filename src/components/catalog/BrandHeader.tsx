@@ -24,7 +24,7 @@ export function BrandHeader({
 }) {
   return (
     <div className="mb-8 pt-8 sm:pt-12">
-      <nav className="mb-4 flex flex-wrap items-center gap-2 text-sm text-fg/62" aria-label="breadcrumb">
+      <nav className="mb-4 flex flex-wrap items-center gap-2 text-sm text-fg/72" aria-label="breadcrumb">
         <Link href="/catalog/cars" className="hover:text-fg">{t.types.car}</Link>
         <span>/</span>
         <Link href="/brand" className="hover:text-fg">{t.brandPage.brands}</Link>
@@ -35,12 +35,12 @@ export function BrandHeader({
         {h1}
         <sup className="ml-2 align-super font-sans text-base font-bold text-brand sm:text-xl">{count}</sup>
       </h1>
-      <p className="mt-3 max-w-3xl text-fg/70">{intro}</p>
+      <p className="mt-3 max-w-3xl text-fg/80">{intro}</p>
       {models.length > 0 && (
         <div className="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:flex-wrap sm:px-0">
-          <Link href={`/brand/${brandSlug}`} className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${!activeModel ? "bg-fg text-white" : "bg-white/70 text-fg/70 ring-1 ring-fg/10 hover:bg-white"}`}>{t.common.all}</Link>
+          <Link href={`/brand/${brandSlug}`} className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${!activeModel ? "bg-fg text-white" : "bg-white/70 text-fg/80 ring-1 ring-fg/10 hover:bg-white"}`}>{t.common.all}</Link>
           {models.map((m) => (
-            <Link key={m.slug} href={`/brand/${brandSlug}/${m.slug}`} className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${activeModel === m.slug ? "bg-fg text-white" : "bg-white/70 text-fg/70 ring-1 ring-fg/10 hover:bg-white"}`}>
+            <Link key={m.slug} href={`/brand/${brandSlug}/${m.slug}`} className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${activeModel === m.slug ? "bg-fg text-white" : "bg-white/70 text-fg/80 ring-1 ring-fg/10 hover:bg-white"}`}>
               {m.name} <span className="opacity-50">{m.count}</span>
             </Link>
           ))}
@@ -48,7 +48,7 @@ export function BrandHeader({
       )}
       {count === 0 && (
         <div className="mt-6 flex flex-wrap items-center gap-3 rounded-3xl bg-brand/10 p-4">
-          <p className="min-w-0 flex-1 text-sm text-fg/70">{t.brandPage.noItems}</p>
+          <p className="min-w-0 flex-1 text-sm text-fg/80">{t.brandPage.noItems}</p>
           <LeadButton className="btn-brand px-6 py-3" />
         </div>
       )}

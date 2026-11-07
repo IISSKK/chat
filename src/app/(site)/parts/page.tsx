@@ -21,7 +21,7 @@ export default async function PartsPage() {
   return (
     <div className="container pb-8 pt-8 sm:pt-12">
       <h1 className="h-display text-3xl sm:text-5xl">{t.parts.title}</h1>
-      <p className="mt-3 max-w-2xl text-fg/70">{t.parts.subtitle}</p>
+      <p className="mt-3 max-w-2xl text-fg/80">{t.parts.subtitle}</p>
 
       <div className="mt-8 grid gap-5 md:grid-cols-2">
         {groups.map(({ kind, title, text, items, Icon, tint }, i) => (
@@ -30,10 +30,10 @@ export default async function PartsPage() {
               <Icon className="h-6 w-6" />
             </span>
             <h2 className="mt-4 font-display text-2xl font-bold">{title}</h2>
-            <p className="mt-1.5 text-sm text-fg/70">{text}</p>
+            <p className="mt-1.5 text-sm text-fg/80">{text}</p>
             <ul className="mt-5 flex flex-wrap gap-2">
               {items.map((x) => (
-                <li key={x} className="rounded-full bg-fg/[0.06] px-3.5 py-1.5 text-sm font-medium text-fg/75">{x}</li>
+                <li key={x} className="rounded-full bg-fg/[0.09] px-3.5 py-1.5 text-sm font-medium text-fg/84">{x}</li>
               ))}
             </ul>
             <div className="mt-auto pt-7">
@@ -51,7 +51,7 @@ export default async function PartsPage() {
           {t.parts.steps.map((s, i) => (
             <li key={s} className="flex gap-3">
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand text-sm font-bold text-white">{i + 1}</span>
-              <span className="pt-1 text-sm text-fg/75">{s}</span>
+              <span className="pt-1 text-sm text-fg/84">{s}</span>
             </li>
           ))}
         </ol>

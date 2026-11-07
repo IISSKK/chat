@@ -67,7 +67,7 @@ export function WaButton({
             placement === "up" ? "bottom-full mb-2" : "top-full mt-2"
           } ${align === "right" ? "right-0 origin-bottom-right" : "left-0 origin-bottom-left"}`}
         >
-          <p className="px-2.5 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wider text-fg/58">{t.whatsapp.choose}</p>
+          <p className="px-2.5 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wider text-fg/70">{t.whatsapp.choose}</p>
           {options.map((o) => (
             <a
               key={o.href}
@@ -76,14 +76,14 @@ export function WaButton({
               target="_blank"
               rel="noopener nofollow"
               onClick={() => setOpen(false)}
-              className="press flex items-center gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-fg/[0.06]"
+              className="press flex items-center gap-3 rounded-xl px-2.5 py-2 text-left hover:bg-fg/[0.09]"
             >
               <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#25D366] text-white">
                 <WhatsAppIcon className="h-[18px] w-[18px]" />
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-sm font-bold">{o.name || o.phone}</span>
-                <span className="block truncate text-xs text-fg/66">
+                <span className="block truncate text-xs text-fg/76">
                   {o.name ? o.phone : ""}
                   {o.langs ? `${o.name ? " · " : ""}${o.langs}` : ""}
                 </span>

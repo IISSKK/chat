@@ -8,7 +8,7 @@ export default async function NotFound() {
       <div className="page-bg" aria-hidden />
       <div>
         <div className="h-display text-8xl text-gradient">404</div>
-        <p className="mt-4 text-fg/70">{t.common.notFound}</p>
+        <p className="mt-4 text-fg/80">{t.common.notFound}</p>
         <Link href="/" className="btn-brand mt-8">{t.common.toHome}</Link>
       </div>
     </div>

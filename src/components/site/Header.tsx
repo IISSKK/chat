@@ -46,20 +46,20 @@ export function Header({ wa }: { wa: WaOption[] }) {
       {/* Курсы валют онлайн */}
       <div className="border-b border-fg/[0.06]">
         <div className="container flex h-9 items-center gap-3 overflow-x-auto no-scrollbar">
-          <span className="hidden shrink-0 text-[11px] font-bold uppercase tracking-wider text-fg/55 lg:inline">{ru.rates.title}</span>
+          <span className="hidden shrink-0 text-[11px] font-bold uppercase tracking-wider text-fg/68 lg:inline">{ru.rates.title}</span>
           <RatesTicker />
         </div>
       </div>
 
       <div className="container flex h-[60px] items-center gap-3">
         <Logo />
-        <nav className="ml-2 hidden shrink-0 items-center gap-0.5 rounded-full bg-fg/[0.05] p-1 lg:flex xl:ml-4">
+        <nav className="ml-2 hidden shrink-0 items-center gap-0.5 rounded-full bg-fg/[0.08] p-1 lg:flex xl:ml-4">
           {NAV.map((n) => (
             <Link
               key={n.href}
               href={n.href}
               className={`press whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-semibold transition-colors xl:px-4 ${
-                isActive(n.href) ? "bg-white text-fg shadow-[0_1px_4px_rgba(15,40,90,.12)]" : "text-fg/70 hover:text-fg"
+                isActive(n.href) ? "bg-white text-fg shadow-[0_1px_4px_rgba(15,40,90,.12)]" : "text-fg/80 hover:text-fg"
               }`}
             >
               {n.label}
@@ -73,13 +73,13 @@ export function Header({ wa }: { wa: WaOption[] }) {
 
         <div className="ml-auto flex items-center gap-2 xl:ml-0">
           <LanguageSwitcher />
-          <Link href="/favorites" className="press relative grid h-10 w-10 place-items-center rounded-full bg-fg/[0.06] text-fg/80 hover:bg-fg/10" aria-label={ru.fav.title} title={ru.fav.title}>
+          <Link href="/favorites" className="press relative grid h-10 w-10 place-items-center rounded-full bg-fg/[0.09] text-fg/80 hover:bg-fg/10" aria-label={ru.fav.title} title={ru.fav.title}>
             <HeartIcon className="h-[18px] w-[18px]" fill={favCount ? "currentColor" : "none"} />
             {favCount > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-flame px-1 text-[11px] font-bold text-white">{favCount}</span>}
           </Link>
           <button
             onClick={() => setSearch((s) => !s)}
-            className="grid h-10 w-10 place-items-center rounded-full bg-fg/[0.06] text-fg/80 hover:bg-fg/10 xl:hidden"
+            className="grid h-10 w-10 place-items-center rounded-full bg-fg/[0.09] text-fg/80 hover:bg-fg/10 xl:hidden"
             aria-label={ru.nav.search}
           >
             {search ? <CloseIcon /> : <SearchIcon />}
@@ -89,7 +89,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
           </WaButton>
           <button
             onClick={() => setMenu(true)}
-            className="grid h-10 w-10 place-items-center rounded-full bg-fg/[0.06] text-fg hover:bg-fg/10 lg:hidden"
+            className="grid h-10 w-10 place-items-center rounded-full bg-fg/[0.09] text-fg hover:bg-fg/10 lg:hidden"
             aria-label={ru.nav.menu}
           >
             <MenuIcon />
@@ -119,7 +119,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
           <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-fg/15" />
           <div className="mb-2 flex items-center justify-between px-2">
             <Logo />
-            <button onClick={() => setMenu(false)} className="grid h-9 w-9 place-items-center rounded-full bg-fg/[0.06]" aria-label={ru.nav.close}>
+            <button onClick={() => setMenu(false)} className="grid h-9 w-9 place-items-center rounded-full bg-fg/[0.09]" aria-label={ru.nav.close}>
               <CloseIcon className="h-4 w-4" />
             </button>
           </div>
@@ -140,7 +140,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
           </div>
           <InstallApp className="mt-3 w-full" />
           <div className="mt-3">
-            <p className="mb-1.5 px-2 text-[11px] font-bold uppercase tracking-wider text-fg/58">{ru.lang.label}</p>
+            <p className="mb-1.5 px-2 text-[11px] font-bold uppercase tracking-wider text-fg/70">{ru.lang.label}</p>
             <LanguageSwitcher variant="row" />
           </div>
           <WaButton options={wa} placement="up" className="btn-wa w-full py-4 text-base" wrapperClassName="mt-3">
