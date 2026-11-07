@@ -53,12 +53,12 @@ export function Header({ wa }: { wa: WaOption[] }) {
 
       <div className="container flex h-[60px] items-center gap-3">
         <Logo />
-        <nav className="ml-4 hidden items-center gap-0.5 rounded-full bg-fg/[0.05] p-1 lg:flex">
+        <nav className="ml-2 hidden shrink-0 items-center gap-0.5 rounded-full bg-fg/[0.05] p-1 lg:flex xl:ml-4">
           {NAV.map((n) => (
             <Link
               key={n.href}
               href={n.href}
-              className={`press rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+              className={`press whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-semibold transition-colors xl:px-4 ${
                 isActive(n.href) ? "bg-white text-fg shadow-[0_1px_4px_rgba(15,40,90,.12)]" : "text-fg/60 hover:text-fg"
               }`}
             >
@@ -67,11 +67,11 @@ export function Header({ wa }: { wa: WaOption[] }) {
           ))}
         </nav>
 
-        <div className="ml-auto hidden w-full max-w-sm md:block">
+        <div className="ml-auto hidden w-full min-w-0 max-w-sm xl:block">
           <SearchBox />
         </div>
 
-        <div className="ml-auto flex items-center gap-2 md:ml-0">
+        <div className="ml-auto flex items-center gap-2 xl:ml-0">
           <LanguageSwitcher />
           <Link href="/favorites" className="press relative grid h-10 w-10 place-items-center rounded-full bg-fg/[0.06] text-fg/80 hover:bg-fg/10" aria-label={ru.fav.title} title={ru.fav.title}>
             <HeartIcon className="h-[18px] w-[18px]" fill={favCount ? "currentColor" : "none"} />
@@ -79,7 +79,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
           </Link>
           <button
             onClick={() => setSearch((s) => !s)}
-            className="grid h-10 w-10 place-items-center rounded-full bg-fg/[0.06] text-fg/80 hover:bg-fg/10 md:hidden"
+            className="grid h-10 w-10 place-items-center rounded-full bg-fg/[0.06] text-fg/80 hover:bg-fg/10 xl:hidden"
             aria-label={ru.nav.search}
           >
             {search ? <CloseIcon /> : <SearchIcon />}
@@ -98,7 +98,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
       </div>
 
       {search && (
-        <div className="container animate-fade-up pb-3 md:hidden">
+        <div className="container animate-fade-up pb-3 xl:hidden">
           <SearchBox autoFocus onDone={() => setSearch(false)} />
         </div>
       )}
