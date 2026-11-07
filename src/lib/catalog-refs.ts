@@ -2,11 +2,19 @@ import "server-only";
 import { getDb, transaction } from "./db";
 import { slugify } from "./utils";
 
+export interface GenerationRef {
+  id: number;
+  model_id: number;
+  name: string;
+  year_from: number;
+  year_to: number;
+}
 export interface ModelRef {
   id: number;
   brand_id: number;
   name: string;
   slug: string;
+  generations?: GenerationRef[];
 }
 export interface BrandRef {
   id: number;
@@ -44,6 +52,10 @@ export function listBrands(): BrandRef[] {
   const db = getDb();
   const brands = (db.prepare("SELECT * FROM brands ORDER BY name COLLATE NOCASE").all() as unknown as BrandRef[]).map(plain);
   const models = (db.prepare("SELECT * FROM models ORDER BY name COLLATE NOCASE").all() as unknown as ModelRef[]).map(plain);
+  const gens = (db.prepare("SELECT * FROM generations ORDER BY year_from, name").all() as unknown as GenerationRef[]).map(plain);
+  const genBy = new Map<number, GenerationRef[]>();
+  for (const g of gens) (genBy.get(g.model_id) ?? genBy.set(g.model_id, []).get(g.model_id)!).push(g);
+  for (const m of models) m.generations = genBy.get(m.id) ?? [];
   const by = new Map<number, ModelRef[]>();
   for (const m of models) (by.get(m.brand_id) ?? by.set(m.brand_id, []).get(m.brand_id)!).push(m);
   return brands.map((b) => ({ ...b, models: by.get(b.id) ?? [] }));
@@ -198,4 +210,66 @@ export function brandModelSlugs(brand: string, model: string): { brand?: { name:
   if (!b) return {};
   const m = model ? (db.prepare("SELECT name, slug FROM models WHERE brand_id = ? AND name = ? COLLATE NOCASE").get(b.id, model) as { name: string; slug: string } | undefined) : undefined;
   return { brand: { name: b.name, slug: b.slug }, model: m ? { name: m.name, slug: m.slug } : undefined };
+}
+
+const MIN_YEAR = 1950;
+
+function checkGeneration(name: string, from: number, to: number): { name?: string; error?: string } {
+  const n = name.trim().replace(/\s+/g, " ").slice(0, 30);
+  const max = new Date().getFullYear() + 1;
+  if (!n) return { error: "Введите название поколения, например DN8" };
+  if (![from, to].every((y) => Number.isInteger(y) && y >= MIN_YEAR && y <= max)) return { error: `Годы должны быть от ${MIN_YEAR} до ${max}` };
+  if (from > to) return { error: "Год «от» не может быть больше года «до»" };
+  return { name: n };
+}
+
+export function createGeneration(modelId: number, name: string, from: number, to: number): { error?: string } {
+  const db = getDb();
+  const c = checkGeneration(name, from, to);
+  if (!c.name) return { error: c.error };
+  if (!db.prepare("SELECT 1 FROM models WHERE id = ?").get(modelId)) return { error: "Модель не найдена" };
+  if (db.prepare("SELECT 1 FROM generations WHERE model_id = ? AND name = ? COLLATE NOCASE").get(modelId, c.name)) return { error: `Поколение «${c.name}» уже есть у этой модели` };
+  db.prepare("INSERT INTO generations (model_id, name, year_from, year_to) VALUES (?, ?, ?, ?)").run(modelId, c.name, from, to);
+  return {};
+}
+
+export function updateGeneration(id: number, name: string, from: number, to: number): string | null {
+  const db = getDb();
+  const cur = db.prepare("SELECT model_id FROM generations WHERE id = ?").get(id) as { model_id: number } | undefined;
+  if (!cur) return "Поколение не найдено";
+  const c = checkGeneration(name, from, to);
+  if (!c.name) return c.error ?? "Ошибка";
+  if (db.prepare("SELECT 1 FROM generations WHERE model_id = ? AND name = ? COLLATE NOCASE AND id <> ?").get(cur.model_id, c.name, id)) return `Поколение «${c.name}» уже есть у этой модели`;
+  db.prepare("UPDATE generations SET name = ?, year_from = ?, year_to = ? WHERE id = ?").run(c.name, from, to, id);
+  return null;
+}
+
+export function deleteGeneration(id: number) {
+  getDb().prepare("DELETE FROM generations WHERE id = ?").run(id);
+}
+
+export interface GenerationInfo extends GenerationRef {
+  brand: string;
+  model: string;
+}
+
+export function getGeneration(id: number): GenerationInfo | null {
+  const r = getDb()
+    .prepare("SELECT g.*, m.name AS model, b.name AS brand FROM generations g JOIN models m ON m.id = g.model_id JOIN brands b ON b.id = m.brand_id WHERE g.id = ?")
+    .get(id) as unknown as GenerationInfo | undefined;
+  return r ? { ...r } : null;
+}
+
+/** Поколения выбранной модели (для фильтра на сайте) */
+export function generationsOf(brand: string, model: string): GenerationRef[] {
+  return (getDb()
+    .prepare("SELECT g.* FROM generations g JOIN models m ON m.id = g.model_id JOIN brands b ON b.id = m.brand_id WHERE b.name = ? COLLATE NOCASE AND m.name = ? COLLATE NOCASE ORDER BY g.year_from, g.name")
+    .all(brand, model) as unknown as GenerationRef[]).map(plain);
+}
+
+/** К какому поколению относится авто: подходящее по году, а при пересечении — с самым узким диапазоном */
+export function generationFor(brand: string, model: string, year: number | null): GenerationRef | null {
+  if (!year) return null;
+  const hit = generationsOf(brand, model).filter((g) => year >= g.year_from && year <= g.year_to);
+  return hit.sort((a, b) => a.year_to - a.year_from - (b.year_to - b.year_from))[0] ?? null;
 }

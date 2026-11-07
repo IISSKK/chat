@@ -5,7 +5,8 @@ import { useState } from "react";
 import { EditIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import { ConfirmDialog } from "./ConfirmDialog";
 
-type Model = { id: number; name: string; used: number };
+type Gen = { id: number; name: string; year_from: number; year_to: number };
+type Model = { id: number; name: string; used: number; generations?: Gen[] };
 type Brand = { id: number; name: string; slug: string; used: number; models: Model[] };
 
 async function call(body: unknown) {
@@ -21,6 +22,7 @@ export function BrandsManager({ initial }: { initial: Brand[] }) {
   const [error, setError] = useState("");
   const [del, setDel] = useState<{ kind: "Brand" | "Model"; id: number; name: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [newGen, setNewGen] = useState<Record<number, { name: string; from: string; to: string }>>({});
 
   const act = async (body: object) => {
     setBusy(true);
@@ -38,6 +40,13 @@ export function BrandsManager({ initial }: { initial: Brand[] }) {
   const rename = async (kind: "Brand" | "Model", id: number, current: string) => {
     const name = prompt(`Новое название (${kind === "Brand" ? "марка" : "модель"}):`, current);
     if (name && name.trim() && name.trim() !== current) await act({ action: `rename${kind}`, id, name });
+  };
+
+  const editGen = async (g: Gen) => {
+    const v = prompt("Поколение и годы выпуска, например: DN8 2019-2023", `${g.name} ${g.year_from}-${g.year_to}`);
+    const m = v && /^(.+?)\s+(\d{4})\s*[-–—]\s*(\d{4})$/.exec(v.trim());
+    if (v && !m) return setError("Формат: название и годы, например DN8 2019-2023");
+    if (m) await act({ action: "updateGeneration", id: g.id, name: m[1], yearFrom: Number(m[2]), yearTo: Number(m[3]) });
   };
 
   return (
@@ -79,6 +88,38 @@ export function BrandsManager({ initial }: { initial: Brand[] }) {
                   ))}
                   {!b.models.length && <span className="text-sm text-slate-400">Моделей пока нет</span>}
                 </div>
+                {b.models.length > 0 && (
+                  <div className="space-y-2 pt-2">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Поколения (для фильтра на сайте)</p>
+                    {b.models.map((m) => {
+                      const g = newGen[m.id] ?? { name: "", from: "", to: "" };
+                      const setG = (patch: Partial<typeof g>) => setNewGen({ ...newGen, [m.id]: { ...g, ...patch } });
+                      return (
+                        <div key={m.id} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 ring-1 ring-slate-200">
+                          <span className="w-28 shrink-0 truncate text-sm font-semibold">{m.name}</span>
+                          {(m.generations ?? []).map((x) => (
+                            <span key={x.id} className="inline-flex items-center gap-1 rounded-full bg-brand/10 py-1 pl-3 pr-1 text-xs font-semibold text-brand">
+                              <button onClick={() => editGen(x)} title="Изменить" className="hover:underline">{x.name} · {x.year_from}–{x.year_to}</button>
+                              <button onClick={() => act({ action: "deleteGeneration", id: x.id, name: x.name })} className="grid h-6 w-6 place-items-center rounded-full hover:bg-brand/15" aria-label="Удалить поколение">×</button>
+                            </span>
+                          ))}
+                          <form
+                            className="flex items-center gap-1.5"
+                            onSubmit={async (e) => {
+                              e.preventDefault();
+                              if (await act({ action: "addGeneration", modelId: m.id, name: g.name, yearFrom: Number(g.from), yearTo: Number(g.to) })) setG({ name: "", from: "", to: "" });
+                            }}
+                          >
+                            <input value={g.name} onChange={(e) => setG({ name: e.target.value })} placeholder="DN8" maxLength={30} className="a-input w-20 py-1.5 text-sm" aria-label="Название поколения" />
+                            <input value={g.from} onChange={(e) => setG({ from: e.target.value.replace(/\D/g, "").slice(0, 4) })} placeholder="от" inputMode="numeric" className="a-input w-16 py-1.5 text-sm" aria-label="Год от" />
+                            <input value={g.to} onChange={(e) => setG({ to: e.target.value.replace(/\D/g, "").slice(0, 4) })} placeholder="до" inputMode="numeric" className="a-input w-16 py-1.5 text-sm" aria-label="Год до" />
+                            <button disabled={busy || !g.name.trim() || g.from.length !== 4 || g.to.length !== 4} className="a-btn-ghost px-2.5 py-1.5 text-sm">+</button>
+                          </form>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
                 <form
                   className="flex gap-2"
                   onSubmit={async (e) => {

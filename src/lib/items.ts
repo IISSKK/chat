@@ -104,7 +104,10 @@ export function facetValues(f: ItemFilters) {
       year: number;
     }[]
   ).map((r) => r.year);
-  return { brands, years };
+  const models = f.brand
+    ? (db.prepare(`SELECT DISTINCT model FROM items ${and} brand = ? COLLATE NOCASE AND model <> '' ORDER BY model COLLATE NOCASE`).all(...params, f.brand) as { model: string }[]).map((r) => r.model)
+    : [];
+  return { brands, years, models };
 }
 
 export interface Suggestion {

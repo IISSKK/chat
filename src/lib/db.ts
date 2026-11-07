@@ -99,6 +99,15 @@ function migrate(db: DB) {
       UNIQUE (brand_id, slug)
     );
 
+    CREATE TABLE IF NOT EXISTS generations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      model_id INTEGER NOT NULL REFERENCES models(id) ON DELETE CASCADE,
+      name TEXT NOT NULL COLLATE NOCASE,
+      year_from INTEGER NOT NULL,
+      year_to INTEGER NOT NULL,
+      UNIQUE (model_id, name)
+    );
+
     -- Автоперевод объявлений
     CREATE TABLE IF NOT EXISTS item_translations (
       item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,

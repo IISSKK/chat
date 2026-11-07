@@ -10,6 +10,7 @@ const ACTION: Record<string, string> = {
   contacts_update: "Изменены номера WhatsApp", lead_update: "Заявка изменена", lead_delete: "Заявка удалена",
   brand_add: "Добавлена марка", model_add: "Добавлена модель", renameBrand: "Марка переименована", renameModel: "Модель переименована", deleteBrand: "Марка удалена", deleteModel: "Модель удалена",
   block_unlock: "Снята блокировка входа",
+  addGeneration: "Добавлено поколение", updateGeneration: "Изменено поколение", deleteGeneration: "Удалено поколение",
   backup_download: "Скачана резервная копия", translate: "Перевод объявления", translate_all: "Перевод всех объявлений",
 };
 const danger = (a: string) => /failed|purge|delete|reset|disabled|trash/.test(a);

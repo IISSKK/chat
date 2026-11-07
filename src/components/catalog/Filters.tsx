@@ -8,7 +8,11 @@ import { useLocale, useT } from "@/i18n/client";
 import { localePath, stripLocale } from "@/i18n/config";
 import { FUELS, TRANSMISSIONS } from "@/lib/types";
 
-export function Filters({ brands, years, showType = false }: { brands: string[]; years: number[]; showType?: boolean }) {
+type Gen = { id: number; name: string; year_from: number; year_to: number };
+
+export function Filters({
+  brands, years, models, generations, lockBrand = false, lockModel = false, showType = false,
+}: { brands: string[]; years: number[]; models: string[]; generations: Gen[]; lockBrand?: boolean; lockModel?: boolean; showType?: boolean }) {
   const router = useRouter();
   const ru = useT();
   const rawPathname = usePathname();
@@ -23,11 +27,14 @@ export function Filters({ brands, years, showType = false }: { brands: string[];
     const next = new URLSearchParams(params.toString());
     if (value) next.set(key, value);
     else next.delete(key);
+    // зависимые поля: выбор марки сбрасывает модель и поколение, поколение и годы взаимозаменяемы
+    const clear: Record<string, string[]> = { brand: ["model", "gen"], model: ["gen"], gen: ["yearFrom", "yearTo"], yearFrom: ["gen"], yearTo: ["gen"] };
+    for (const k of clear[key] ?? []) next.delete(k);
     next.delete("page");
     start(() => router.replace(`${pathname}?${next.toString()}`, { scroll: false }));
   };
 
-  const active = ["brand", "year", "fuel", "transmission", "type", "status"].filter((k) => params.get(k)).length;
+  const active = ["brand", "model", "gen", "yearFrom", "yearTo", "fuel", "transmission", "type", "status"].filter((k) => params.get(k)).length;
 
   const reset = () => {
     const next = new URLSearchParams();
@@ -57,8 +64,11 @@ export function Filters({ brands, years, showType = false }: { brands: string[];
             ["car", ru.types.car],
             ["engine", ru.types.engine],
           ])}
-        {field("brand", ru.fields.brand, brands.map((b) => [b, b]))}
-        {field("year", ru.fields.year, years.map((y) => [String(y), String(y)]))}
+        {!lockBrand && field("brand", ru.fields.brand, brands.map((b) => [b, b]))}
+        {!lockModel && models.length > 0 && field("model", ru.fields.model, models.map((m) => [m, m]))}
+        {generations.length > 0 && field("gen", ru.fields.generation, generations.map((g) => [String(g.id), `${g.name} (${g.year_from}–${g.year_to})`]))}
+        {field("yearFrom", ru.fields.yearFrom, [...years].sort((a, b) => a - b).map((y) => [String(y), String(y)]))}
+        {field("yearTo", ru.fields.yearTo, years.map((y) => [String(y), String(y)]))}
         {field("fuel", ru.fields.fuel, FUELS.map((f) => [f, ru.fuel[f]]))}
         {field("transmission", ru.fields.transmission, TRANSMISSIONS.map((f) => [f, ru.transmission[f]]))}
         {field("status", ru.fields.status, [

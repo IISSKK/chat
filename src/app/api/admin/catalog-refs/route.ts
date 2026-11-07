@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { revalidatePath } from "next/cache";
-import { brandUsage, createBrand, createModel, deleteBrand, deleteModel, listBrands, modelUsage, renameBrand, renameModel } from "@/lib/catalog-refs";
+import { brandUsage, createBrand, createGeneration, createModel, deleteBrand, deleteGeneration, deleteModel, updateGeneration, listBrands, modelUsage, renameBrand, renameModel } from "@/lib/catalog-refs";
 import { requireApiPermission } from "@/lib/admin-guard";
 import { logAudit } from "@/lib/audit";
 
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   const admin = await requireApiPermission();
   if (admin instanceof NextResponse) return admin;
   if (!admin.permissions.has("cars") && !admin.permissions.has("engines")) return NextResponse.json({ error: "Недостаточно прав" }, { status: 403 });
-  const b = (await req.json().catch(() => ({}))) as { action?: string; id?: number; brandId?: number; name?: string };
+  const b = (await req.json().catch(() => ({}))) as { action?: string; id?: number; brandId?: number; modelId?: number; name?: string; yearFrom?: number; yearTo?: number };
   let error: string | null | undefined = null;
   let result: unknown = {};
   switch (b.action) {
@@ -32,6 +32,16 @@ export async function POST(req: NextRequest) {
       error = r.error;
       result = { model: r.model };
       if (r.model) logAudit(admin.username, "model_add", "model", r.model.id, r.model.name);
+      break;
+    }
+    case "addGeneration":
+    case "updateGeneration":
+    case "deleteGeneration": {
+      if (!admin.permissions.has("cars")) return NextResponse.json({ error: "Недостаточно прав" }, { status: 403 });
+      if (b.action === "addGeneration") error = createGeneration(Number(b.modelId), String(b.name ?? ""), Number(b.yearFrom), Number(b.yearTo)).error;
+      else if (b.action === "updateGeneration") error = updateGeneration(Number(b.id), String(b.name ?? ""), Number(b.yearFrom), Number(b.yearTo));
+      else deleteGeneration(Number(b.id));
+      if (!error) logAudit(admin.username, b.action, "generation", Number(b.id ?? b.modelId), `${b.name ?? ""} ${b.yearFrom ?? ""}-${b.yearTo ?? ""}`.trim());
       break;
     }
     case "renameBrand":

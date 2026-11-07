@@ -17,6 +17,7 @@ import { ShareMenu } from "@/components/catalog/ShareMenu";
 import { ItemViews } from "@/components/catalog/ItemViews";
 import { FavoriteButton } from "@/components/catalog/FavoriteButton";
 import { VideoPlayer } from "@/components/catalog/VideoPlayer";
+import { generationFor } from "@/lib/catalog-refs";
 import { LeadButton } from "@/components/site/LeadModal";
 import { WaButton } from "@/components/site/WaButton";
 import { ArrowLeft, DocIcon, WhatsAppIcon } from "@/components/icons";
@@ -73,12 +74,14 @@ export default async function ItemPage({ params }: Props) {
   const fuel = t.fuel[item.fuel as keyof typeof t.fuel] ?? item.fuel;
   const trans = t.transmission[item.transmission as keyof typeof t.transmission] ?? item.transmission;
   const slugs = item.type === "car" ? brandModelSlugs(item.brand, item.model) : brandModelSlugs(item.brand, "");
+  const gen = item.type === "car" ? generationFor(item.brand, item.model, item.year) : null;
   const video = item.video_url ? parseVideoUrl(item.video_url) : null;
 
   const specs: [string, string | null, string?][] = [
     [t.fields.brand, item.brand, slugs.brand ? `/brand/${slugs.brand.slug}` : undefined],
     [t.fields.model, item.model, slugs.brand && slugs.model ? `/brand/${slugs.brand.slug}/${slugs.model.slug}` : undefined],
     [t.fields.year, item.year ? String(item.year) : null],
+    [t.fields.generation, gen ? `${gen.name} (${gen.year_from}–${gen.year_to})` : null],
     [t.fields.firstRegistration, item.first_registration],
     [t.fields.vin, item.vin],
     [t.fields.serial, item.serial],

@@ -2,6 +2,7 @@ import Link from "@/components/site/LocLink";
 import { Suspense } from "react";
 import { getLocale, getT } from "@/i18n/server";
 import { facetValues, listItems } from "@/lib/items";
+import { generationsOf, getGeneration } from "@/lib/catalog-refs";
 import { CATEGORIES, FUELS, ITEM_TYPES, PUBLIC_STATUSES, TRANSMISSIONS, type Category, type ItemFilters } from "@/lib/types";
 import { Filters } from "./Filters";
 import { ItemGrid } from "./ItemCard";
@@ -14,11 +15,23 @@ const pickOne = <T extends string>(v: string | undefined, list: readonly T[]) =>
 
 export function parseFilters(sp: SearchParams, fixed: Partial<ItemFilters> = {}) {
   const year = Number(one(sp.year));
+  const yearOf = (v: string | undefined) => {
+    const n = Number(v);
+    return Number.isInteger(n) && n >= 1950 && n <= 2100 ? n : undefined;
+  };
+  let yearFrom = yearOf(one(sp.yearFrom));
+  let yearTo = yearOf(one(sp.yearTo));
+  if (yearFrom && yearTo && yearFrom > yearTo) [yearFrom, yearTo] = [yearTo, yearFrom];
+  const genId = Number(one(sp.gen));
+  const gen = Number.isInteger(genId) && genId > 0 ? getGeneration(genId) : null;
   const filters: ItemFilters = {
     type: pickOne(one(sp.type), ITEM_TYPES),
     category: pickOne(one(sp.category), CATEGORIES),
     status: pickOne(one(sp.status), PUBLIC_STATUSES),
-    brand: one(sp.brand),
+    brand: gen?.brand ?? one(sp.brand),
+    model: gen?.model ?? one(sp.model),
+    yearFrom: gen?.year_from ?? yearFrom,
+    yearTo: gen?.year_to ?? yearTo,
     year: Number.isInteger(year) && year > 1900 ? year : undefined,
     fuel: pickOne(one(sp.fuel), FUELS),
     transmission: pickOne(one(sp.transmission), TRANSMISSIONS),
@@ -89,7 +102,15 @@ export async function CatalogListing({
   return (
     <>
       <Suspense>
-        <Filters brands={facets.brands} years={facets.years} showType={showType} />
+        <Filters
+          brands={facets.brands}
+          years={facets.years}
+          models={facets.models}
+          generations={filters.brand && filters.model ? generationsOf(filters.brand, filters.model) : []}
+          lockBrand={!!fixed.brand}
+          lockModel={!!fixed.model}
+          showType={showType}
+        />
       </Suspense>
       <p className="mb-5 mt-6 text-sm text-fg/50">
         {t.common.found}: <b className="text-fg">{total}</b>
