@@ -79,6 +79,14 @@ export function getItem(id: number, locale?: Locale): Item | null {
   return locale ? applyTranslations([item], locale)[0] : item;
 }
 
+/** Самое новое (последнее добавленное) опубликованное объявление в наличии, у которого есть фото. Из него берутся витрина и обложки на главной. */
+export function latestItem(type: "car" | "engine", locale?: Locale): Item | null {
+  const row = getDb()
+    .prepare("SELECT id FROM items WHERE type = ? AND status = 'available' AND deleted_at IS NULL AND EXISTS (SELECT 1 FROM photos WHERE item_id = items.id) ORDER BY id DESC LIMIT 1")
+    .get(type) as { id: number } | undefined;
+  return row ? getItem(row.id, locale) : null;
+}
+
 /** Любое объявление (для админки и предпросмотра черновика): включая черновики и корзину */
 export function getItemAny(id: number, locale?: Locale): Item | null {
   const row = getDb().prepare("SELECT * FROM items WHERE id = ?").get(id) as Row | undefined;

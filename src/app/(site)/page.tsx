@@ -1,4 +1,3 @@
-import { getCover } from "@/lib/covers";
 import Link from "@/components/site/LocLink";
 import { getLocale, getT } from "@/i18n/server";
 import type { Metadata } from "next";
@@ -7,7 +6,8 @@ import { siteConfig } from "@/config/site";
 import { publicBrandIndex } from "@/lib/catalog-refs";
 import { LeadButton } from "@/components/site/LeadModal";
 import { localePath } from "@/i18n/config";
-import { countBy, listItems } from "@/lib/items";
+import { countBy, latestItem, listItems } from "@/lib/items";
+import { Band } from "@/components/site/Band";
 import type { Category, Item } from "@/lib/types";
 import { itemPath, photoUrl } from "@/lib/utils";
 import { waOptions } from "@/lib/contacts";
@@ -42,8 +42,8 @@ export default async function HomePage() {
   const t = await getT();
   const locale = await getLocale();
   const counts = { car: countBy({ type: "car" }), engine: countBy({ type: "engine" }) };
-  const featured = listItems({ type: "car", status: "available" }, 1, 1, locale).items[0];
-  const engineCover = listItems({ type: "engine", status: "available" }, 1, 1, locale).items[0];
+  const featured = latestItem("car", locale);
+  const engineCover = latestItem("engine", locale);
 
   const sections: { cat: Category; eyebrow: string }[] = [
     { cat: "standby", eyebrow: t.home.eyebrowStandby },
@@ -52,8 +52,8 @@ export default async function HomePage() {
   ];
 
   const categories = [
-    { href: "/catalog/cars", title: t.types.car, text: t.home.categoryCars, count: counts.car, Icon: CarIcon, tint: "from-brand/85 via-brand/40", coverFile: getCover("car") ?? featured?.photos[0]?.filename },
-    { href: "/catalog/engines", title: t.types.engine, text: t.home.categoryEngines, count: counts.engine, Icon: EngineIcon, tint: "from-flame/85 via-flame/40", coverFile: getCover("engine") ?? engineCover?.photos[0]?.filename },
+    { href: "/catalog/cars", title: t.types.car, text: t.home.categoryCars, count: counts.car, Icon: CarIcon, tint: "from-brand/85 via-brand/40", coverFile: featured?.photos[0]?.filename },
+    { href: "/catalog/engines", title: t.types.engine, text: t.home.categoryEngines, count: counts.engine, Icon: EngineIcon, tint: "from-flame/85 via-flame/40", coverFile: engineCover?.photos[0]?.filename },
   ];
 
   const brandChips = publicBrandIndex().slice(0, 10);
@@ -146,7 +146,7 @@ export default async function HomePage() {
       </section>
 
       {brandChips.length > 0 && (
-        <section className="container mt-10 sm:mt-14">
+        <section className="container mb-14 mt-10 sm:mb-20 sm:mt-14">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-fg/68">{t.brandPage.popular}</p>
           <div className="-mx-4 flex gap-2 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:flex-wrap sm:px-0">
             {brandChips.map(({ brand, count }) => (
@@ -159,7 +159,7 @@ export default async function HomePage() {
       )}
 
       {/* Категории */}
-      <section className="container mt-16 sm:mt-24">
+      <Band tone="white">
         <SectionTitle title={t.home.categoriesTitle} />
         <div className="grid gap-4 md:grid-cols-2">
           {categories.map((c, i) => (
@@ -189,43 +189,44 @@ export default async function HomePage() {
             </Link>
           ))}
         </div>
-      </section>
+      </Band>
 
-      {/* Подборки */}
-      {sections.map(({ cat, eyebrow }) => {
-        const items = listItems({ type: "car", category: cat }, 1, 8, locale).items;
-        if (!items.length) return null;
-        return (
-          <section key={cat} className="cv-auto container mt-20 sm:mt-24">
-            <SectionTitle eyebrow={eyebrow} title={t.categoriesLong[cat]} href={`/catalog/cars/${cat}`} />
-            <Rail items={items} />
-          </section>
-        );
-      })}
+      {/* Подборки машин: одна голубая полоса */}
+      {(() => {
+        const rails = sections
+          .map(({ cat, eyebrow }) => ({ cat, eyebrow, items: listItems({ type: "car", category: cat }, 1, 8, locale).items }))
+          .filter((r) => r.items.length);
+        return rails.length ? (
+          <Band tone="blue">
+            <div className="space-y-16 sm:space-y-20">
+              {rails.map(({ cat, eyebrow, items }) => (
+                <div key={cat}>
+                  <SectionTitle eyebrow={eyebrow} title={t.categoriesLong[cat]} href={`/catalog/cars/${cat}`} />
+                  <Rail items={items} />
+                </div>
+              ))}
+            </div>
+          </Band>
+        ) : null;
+      })()}
       {(() => {
         const engines = listItems({ type: "engine" }, 1, 8, locale).items;
         return engines.length ? (
-          <section className="cv-auto container mt-20 sm:mt-24">
+          <Band tone="white">
             <SectionTitle eyebrow={t.home.eyebrowEngines} title={t.types.engine} href="/catalog/engines" />
             <Rail items={engines} />
-          </section>
+          </Band>
         ) : null;
       })()}
 
-      {/* Преимущества */}
-      <section className="cv-auto container mt-20 sm:mt-24">
-        <div className="relative overflow-hidden rounded-[2rem] bg-[#0B1220] p-6 shadow-[0_30px_70px_-30px_rgba(11,18,32,.6)] sm:p-10">
-          <div className="pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full bg-brand/30 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-flame/25 blur-3xl" />
-          <div className="relative">
-            <SectionTitle dark eyebrow="Barakat Auto" title={t.home.advantagesTitle} />
-            <Advantages dark />
-          </div>
-        </div>
-      </section>
+      {/* Преимущества: тёмная полоса */}
+      <Band tone="dark">
+        <SectionTitle dark eyebrow="Barakat Auto" title={t.home.advantagesTitle} />
+        <Advantages dark />
+      </Band>
 
       {/* Руководство покупателя */}
-      <section className="cv-auto container mt-20 sm:mt-24">
+      <Band tone="blue">
         <div data-reveal className="surface relative overflow-hidden rounded-[32px] p-6 sm:p-10">
           <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-flame/15 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-brand/15 blur-3xl" />
@@ -238,10 +239,10 @@ export default async function HomePage() {
             <Guides />
           </div>
         </div>
-      </section>
+      </Band>
 
       {/* Контакты */}
-      <section id="contacts" className="container mt-20 scroll-mt-28 sm:mt-24">
+      <Band tone="white" id="contacts">
         <div className="grid gap-8 lg:grid-cols-[1fr_1.3fr] lg:items-center">
           <div data-reveal>
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand">{t.home.eyebrowContacts}</p>
@@ -256,7 +257,7 @@ export default async function HomePage() {
           </div>
           <ContactCards />
         </div>
-      </section>
+      </Band>
     </>
   );
 }

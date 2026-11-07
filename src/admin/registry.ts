@@ -19,12 +19,11 @@ import { auditModule } from "./modules/audit";
 import { backupModule } from "./modules/backup";
 import { brandsModule } from "./modules/brands";
 import { blocksModule } from "./modules/blocks";
-import { coversModule } from "./modules/covers";
 import { accountModule } from "./modules/account";
 import type { Permission } from "./permissions";
 import type { AdminModule, ResourceModule } from "./types";
 
-const modules: AdminModule[] = [dashboardModule, leadsModule, ...catalogModules, brandsModule, coversModule, statsModule, analyticsModule, contactsModule, adminsModule, auditModule, backupModule, blocksModule, accountModule];
+const modules: AdminModule[] = [dashboardModule, leadsModule, ...catalogModules, brandsModule, statsModule, analyticsModule, contactsModule, adminsModule, auditModule, backupModule, blocksModule, accountModule];
 
 /** Модули, доступные администратору с данным набором прав */
 export function getAdminModules(perms?: Set<Permission>): AdminModule[] {
