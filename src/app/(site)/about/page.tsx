@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 import { getT } from "@/i18n/server";
 import { alternatesFor } from "@/lib/seo";
-import { fmt } from "@/i18n/format";
 import { waOptions } from "@/lib/contacts";
 import { WaButton } from "@/components/site/WaButton";
 import { countBy } from "@/lib/items";

@@ -19,10 +19,6 @@ export function slugify(input: string): string {
     .slice(0, 80) || "item";
 }
 
-export function cn(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export function itemPath(item: Pick<Item, "id" | "slug">) {
   return `/item/${item.id}-${item.slug}`;
 }
@@ -39,8 +35,6 @@ export function photoUrl(filename: string, size: "full" | "sm" = "full") {
   if (size === "sm") return `/media/${filename.replace(/\.(\w+)$/, "_sm.$1")}`;
   return `/media/${filename}`;
 }
-
-
 
 export function typePath(type: ItemType) {
   return type === "car" ? "/catalog/cars" : "/catalog/engines";

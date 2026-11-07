@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 /** Данные избранного: ?ids=1,2,3&l=ru → актуальные объявления на языке посетителя (только опубликованные) */
 export async function GET(req: NextRequest) {
+  if (!allowRequest(req, "favget", 60, 5 * 60_000)) return NextResponse.json({ error: "Слишком часто" }, { status: 429 });
   const sp = req.nextUrl.searchParams;
   const ids = [...new Set((sp.get("ids") || "").split(",").map(Number).filter((n) => Number.isInteger(n) && n > 0))].slice(0, 50);
   const l = sp.get("l");

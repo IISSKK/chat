@@ -19,7 +19,6 @@ type Suggestion = {
   status: string;
 };
 
-
 function Highlight({ text, q }: { text: string; q: string }) {
   const i = text.toLowerCase().indexOf(q.toLowerCase());
   if (i < 0 || !q) return <>{text}</>;

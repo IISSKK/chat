@@ -205,7 +205,8 @@ export function getDb(): DB {
   db.exec("PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;");
   migrate(db);
   const { n } = db.prepare("SELECT COUNT(*) AS n FROM items").get() as { n: number };
-  if (n === 0 && process.env.SEED_DEMO !== "false") seedDemoData(db);
+  const seed = process.env.SEED_DEMO ? process.env.SEED_DEMO === "true" : process.env.NODE_ENV !== "production";
+  if (n === 0 && seed) seedDemoData(db);
   globalForDb.__db = db;
   try {
     // подтягиваем марки и модели существующих объявлений в справочник

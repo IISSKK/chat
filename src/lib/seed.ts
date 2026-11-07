@@ -53,7 +53,6 @@ const engines: Seed[] = [
   { title: "G4NA 2.0 MPi Nu", brand: "Hyundai", model: "Elantra / Tucson", year: 2020, engine_code: "G4NA", displacement: 1999, transmission: "automatic", fuel: "gasoline", mileage: 39000, notes: "Низкий пробег, гарантия на запуск." },
 ];
 
-
 const wmiByBrand: Record<string, string> = {
   Hyundai: "KMH", Kia: "KNA", Genesis: "KMT", SsangYong: "KPT", "Renault Samsung": "KNM",
 };

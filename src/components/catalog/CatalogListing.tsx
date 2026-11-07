@@ -2,7 +2,7 @@ import Link from "@/components/site/LocLink";
 import { Suspense } from "react";
 import { getLocale, getT } from "@/i18n/server";
 import { facetValues, listItems } from "@/lib/items";
-import { CATEGORIES, FUELS, ITEM_TYPES, PUBLIC_STATUSES, TRANSMISSIONS, type Category, type ItemFilters, type ItemType } from "@/lib/types";
+import { CATEGORIES, FUELS, ITEM_TYPES, PUBLIC_STATUSES, TRANSMISSIONS, type Category, type ItemFilters } from "@/lib/types";
 import { Filters } from "./Filters";
 import { ItemGrid } from "./ItemCard";
 import { Pagination } from "./Pagination";
@@ -32,7 +32,6 @@ export function parseFilters(sp: SearchParams, fixed: Partial<ItemFilters> = {})
 }
 
 export async function CatalogHeader({ title, subtitle, count }: { title: string; subtitle?: string; count?: number }) {
-  const t = await getT();
   return (
     <div className="mb-8 pt-8 sm:pt-12">
       <h1 className="h-display text-3xl sm:text-5xl">

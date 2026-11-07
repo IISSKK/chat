@@ -17,9 +17,12 @@ async function load(ctx: Ctx) {
 }
 
 export async function PUT(req: NextRequest, ctx: Ctx) {
+  const session = await requireApiPermission();
+  if (session instanceof NextResponse) return session;
   const item = await load(ctx);
   if (!item || item.deleted_at) return NextResponse.json({ error: "Не найдено" }, { status: 404 });
-  const fd = await req.formData();
+  const fd = await req.formData().catch(() => null);
+  if (!fd) return NextResponse.json({ error: "Некорректный запрос" }, { status: 400 });
   const { data, error } = parseItemInput(fd);
   if (!data) return NextResponse.json({ error }, { status: 400 });
   // Нужно право и на текущий раздел объявления, и на новый (если тип меняется)

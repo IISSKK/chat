@@ -10,10 +10,11 @@ import { allow } from "@/lib/ratelimit";
 /** Перевести объявление заново ({id}) или все без актуального перевода ({all: true}) */
 export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => ({}))) as { id?: number; all?: boolean };
-  if (!translationEnabled()) return NextResponse.json({ error: "Автоперевод выключен: на сервере не задан ANTHROPIC_API_KEY" }, { status: 400 });
+  const disabled = () => NextResponse.json({ error: "Автоперевод выключен: на сервере не задан ANTHROPIC_API_KEY" }, { status: 400 });
   if (body.all) {
     const admin = await requireApiPermission("cars", "engines");
     if (admin instanceof NextResponse) return admin;
+    if (!translationEnabled()) return disabled();
     if (!allow("translate-all", 3, 60 * 60_000)) return NextResponse.json({ error: "Слишком часто. Подождите немного." }, { status: 429 });
     const n = queueAllMissing();
     logAudit(admin.username, "translate_all", "", "", `в очередь: ${n}`);
@@ -24,6 +25,7 @@ export async function POST(req: NextRequest) {
   if (!item) return NextResponse.json({ error: "Не найдено" }, { status: 404 });
   const admin = await requireApiPermission(permissionForType(item.type));
   if (admin instanceof NextResponse) return admin;
+  if (!translationEnabled()) return disabled();
   if (!allow(`translate:${admin.id}`, 20, 10 * 60_000)) return NextResponse.json({ error: "Слишком часто. Подождите немного." }, { status: 429 });
   queueTranslation(item.id, true);
   logAudit(admin.username, "translate", item.type, item.id, item.title);

@@ -8,7 +8,10 @@ import { logAudit } from "@/lib/audit";
 import { queueTranslation } from "@/lib/translate";
 
 export async function POST(req: NextRequest) {
-  const fd = await req.formData();
+  const session = await requireApiPermission();
+  if (session instanceof NextResponse) return session;
+  const fd = await req.formData().catch(() => null);
+  if (!fd) return NextResponse.json({ error: "Некорректный запрос" }, { status: 400 });
   const { data, error } = parseItemInput(fd);
   if (!data) return NextResponse.json({ error }, { status: 400 });
   const admin = await requireApiPermission(permissionForType(data.type));

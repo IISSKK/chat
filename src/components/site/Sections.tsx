@@ -60,7 +60,6 @@ export const GUIDES = [
 ];
 
 export async function Guides({ wide = false }: { wide?: boolean }) {
-  const t = await getT();
   return (
     <div className={`grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 ${wide ? "sm:grid-cols-3 lg:grid-cols-5" : ""}`}>
       {GUIDES.map((g, i) => (
