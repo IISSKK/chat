@@ -64,6 +64,7 @@ const ko: Dictionary = {
     found: "검색 결과",
     filters: "필터",
     any: "전체",
+    searchList: "검색…",
     noPhoto: "사진 준비 중",
     notFound: "페이지를 찾을 수 없거나 매물이 삭제되었습니다.",
     toHome: "홈으로",

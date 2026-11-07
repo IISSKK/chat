@@ -1,3 +1,4 @@
+import { Select } from "@/components/ui/Select";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getResource } from "@/admin/registry";
@@ -67,16 +68,8 @@ export default async function ResourceList({ params, searchParams }: Props) {
           <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input name="q" defaultValue={q} placeholder="Поиск: название, VIN, серийный номер, год…" className="a-input pl-9" />
         </label>
-        <select name="category" defaultValue={category ?? ""} className="a-select">
-          <option value="">Все категории</option>
-          {CATEGORIES.map((c) => <option key={c} value={c}>{t.categoriesLong[c]}</option>)}
-        </select>
-        <select name="status" defaultValue={status ?? ""} className="a-select">
-          <option value="">Любой статус</option>
-          <option value="available">В наличии</option>
-          <option value="sold">Продано</option>
-          <option value="draft">Черновик</option>
-        </select>
+        <Select variant="admin" name="category" defaultValue={category ?? ""} aria-label="Категория" options={[{ value: "", label: "Все категории" }, ...CATEGORIES.map((c) => ({ value: c, label: t.categoriesLong[c] }))]} />
+        <Select variant="admin" name="status" defaultValue={status ?? ""} aria-label="Статус" options={[{ value: "", label: "Любой статус" }, { value: "available", label: "В наличии" }, { value: "sold", label: "Продано" }, { value: "draft", label: "Черновик" }]} />
         <div className="flex gap-2">
           <button className="a-btn-primary flex-1">Найти</button>
           {(q || category || status) && <Link href={mod.href} className="a-btn-ghost">Сброс</Link>}

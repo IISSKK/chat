@@ -1,5 +1,6 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { TrashIcon, WhatsAppIcon, MailIcon } from "@/components/icons";
@@ -66,9 +67,7 @@ export function LeadsBoard({ leads, canDelete }: { leads: Lead[]; canDelete: boo
             </div>
             {l.message && <p className="whitespace-pre-line rounded-xl bg-slate-50 p-3 text-sm text-slate-700">{l.message}</p>}
             <div className="flex flex-wrap items-center gap-2">
-              <select value={l.status} onChange={(e) => patch(l.id, { status: e.target.value })} className="a-select max-w-[170px] py-2 text-sm">
-                {STATUS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
-              </select>
+              <Select variant="admin" value={l.status} onChange={(v) => patch(l.id, { status: v })} aria-label="Статус заявки" className="w-[180px]" options={STATUS.map((s) => ({ value: s.id, label: s.label }))} />
               <input
                 value={note[l.id] ?? l.note}
                 onChange={(e) => setNote({ ...note, [l.id]: e.target.value })}

@@ -149,7 +149,7 @@ export function AdminsManager({ initial, owner, meId, permissions }: { initial: 
                 <PermChecklist perms={permissions} value={draft.permissions} onChange={(v) => setDraft((d) => ({ ...d, permissions: v }))} />
                 <label className="block">
                   <span className="a-label">Новый пароль (необязательно)</span>
-                  <input type="password" autoComplete="new-password" value={draft.password} onChange={(e) => setDraft((d) => ({ ...d, password: e.target.value }))} className="a-input max-w-sm" placeholder="минимум 8 символов" />
+                  <input type="password" autoComplete="new-password" value={draft.password} onChange={(e) => setDraft((d) => ({ ...d, password: e.target.value }))} className="a-input max-w-sm" placeholder="минимум 10 символов, буквы и цифры" />
                 </label>
                 <div className="flex gap-2">
                   <button
@@ -194,7 +194,7 @@ export function AdminsManager({ initial, owner, meId, permissions }: { initial: 
             </label>
             <label className="block">
               <span className="a-label">Пароль</span>
-              <input required type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="a-input" placeholder="минимум 8 символов" autoComplete="new-password" />
+              <input required type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="a-input" placeholder="минимум 10 символов, буквы и цифры" autoComplete="new-password" />
             </label>
           </div>
           <div>

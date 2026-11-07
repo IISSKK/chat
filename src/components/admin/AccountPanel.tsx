@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 async function api(body: unknown) {
   const res = await fetch("/api/admin/account", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -9,7 +9,7 @@ async function api(body: unknown) {
   return { ok: res.ok, data };
 }
 
-export function AccountPanel({ twoFactor, recoveryLeft, isOwner, required }: { twoFactor: boolean; recoveryLeft: number; isOwner: boolean; required: boolean }) {
+export function AccountPanel({ twoFactor, recoveryLeft, isOwner, required, autoStart }: { twoFactor: boolean; recoveryLeft: number; isOwner: boolean; required: boolean; autoStart?: boolean }) {
   const router = useRouter();
   const [setup, setSetup] = useState<{ secret: string; qr: string } | null>(null);
   const [code, setCode] = useState("");
@@ -26,6 +26,16 @@ export function AccountPanel({ twoFactor, recoveryLeft, isOwner, required }: { t
     if (!ok) return setMsg({ ok: false, text: data.error || "Ошибка" });
     onOk(data);
   };
+
+  // При первом входе без 2FA сразу показываем QR-код — отдельно нажимать «Включить» не нужно
+  const started = useRef(false);
+  useEffect(() => {
+    if (autoStart && !twoFactor && !started.current) {
+      started.current = true;
+      run({ action: "begin2fa" }, (d) => setSetup(d));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const relogin = () => {
     router.replace("/admin/login");

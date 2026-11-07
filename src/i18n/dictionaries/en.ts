@@ -64,6 +64,7 @@ const en: Dictionary = {
     found: "Found",
     filters: "Filters",
     any: "Any",
+    searchList: "Search…",
     noPhoto: "Photos coming soon",
     notFound: "Page not found or the listing has been removed.",
     toHome: "Back to home",

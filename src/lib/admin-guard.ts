@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import type { Permission } from "@/admin/permissions";
 import { can, getCurrentAdmin, type CurrentAdmin } from "./admins";
 
-/** Если в .env задано REQUIRE_2FA=1 — без включённой 2FA работать в админке нельзя (только настроить её). */
-export const twoFactorRequired = () => process.env.REQUIRE_2FA === "1";
+/** По умолчанию 2FA обязательна: при первом входе админ сразу попадает на её настройку. Отключить можно только явно: REQUIRE_2FA=0. */
+export const twoFactorRequired = () => process.env.REQUIRE_2FA !== "0";
 
 /** Для страниц админки: нет права — возвращаем на обзор с сообщением. */
 export async function requirePagePermission(perm?: Permission, opts: { allowWithout2fa?: boolean } = {}): Promise<CurrentAdmin> {

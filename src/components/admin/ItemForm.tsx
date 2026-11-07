@@ -1,5 +1,6 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import ru from "@/i18n/dictionaries/ru";
@@ -175,10 +176,7 @@ export function ItemForm({
             <div>
               <span className="a-label">Марка</span>
               <div className="flex gap-2">
-                <select value={brand} onChange={(e) => { setBrand(e.target.value); setModel(""); }} className="a-select">
-                  <option value="">— не выбрана —</option>
-                  {brands.map((b) => <option key={b.id} value={b.name}>{b.name}</option>)}
-                </select>
+                <Select variant="admin" className="min-w-0 flex-1" value={brand} onChange={(v) => { setBrand(v); setModel(""); }} aria-label="Марка" placeholder="— не выбрана —" searchPlaceholder="Найти марку…" options={[{ value: "", label: "— не выбрана —" }, ...brands.map((b) => ({ value: b.name, label: b.name }))]} />
                 <button type="button" onClick={() => addRef("brand")} className="a-btn-ghost shrink-0 px-3" title="Добавить марку в справочник" aria-label="Добавить марку"><PlusIcon className="h-4 w-4" /></button>
               </div>
             </div>
@@ -188,10 +186,7 @@ export function ItemForm({
                 <input value={model} onChange={(e) => setModel(e.target.value)} placeholder="Sonata / Santa Fe" className="a-input" maxLength={80} />
               ) : (
                 <div className="flex gap-2">
-                  <select value={model} onChange={(e) => setModel(e.target.value)} disabled={!brandObj} className="a-select">
-                    <option value="">{brandObj ? "— не выбрана —" : "Сначала выберите марку"}</option>
-                    {brandObj?.models.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
-                  </select>
+                  <Select variant="admin" className="min-w-0 flex-1" value={model} onChange={setModel} disabled={!brandObj} aria-label="Модель" placeholder={brandObj ? "— не выбрана —" : "Сначала выберите марку"} searchPlaceholder="Найти модель…" options={[{ value: "", label: brandObj ? "— не выбрана —" : "Сначала выберите марку" }, ...(brandObj?.models.map((m) => ({ value: m.name, label: m.name })) ?? [])]} />
                   <button type="button" onClick={() => addRef("model")} disabled={!brandObj} className="a-btn-ghost shrink-0 px-3" title="Добавить модель в справочник" aria-label="Добавить модель"><PlusIcon className="h-4 w-4" /></button>
                 </div>
               )}
@@ -200,17 +195,11 @@ export function ItemForm({
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
               <span className="a-label">Категория</span>
-              <select name="category" defaultValue={v?.category ?? "listing"} className="a-select">
-                {CATEGORIES.map((c) => <option key={c} value={c}>{categoryLabels[c]}</option>)}
-              </select>
+              <Select variant="admin" name="category" defaultValue={v?.category ?? "listing"} aria-label="Категория" options={CATEGORIES.map((c) => ({ value: c, label: categoryLabels[c] }))} />
             </label>
             <label className="block">
               <span className="a-label">Статус</span>
-              <select value={status} onChange={(e) => setStatus(e.target.value)} className="a-select">
-                <option value="draft">Черновик (не виден на сайте)</option>
-                <option value="available">В наличии</option>
-                <option value="sold">Продано (SOLDOUT)</option>
-              </select>
+              <Select variant="admin" value={status} onChange={setStatus} aria-label="Статус" options={[{ value: "draft", label: "Черновик (не виден на сайте)" }, { value: "available", label: "В наличии" }, { value: "sold", label: "Продано (SOLDOUT)" }]} />
             </label>
           </div>
         </section>
@@ -226,18 +215,12 @@ export function ItemForm({
             {field("displacement", "Объём, см³", { type: "number", min: 0, inputMode: "numeric", placeholder: "1999" })}
             <label className="block">
               <span className="a-label">Коробка</span>
-              <select name="transmission" defaultValue={v?.transmission ?? ""} className="a-select">
-                <option value="">—</option>
-                {TRANSMISSIONS.map((x) => <option key={x} value={x}>{ru.transmission[x]}</option>)}
-              </select>
+              <Select variant="admin" name="transmission" defaultValue={v?.transmission ?? ""} aria-label="Коробка" options={[{ value: "", label: "—" }, ...TRANSMISSIONS.map((x) => ({ value: x, label: ru.transmission[x] }))]} />
             </label>
             {field("mileage", "Пробег, км", { type: "number", min: 0, inputMode: "numeric" })}
             <label className="block">
               <span className="a-label">Топливо</span>
-              <select name="fuel" defaultValue={v?.fuel ?? ""} className="a-select">
-                <option value="">—</option>
-                {FUELS.map((x) => <option key={x} value={x}>{ru.fuel[x]}</option>)}
-              </select>
+              <Select variant="admin" name="fuel" defaultValue={v?.fuel ?? ""} aria-label="Топливо" options={[{ value: "", label: "—" }, ...FUELS.map((x) => ({ value: x, label: ru.fuel[x] }))]} />
             </label>
           </div>
           <label className="block">

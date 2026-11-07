@@ -1,5 +1,6 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
 import { useEffect, useRef, useState } from "react";
 import { CloseIcon } from "@/components/icons";
 import { useLocale, useT } from "@/i18n/client";
@@ -146,13 +147,7 @@ function CountryField({ countries, label, other, nameOf }: { countries: string[]
     <div className="space-y-2">
       <label className="block">
         <span className="mb-1 block text-xs font-bold text-fg/50">{label}</span>
-        <select name="country" value={value} onChange={(e) => setValue(e.target.value)} className="select">
-          <option value="">—</option>
-          {sorted.map((c) => (
-            <option key={c} value={c}>{nameOf(c)}</option>
-          ))}
-          <option value="other">{other}</option>
-        </select>
+        <Select name="country" value={value} onChange={setValue} aria-label={label} options={[{ value: "", label: "—" }, ...sorted.map((c) => ({ value: c, label: nameOf(c) })), { value: "other", label: other }]} />
       </label>
       {value === "other" && <input name="country_other" maxLength={60} placeholder={other} className="input" />}
     </div>

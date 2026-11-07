@@ -17,10 +17,10 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       </div>
       {sp.setup2fa && (
         <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          На этом сайте требуется двухфакторная защита. Включите её ниже — без этого остальные разделы админки недоступны.
+          Для безопасности вход в админку защищается вторым шагом. 1) Поставьте на телефон приложение Google Authenticator (или Microsoft Authenticator, Authy). 2) Отсканируйте QR-код ниже. 3) Введите 6-значный код из приложения. Без этого остальные разделы админки недоступны.
         </p>
       )}
-      <AccountPanel twoFactor={st.enabled} recoveryLeft={st.recoveryHashes.length} isOwner={me.isOwner} required={twoFactorRequired()} />
+      <AccountPanel twoFactor={st.enabled} recoveryLeft={st.recoveryHashes.length} isOwner={me.isOwner} required={twoFactorRequired()} autoStart={!!sp.setup2fa} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { FilterIcon } from "@/components/icons";
@@ -38,12 +39,7 @@ export function Filters({ brands, years, showType = false }: { brands: string[];
   const field = (key: string, label: string, options: [string, string][]) => (
     <label className="block">
       <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-fg/40">{label}</span>
-      <select className="select" value={params.get(key) ?? ""} onChange={(e) => set(key, e.target.value)}>
-        <option value="">{ru.common.any}</option>
-        {options.map(([v, l]) => (
-          <option key={v} value={v}>{l}</option>
-        ))}
-      </select>
+      <Select value={params.get(key) ?? ""} onChange={(v) => set(key, v)} aria-label={label} placeholder={ru.common.any} searchPlaceholder={ru.common.searchList} options={[{ value: "", label: ru.common.any }, ...options.map(([value, label]) => ({ value, label }))]} />
     </label>
   );
 

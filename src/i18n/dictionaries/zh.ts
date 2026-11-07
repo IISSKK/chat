@@ -63,6 +63,7 @@ const zh: Dictionary = {
     found: "共找到",
     filters: "筛选",
     any: "不限",
+    searchList: "搜索…",
     noPhoto: "照片即将上传",
     notFound: "页面不存在或车源已删除。",
     toHome: "返回首页",
