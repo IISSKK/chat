@@ -1,3 +1,4 @@
+import { KoreaFlag } from "@/components/site/KoreaFlag";
 import Link from "@/components/site/LocLink";
 import { getLocale, getT } from "@/i18n/server";
 import type { Metadata } from "next";
@@ -87,7 +88,8 @@ export default async function HomePage() {
             <span className="inline-flex animate-fade-up items-center gap-2 rounded-full bg-brand/10 px-3.5 py-1.5 text-xs font-bold text-brand">
               <span className="h-1.5 w-1.5 rounded-full bg-flame" /> {t.home.heroBadge}
             </span>
-            <h1 className="h-display mt-5 text-[2.5rem] leading-[1.03] sm:text-6xl lg:text-[4.3rem]">
+            <h1 className="h-display relative isolate mt-5 text-[2.5rem] leading-[1.03] sm:text-6xl lg:text-[4.3rem]">
+              <KoreaFlag className="pointer-events-none absolute -inset-x-3 -inset-y-4 -z-10 h-[calc(100%+2rem)] w-[calc(100%+1.5rem)] opacity-[0.17] [mask-image:radial-gradient(ellipse_at_center,#000_40%,transparent_92%)]" />
               <span className="block animate-fade-up [animation-delay:60ms]">{t.home.heroTitle1}</span>
               <span className="block animate-fade-up text-gradient [animation-delay:120ms]">{t.home.heroTitle2}</span>
               <span className="block animate-fade-up [animation-delay:180ms]">{t.home.heroTitle3}</span>
