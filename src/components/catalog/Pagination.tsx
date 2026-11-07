@@ -39,7 +39,7 @@ export async function Pagination({
       )}
       {nums.map((n, i) =>
         n === "…" ? (
-          <span key={`e${i}`} className="px-1 text-fg/40">…</span>
+          <span key={`e${i}`} className="px-1 text-fg/55">…</span>
         ) : (
           <Link
             key={n}

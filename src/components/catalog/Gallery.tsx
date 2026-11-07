@@ -46,7 +46,7 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
   }, [zoom, index, go]);
 
   if (!n) {
-    return <div className="grid aspect-[4/3] place-items-center rounded-3xl bg-ink-700 text-fg/40">{t.common.noPhoto}</div>;
+    return <div className="grid aspect-[4/3] place-items-center rounded-3xl bg-ink-700 text-fg/55">{t.common.noPhoto}</div>;
   }
 
   const arrow = "absolute top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-fg shadow-md transition hover:scale-110 hover:bg-ink/80 active:scale-95";

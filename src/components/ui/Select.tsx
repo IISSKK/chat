@@ -164,8 +164,8 @@ export function Select({
         aria-label={rest["aria-label"]}
         className={`flex min-h-[44px] items-center justify-between gap-2 text-left outline-none transition disabled:cursor-not-allowed disabled:opacity-50 ${triggerCls}`}
       >
-        <span className={`truncate ${selected && selected.value !== "" ? "" : admin ? "text-slate-400" : "text-fg/45"}`}>{selected ? selected.label : placeholder}</span>
-        <svg viewBox="0 0 12 8" className={`h-2 w-3 shrink-0 transition-transform ${open ? "rotate-180" : ""} ${admin ? "text-slate-500" : "text-fg/50"}`} aria-hidden>
+        <span className={`truncate ${selected && selected.value !== "" ? "" : admin ? "text-slate-400" : "text-fg/58"}`}>{selected ? selected.label : placeholder}</span>
+        <svg viewBox="0 0 12 8" className={`h-2 w-3 shrink-0 transition-transform ${open ? "rotate-180" : ""} ${admin ? "text-slate-500" : "text-fg/62"}`} aria-hidden>
           <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>

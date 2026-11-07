@@ -36,7 +36,7 @@ h1, h2, h3 { @apply font-display; letter-spacing: -0.02em; }
   }
   /* Полупрозрачная поверхность без размытия — для карточек и блоков (быстро) */
   .surface {
-    @apply border border-white/80 bg-white/70 shadow-[0_1px_2px_rgba(15,40,90,.04),0_8px_28px_-14px_rgba(15,40,90,.18)];
+    @apply border border-[rgba(15,40,90,.09)] bg-white/80 shadow-[0_1px_2px_rgba(15,40,90,.06),0_14px_34px_-14px_rgba(15,40,90,.28)];
   }
   .card { @apply surface rounded-3xl; }
 
@@ -46,8 +46,8 @@ h1, h2, h3 { @apply font-display; letter-spacing: -0.02em; }
   }
   /* Основная: полупрозрачный синий */
   .btn-brand {
-    @apply btn border border-white/30 bg-brand/90 text-white shadow-[0_8px_24px_-8px_rgb(var(--c-brand)/0.6),inset_0_1px_0_rgba(255,255,255,.35)]
-      hover:bg-brand;
+    @apply btn border border-white/25 bg-gradient-to-b from-brand-400 to-brand text-white shadow-[0_10px_26px_-8px_rgb(var(--c-brand)/0.75),inset_0_1px_0_rgba(255,255,255,.4)]
+      hover:brightness-105;
   }
   /* Оранжевая */
   .btn-flame {
@@ -56,12 +56,12 @@ h1, h2, h3 { @apply font-display; letter-spacing: -0.02em; }
   }
   /* WhatsApp: полупрозрачный зелёный */
   .btn-wa {
-    @apply btn border border-white/30 bg-[#25D366]/90 text-white shadow-[0_8px_24px_-8px_rgba(37,211,102,.55),inset_0_1px_0_rgba(255,255,255,.35)]
-      hover:bg-[#25D366];
+    @apply btn border border-white/25 bg-gradient-to-b from-[#3BE07C] to-[#1FB85A] text-white shadow-[0_10px_26px_-8px_rgba(31,184,90,.7),inset_0_1px_0_rgba(255,255,255,.4)]
+      hover:brightness-105;
   }
   /* Стеклянная (вторичная) */
   .btn-ghost {
-    @apply btn border border-white/80 bg-white/55 text-fg shadow-[0_1px_2px_rgba(15,40,90,.06)] ring-1 ring-fg/[0.06]
+    @apply btn border border-white/80 bg-white/65 text-fg shadow-[0_1px_2px_rgba(15,40,90,.08)] ring-1 ring-fg/[0.12]
       hover:bg-white/85;
   }
   /* Синяя полупрозрачная заливка (iOS tinted) */
@@ -72,7 +72,7 @@ h1, h2, h3 { @apply font-display; letter-spacing: -0.02em; }
   .text-gradient { @apply bg-gradient-to-r from-brand via-ember-400 to-flame bg-clip-text text-transparent; }
 
   .input {
-    @apply w-full rounded-2xl border border-fg/10 bg-white/70 px-4 py-3 text-sm text-fg outline-none transition
+    @apply w-full rounded-2xl border border-fg/[0.18] bg-white/80 px-4 py-3 text-sm text-fg outline-none transition
       placeholder:text-fg/40 focus:border-brand/50 focus:bg-white focus:ring-4 focus:ring-brand/15;
   }
   .select { @apply input appearance-none bg-[length:12px] bg-[right_0.9rem_center] bg-no-repeat pr-9;

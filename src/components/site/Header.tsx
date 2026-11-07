@@ -46,7 +46,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
       {/* Курсы валют онлайн */}
       <div className="border-b border-fg/[0.06]">
         <div className="container flex h-9 items-center gap-3 overflow-x-auto no-scrollbar">
-          <span className="hidden shrink-0 text-[11px] font-bold uppercase tracking-wider text-fg/40 lg:inline">{ru.rates.title}</span>
+          <span className="hidden shrink-0 text-[11px] font-bold uppercase tracking-wider text-fg/55 lg:inline">{ru.rates.title}</span>
           <RatesTicker />
         </div>
       </div>
@@ -59,7 +59,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
               key={n.href}
               href={n.href}
               className={`press whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-semibold transition-colors xl:px-4 ${
-                isActive(n.href) ? "bg-white text-fg shadow-[0_1px_4px_rgba(15,40,90,.12)]" : "text-fg/60 hover:text-fg"
+                isActive(n.href) ? "bg-white text-fg shadow-[0_1px_4px_rgba(15,40,90,.12)]" : "text-fg/70 hover:text-fg"
               }`}
             >
               {n.label}
@@ -140,7 +140,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
           </div>
           <InstallApp className="mt-3 w-full" />
           <div className="mt-3">
-            <p className="mb-1.5 px-2 text-[11px] font-bold uppercase tracking-wider text-fg/45">{ru.lang.label}</p>
+            <p className="mb-1.5 px-2 text-[11px] font-bold uppercase tracking-wider text-fg/58">{ru.lang.label}</p>
             <LanguageSwitcher variant="row" />
           </div>
           <WaButton options={wa} placement="up" className="btn-wa w-full py-4 text-base" wrapperClassName="mt-3">

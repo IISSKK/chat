@@ -6,7 +6,7 @@ export async function LegalPage({ title, updated, sections }: { title: string; u
   return (
     <div className="container max-w-3xl pt-10 sm:pt-16">
       <h1 className="h-display text-3xl sm:text-5xl">{title}</h1>
-      <p className="mt-3 text-sm text-fg/50">{fmt(t.legal.edition, { date: updated })}</p>
+      <p className="mt-3 text-sm text-fg/62">{fmt(t.legal.edition, { date: updated })}</p>
       <div className="mt-10 space-y-4">
         {sections.map(({ h, p: body }, i) => (
           <section key={h} data-reveal className="rounded-3xl surface p-5 sm:p-7">

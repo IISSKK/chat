@@ -130,7 +130,7 @@ export function SearchBox({
         }`}
       >
         <SearchIcon
-          className={`shrink-0 text-fg/50 transition-all duration-300 group-focus-within:scale-110 group-focus-within:text-brand ${
+          className={`shrink-0 text-fg/62 transition-all duration-300 group-focus-within:scale-110 group-focus-within:text-brand ${
             lg ? "h-5 w-5 sm:h-6 sm:w-6" : "h-4 w-4"
           }`}
         />
@@ -150,7 +150,7 @@ export function SearchBox({
           aria-controls={listId}
           aria-autocomplete="list"
           enterKeyHint="search"
-          className={`min-w-0 flex-1 bg-transparent text-fg outline-none placeholder:text-fg/40 ${
+          className={`min-w-0 flex-1 bg-transparent text-fg outline-none placeholder:text-fg/55 ${
             lg ? "py-2 text-base sm:text-lg" : "py-1.5 text-sm"
           }`}
         />
@@ -168,7 +168,7 @@ export function SearchBox({
           className="absolute left-0 right-0 top-full z-50 mt-2 origin-top animate-fade-up overflow-hidden glass rounded-3xl !bg-white p-2 text-left shadow-2xl backdrop-blur-2xl"
         >
           {!loading && items.length === 0 && (
-            <div className="px-4 py-6 text-center text-sm text-fg/50">{ru.common.noResults}</div>
+            <div className="px-4 py-6 text-center text-sm text-fg/62">{ru.common.noResults}</div>
           )}
           {items.map((s, i) => (
             <button
@@ -190,7 +190,7 @@ export function SearchBox({
                 <span className="block truncate text-sm font-semibold">
                   <Highlight text={s.title} q={term} />
                 </span>
-                <span className="flex items-center gap-2 text-xs text-fg/50">
+                <span className="flex items-center gap-2 text-xs text-fg/62">
                   <span className="rounded-full bg-ember/20 px-2 py-0.5 text-[10px] font-bold uppercase text-ember-400">
                     {fieldLabel[s.field]}
                   </span>

@@ -62,7 +62,7 @@ export function FavoritesView() {
       <div className="rounded-[32px] border border-dashed border-fg/15 py-20 text-center">
         <HeartIcon className="mx-auto mb-4 h-12 w-12 text-fg/25" />
         <p className="text-xl font-bold">{t.fav.empty}</p>
-        <p className="mx-auto mt-2 max-w-sm text-sm text-fg/55">{t.fav.emptyHint}</p>
+        <p className="mx-auto mt-2 max-w-sm text-sm text-fg/66">{t.fav.emptyHint}</p>
         <LocLink href="/catalog/cars" className="btn-brand mt-6">{t.fav.browse}</LocLink>
       </div>
     );
@@ -89,12 +89,12 @@ export function FavoritesView() {
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex rounded-full bg-fg/[0.06] p-1">
           {(["list", "compare"] as const).map((m) => (
-            <button key={m} onClick={() => setMode(m)} className={`press rounded-full px-4 py-2 text-sm font-semibold ${mode === m ? "bg-white text-fg shadow-sm" : "text-fg/55"}`}>
+            <button key={m} onClick={() => setMode(m)} className={`press rounded-full px-4 py-2 text-sm font-semibold ${mode === m ? "bg-white text-fg shadow-sm" : "text-fg/66"}`}>
               {m === "list" ? t.fav.list : <span className="inline-flex items-center gap-1.5"><CompareIcon className="h-4 w-4" />{t.fav.compare}</span>}
             </button>
           ))}
         </div>
-        <span className="text-sm text-fg/50">{t.fav.count}: <b className="text-fg">{items.length}</b></span>
+        <span className="text-sm text-fg/62">{t.fav.count}: <b className="text-fg">{items.length}</b></span>
         <div className="ml-auto flex flex-wrap gap-2">
           {sendOptions.length > 0 && (
             <WaButton options={sendOptions} placement="down" align="right" className="btn-wa px-5 py-2.5" wrapperClassName="inline-block">
@@ -113,7 +113,7 @@ export function FavoritesView() {
         </div>
       ) : (
         <div className="space-y-4">
-          <p className="text-sm text-fg/55">{cmp.length < 2 ? t.fav.compareNeed : t.fav.compareHint}</p>
+          <p className="text-sm text-fg/66">{cmp.length < 2 ? t.fav.compareNeed : t.fav.compareHint}</p>
           <div className="flex flex-wrap gap-2">
             {items.map((i) => {
               const on = picked.includes(i.id);
@@ -132,11 +132,11 @@ export function FavoritesView() {
               <table className="w-full min-w-[520px] text-sm">
                 <thead>
                   <tr className="border-b border-fg/[0.06] text-left">
-                    <th className="sticky left-0 w-32 bg-white/90 px-4 py-3 text-xs font-bold uppercase tracking-wider text-fg/40">{t.fav.spec}</th>
+                    <th className="sticky left-0 w-32 bg-white/90 px-4 py-3 text-xs font-bold uppercase tracking-wider text-fg/55">{t.fav.spec}</th>
                     {cmp.map((i) => (
                       <th key={i.id} className="min-w-[160px] px-4 py-3 align-top">
                         <LocLink href={itemPath(i)} className="font-bold hover:text-brand">{i.title}</LocLink>
-                        <button onClick={() => toggleFavorite(i.id)} className="mt-1 block text-xs font-normal text-fg/40 hover:text-flame">{t.fav.remove}</button>
+                        <button onClick={() => toggleFavorite(i.id)} className="mt-1 block text-xs font-normal text-fg/55 hover:text-flame">{t.fav.remove}</button>
                       </th>
                     ))}
                   </tr>
@@ -148,7 +148,7 @@ export function FavoritesView() {
                     const differ = new Set(vals).size > 1;
                     return (
                       <tr key={label} className="border-b border-fg/[0.05] last:border-0">
-                        <td className="sticky left-0 bg-white/90 px-4 py-2.5 text-fg/50">{label}</td>
+                        <td className="sticky left-0 bg-white/90 px-4 py-2.5 text-fg/62">{label}</td>
                         {vals.map((v, k) => (
                           <td key={k} className={`px-4 py-2.5 font-semibold ${differ ? "text-brand" : ""}`}>{v || "—"}</td>
                         ))}

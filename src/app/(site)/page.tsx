@@ -92,12 +92,12 @@ export default async function HomePage() {
               <span className="block animate-fade-up text-gradient [animation-delay:120ms]">{t.home.heroTitle2}</span>
               <span className="block animate-fade-up [animation-delay:180ms]">{t.home.heroTitle3}</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-xl animate-fade-up text-[17px] leading-relaxed text-fg/60 [animation-delay:240ms] lg:mx-0">{t.home.heroText}</p>
+            <p className="mx-auto mt-5 max-w-xl animate-fade-up text-[17px] leading-relaxed text-fg/70 [animation-delay:240ms] lg:mx-0">{t.home.heroText}</p>
             <div className="relative z-20 mx-auto mt-7 max-w-xl animate-fade-up [animation-delay:300ms] lg:mx-0">
               <SearchBox size="lg" />
               <div className="mt-3.5 flex flex-wrap justify-center gap-2 lg:justify-start">
                 {QUICK.map((q) => (
-                  <Link key={q} href={`/search?q=${encodeURIComponent(q)}`} className="press rounded-full bg-white/60 px-3 py-1.5 text-xs font-semibold text-fg/60 ring-1 ring-fg/[0.06] hover:bg-white hover:text-brand">
+                  <Link key={q} href={`/search?q=${encodeURIComponent(q)}`} className="press rounded-full bg-white/60 px-3 py-1.5 text-xs font-semibold text-fg/70 ring-1 ring-fg/[0.06] hover:bg-white hover:text-brand">
                     {q}
                   </Link>
                 ))}
@@ -118,7 +118,7 @@ export default async function HomePage() {
                   <div className="glass absolute inset-x-3 bottom-3 flex items-center gap-3 rounded-2xl p-3">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[15px] font-bold">{featured.title}</p>
-                      <p className="truncate text-xs text-fg/55">{specChips(featured, t).slice(0, 3).join(" · ")}</p>
+                      <p className="truncate text-xs text-fg/66">{specChips(featured, t).slice(0, 3).join(" · ")}</p>
                     </div>
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand text-white transition-transform group-hover:translate-x-0.5">
                       <ArrowRight className="h-4 w-4" />
@@ -135,7 +135,7 @@ export default async function HomePage() {
                   </span>
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-bold">{c.title}</span>
-                    <span className="block text-xs text-fg/50">{c.count} {t.home.items}</span>
+                    <span className="block text-xs text-fg/62">{c.count} {t.home.items}</span>
                   </span>
                 </Link>
               ))}
@@ -146,11 +146,11 @@ export default async function HomePage() {
 
       {brandChips.length > 0 && (
         <section className="container mt-10 sm:mt-14">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-fg/40">{t.brandPage.popular}</p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-fg/55">{t.brandPage.popular}</p>
           <div className="-mx-4 flex gap-2 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:flex-wrap sm:px-0">
             {brandChips.map(({ brand, count }) => (
               <Link key={brand.id} href={`/brand/${brand.slug}`} className="press shrink-0 rounded-full bg-white/70 px-4 py-2 text-sm font-semibold ring-1 ring-fg/10 hover:bg-white hover:text-brand">
-                {brand.name} <span className="text-fg/40">{count}</span>
+                {brand.name} <span className="text-fg/55">{count}</span>
               </Link>
             ))}
           </div>
@@ -212,8 +212,14 @@ export default async function HomePage() {
 
       {/* Преимущества */}
       <section className="cv-auto container mt-20 sm:mt-24">
-        <SectionTitle eyebrow="Barakat Auto" title={t.home.advantagesTitle} />
-        <Advantages />
+        <div className="relative overflow-hidden rounded-[2rem] bg-[#0B1220] p-6 shadow-[0_30px_70px_-30px_rgba(11,18,32,.6)] sm:p-10">
+          <div className="pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full bg-brand/30 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-flame/25 blur-3xl" />
+          <div className="relative">
+            <SectionTitle dark eyebrow="Barakat Auto" title={t.home.advantagesTitle} />
+            <Advantages dark />
+          </div>
+        </div>
       </section>
 
       {/* Руководство покупателя */}
@@ -225,7 +231,7 @@ export default async function HomePage() {
             <div>
               <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-flame">PDF</p>
               <h2 className="h-display text-3xl sm:text-4xl">{t.home.guidesTitle}</h2>
-              <p className="mt-3 text-fg/60">{t.home.guidesText}</p>
+              <p className="mt-3 text-fg/70">{t.home.guidesText}</p>
             </div>
             <Guides />
           </div>
@@ -238,7 +244,7 @@ export default async function HomePage() {
           <div data-reveal>
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand">{t.home.eyebrowContacts}</p>
             <h2 className="h-display text-4xl sm:text-5xl">{t.home.contactsTitle}</h2>
-            <p className="mt-4 max-w-md text-fg/60">{t.home.contactsText}</p>
+            <p className="mt-4 max-w-md text-fg/70">{t.home.contactsText}</p>
             <div className="mt-6 flex flex-wrap gap-3">
             <LeadButton className="btn-brand px-7 py-4 text-base" />
             <WaButton options={waOptions("generic", undefined, t.meta.code)} placement="up" className="btn-wa px-7 py-4 text-base" wrapperClassName="inline-block">

@@ -45,7 +45,7 @@ export function Filters({
 
   const field = (key: string, label: string, options: [string, string][]) => (
     <label className="block">
-      <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-fg/40">{label}</span>
+      <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-fg/55">{label}</span>
       <Select value={params.get(key) ?? ""} onChange={(v) => set(key, v)} aria-label={label} placeholder={ru.common.any} searchPlaceholder={ru.common.searchList} options={[{ value: "", label: ru.common.any }, ...options.map(([value, label]) => ({ value, label }))]} />
     </label>
   );

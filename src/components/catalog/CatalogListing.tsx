@@ -51,7 +51,7 @@ export async function CatalogHeader({ title, subtitle, count }: { title: string;
         {title}
         {count !== undefined && <sup className="ml-2 align-super font-sans text-base font-bold text-brand sm:text-xl">{count}</sup>}
       </h1>
-      {subtitle && <p className="mt-3 max-w-2xl text-fg/60">{subtitle}</p>}
+      {subtitle && <p className="mt-3 max-w-2xl text-fg/70">{subtitle}</p>}
     </div>
   );
 }
@@ -112,7 +112,7 @@ export async function CatalogListing({
           showType={showType}
         />
       </Suspense>
-      <p className="mb-5 mt-6 text-sm text-fg/50">
+      <p className="mb-5 mt-6 text-sm text-fg/62">
         {t.common.found}: <b className="text-fg">{total}</b>
       </p>
       {items.length ? (
@@ -121,7 +121,7 @@ export async function CatalogListing({
         <div className="rounded-3xl border border-dashed border-fg/10 py-20 text-center">
           <div className="mb-3 text-5xl">🔍</div>
           <p className="font-display text-xl font-bold">{t.common.noResults}</p>
-          <p className="mt-2 text-sm text-fg/50">{t.common.noResultsHint}</p>
+          <p className="mt-2 text-sm text-fg/62">{t.common.noResultsHint}</p>
         </div>
       )}
       <Pagination page={current} pages={pages} basePath={basePath} params={plain} />

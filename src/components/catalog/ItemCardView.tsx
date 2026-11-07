@@ -94,7 +94,7 @@ export function ItemCardView({ item, t, price, docs, index = 0, origin }: { item
             {item.title}
           </Link>
           {(item.vin || item.serial) && (
-            <p className="mt-1 truncate font-mono text-[11px] text-fg/40">{item.vin ? `VIN ${item.vin}` : `S/N ${item.serial}`}</p>
+            <p className="mt-1 truncate font-mono text-[11px] text-fg/55">{item.vin ? `VIN ${item.vin}` : `S/N ${item.serial}`}</p>
           )}
         </div>
         <div className="flex flex-wrap gap-1.5">

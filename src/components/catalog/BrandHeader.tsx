@@ -24,7 +24,7 @@ export function BrandHeader({
 }) {
   return (
     <div className="mb-8 pt-8 sm:pt-12">
-      <nav className="mb-4 flex flex-wrap items-center gap-2 text-sm text-fg/50" aria-label="breadcrumb">
+      <nav className="mb-4 flex flex-wrap items-center gap-2 text-sm text-fg/62" aria-label="breadcrumb">
         <Link href="/catalog/cars" className="hover:text-fg">{t.types.car}</Link>
         <span>/</span>
         <Link href="/brand" className="hover:text-fg">{t.brandPage.brands}</Link>
@@ -35,7 +35,7 @@ export function BrandHeader({
         {h1}
         <sup className="ml-2 align-super font-sans text-base font-bold text-brand sm:text-xl">{count}</sup>
       </h1>
-      <p className="mt-3 max-w-3xl text-fg/60">{intro}</p>
+      <p className="mt-3 max-w-3xl text-fg/70">{intro}</p>
       {models.length > 0 && (
         <div className="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:flex-wrap sm:px-0">
           <Link href={`/brand/${brandSlug}`} className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${!activeModel ? "bg-fg text-white" : "bg-white/70 text-fg/70 ring-1 ring-fg/10 hover:bg-white"}`}>{t.common.all}</Link>

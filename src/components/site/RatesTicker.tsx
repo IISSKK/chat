@@ -85,7 +85,7 @@ export function RatesTicker({ className = "" }: { className?: string }) {
         return (
           <span key={c} className={`flex items-center gap-1 rounded-full px-1.5 py-0.5 tabular-nums ${tr ? "animate-flash" : ""}`}>
             <span aria-hidden>{FLAG[c]}</span>
-            <span className="text-fg/45">{UNIT[c] > 1 ? `${UNIT[c]} ${c}` : c}</span>
+            <span className="text-fg/58">{UNIT[c] > 1 ? `${UNIT[c]} ${c}` : c}</span>
             {value === null ? (
               <span className="inline-block h-3 w-10 rounded img-skeleton align-middle" />
             ) : (
@@ -105,7 +105,7 @@ export function RatesTicker({ className = "" }: { className?: string }) {
             role="radio"
             aria-checked={base === b}
             onClick={() => choose(b)}
-            className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${base === b ? "bg-white text-brand shadow-sm" : "text-fg/50 hover:text-fg"}`}
+            className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${base === b ? "bg-white text-brand shadow-sm" : "text-fg/62 hover:text-fg"}`}
           >
             {SYMBOL[b]}
           </button>

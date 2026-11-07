@@ -67,7 +67,7 @@ export function WaButton({
             placement === "up" ? "bottom-full mb-2" : "top-full mt-2"
           } ${align === "right" ? "right-0 origin-bottom-right" : "left-0 origin-bottom-left"}`}
         >
-          <p className="px-2.5 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wider text-fg/45">{t.whatsapp.choose}</p>
+          <p className="px-2.5 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-wider text-fg/58">{t.whatsapp.choose}</p>
           {options.map((o) => (
             <a
               key={o.href}
@@ -83,7 +83,7 @@ export function WaButton({
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-sm font-bold">{o.name || o.phone}</span>
-                <span className="block truncate text-xs text-fg/55">
+                <span className="block truncate text-xs text-fg/66">
                   {o.name ? o.phone : ""}
                   {o.langs ? `${o.name ? " · " : ""}${o.langs}` : ""}
                 </span>

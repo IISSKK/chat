@@ -31,11 +31,11 @@ export function VisitCounter() {
   return (
     <div className="grid grid-cols-4 gap-2">
       {cells.map(([label, v]) => (
-        <div key={label} className="rounded-2xl border border-white/80 bg-white/60 px-2 py-2.5 text-center">
-          <div className="font-display text-base font-bold tabular-nums text-fg sm:text-lg">
-            {v === undefined ? <span className="mx-auto block h-5 w-8 rounded img-skeleton" /> : new Intl.NumberFormat(ru.meta.intl).format(v)}
+        <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.06] px-2 py-2.5 text-center">
+          <div className="font-display text-base font-bold tabular-nums text-white sm:text-lg">
+            {v === undefined ? <span className="mx-auto block h-5 w-8 animate-pulse rounded bg-white/15" /> : new Intl.NumberFormat(ru.meta.intl).format(v)}
           </div>
-          <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-fg/40">{label}</div>
+          <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/50">{label}</div>
         </div>
       ))}
     </div>

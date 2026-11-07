@@ -25,7 +25,7 @@ export default async function BrandsIndex() {
           <div key={brand.id} className="surface rounded-3xl p-5">
             <Link href={`/brand/${brand.slug}`} className="flex items-baseline justify-between gap-2 text-xl font-bold hover:text-brand">
               {brand.name}
-              <span className="text-sm font-semibold text-fg/45">{fmt(t.brandPage.count, { n: count })}</span>
+              <span className="text-sm font-semibold text-fg/58">{fmt(t.brandPage.count, { n: count })}</span>
             </Link>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {models.slice(0, 10).map(({ model, count: n }) => (

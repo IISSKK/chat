@@ -42,6 +42,6 @@ export function InstallApp({ className = "" }: { className?: string }) {
       </button>
     );
   }
-  if (ios) return <p className={`rounded-2xl bg-fg/[0.05] px-4 py-3 text-xs text-fg/60 ${className}`}>📲 {t.pwa.iosHint}</p>;
+  if (ios) return <p className={`rounded-2xl bg-fg/[0.05] px-4 py-3 text-xs text-fg/70 ${className}`}>📲 {t.pwa.iosHint}</p>;
   return null;
 }

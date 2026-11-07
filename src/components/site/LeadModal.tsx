@@ -90,7 +90,7 @@ export function LeadButton({ itemId, itemTitle, className = "btn-brand", childre
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-xl font-extrabold tracking-tight">{status === "done" ? t.lead.thanksTitle : t.lead.title}</h2>
-                {status !== "done" && <p className="mt-1 text-sm text-fg/60">{t.lead.intro}</p>}
+                {status !== "done" && <p className="mt-1 text-sm text-fg/70">{t.lead.intro}</p>}
               </div>
               <button type="button" onClick={() => setOpen(false)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-fg/[0.06]" aria-label={t.nav.close}>
                 <CloseIcon className="h-4 w-4" />
@@ -106,28 +106,28 @@ export function LeadButton({ itemId, itemTitle, className = "btn-brand", childre
               <form onSubmit={submit} className="space-y-3">
                 {itemTitle && (
                   <p className="rounded-2xl bg-brand/10 px-3 py-2 text-sm">
-                    <span className="text-fg/50">{t.lead.forItem}: </span>
+                    <span className="text-fg/62">{t.lead.forItem}: </span>
                     <b>{itemTitle}</b>
                   </p>
                 )}
                 {/* ловушка для ботов: человек это поле не видит */}
                 <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
                 <label className="block">
-                  <span className="mb-1 block text-xs font-bold text-fg/50">{t.lead.name}</span>
+                  <span className="mb-1 block text-xs font-bold text-fg/62">{t.lead.name}</span>
                   <input name="name" required minLength={2} maxLength={80} autoComplete="name" className="input" />
                 </label>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-bold text-fg/50">{t.lead.contact}</span>
+                  <span className="mb-1 block text-xs font-bold text-fg/62">{t.lead.contact}</span>
                   <input name="contact" required maxLength={120} autoComplete="tel" inputMode="text" placeholder={t.lead.contactHint} className="input" />
                 </label>
                 <CountryField countries={COUNTRIES} label={t.lead.country} other={t.lead.countryOther} nameOf={countryName} />
                 <label className="block">
-                  <span className="mb-1 block text-xs font-bold text-fg/50">{t.lead.message}</span>
+                  <span className="mb-1 block text-xs font-bold text-fg/62">{t.lead.message}</span>
                   <textarea name="message" rows={3} maxLength={1500} placeholder={t.lead.messagePlaceholder} className="input resize-none" />
                 </label>
                 {error && <p className="animate-fade-in rounded-xl bg-[#FF3B30]/10 px-3 py-2 text-sm text-[#D70015]">{error}</p>}
                 <button disabled={status === "sending"} className="btn-brand w-full py-3.5">{status === "sending" ? t.lead.sending : t.lead.send}</button>
-                <p className="text-center text-[11px] text-fg/45">
+                <p className="text-center text-[11px] text-fg/58">
                   {t.lead.consent}{" "}
                   <LocLink href="/privacy" className="underline" onClick={() => setOpen(false)}>{t.footer.privacy}</LocLink>
                 </p>
@@ -146,7 +146,7 @@ function CountryField({ countries, label, other, nameOf }: { countries: string[]
   return (
     <div className="space-y-2">
       <label className="block">
-        <span className="mb-1 block text-xs font-bold text-fg/50">{label}</span>
+        <span className="mb-1 block text-xs font-bold text-fg/62">{label}</span>
         <Select name="country" value={value} onChange={setValue} aria-label={label} options={[{ value: "", label: "—" }, ...sorted.map((c) => ({ value: c, label: nameOf(c) })), { value: "other", label: other }]} />
       </label>
       {value === "other" && <input name="country_other" maxLength={60} placeholder={other} className="input" />}

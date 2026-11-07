@@ -137,7 +137,7 @@ export default async function ItemPage({ params }: Props) {
           <a href={`/admin/${item.type === "car" ? "cars" : "engines"}/${item.id}`} className="ml-auto underline">{t.misc.draftEdit} →</a>
         </div>
       )}
-      <nav className="mb-5 flex flex-wrap items-center gap-2 text-sm text-fg/50" aria-label="breadcrumb">
+      <nav className="mb-5 flex flex-wrap items-center gap-2 text-sm text-fg/62" aria-label="breadcrumb">
         <Link href={typePath(item.type)} className="inline-flex items-center gap-1.5 rounded-full bg-fg/[0.06] px-3 py-1.5 font-semibold text-fg/80 transition hover:bg-fg/10">
           <ArrowLeft className="h-4 w-4" /> {t.types[item.type]}
         </Link>
@@ -163,7 +163,7 @@ export default async function ItemPage({ params }: Props) {
           </div>
           {video && (
             <section>
-              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-fg/40">{t.video.title}</h2>
+              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-fg/55">{t.video.title}</h2>
               <VideoPlayer embed={video.embed} title={item.title} poster={item.photos[0] ? photoUrl(item.photos[0].filename, "sm") : undefined} />
             </section>
           )}
@@ -182,7 +182,7 @@ export default async function ItemPage({ params }: Props) {
           </div>
 
           <div className="mt-6 rounded-3xl surface p-4 sm:p-5">
-            <p className="mb-4 text-sm text-fg/60">{sold ? t.item.soldNote : t.item.contactNote}</p>
+            <p className="mb-4 text-sm text-fg/70">{sold ? t.item.soldNote : t.item.contactNote}</p>
             <div className="grid gap-2">
               <WaButton options={waOptions("price", item.id, t.meta.code)} className="btn-wa w-full py-4 text-base">
                 <WhatsAppIcon /> {t.actions.askPrice}
@@ -201,11 +201,11 @@ export default async function ItemPage({ params }: Props) {
           </div>
 
           <div className="mt-6">
-            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-fg/40">{t.item.specs}</h2>
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-fg/55">{t.item.specs}</h2>
             <dl className="divide-y divide-fg/[0.06] overflow-hidden rounded-3xl surface">
               {specs.filter(([, v]) => v).map(([k, v, href]) => (
                 <div key={k} className="grid grid-cols-[minmax(110px,40%)_1fr] gap-3 px-4 py-3 text-sm sm:px-5">
-                  <dt className="text-fg/50">{k}</dt>
+                  <dt className="text-fg/62">{k}</dt>
                   <dd className={`font-semibold ${k === t.fields.vin || k === t.fields.serial ? "break-all font-mono" : ""}`}>
                     {href ? <Link href={href} className="text-brand hover:underline">{v}</Link> : v}
                   </dd>
@@ -216,7 +216,7 @@ export default async function ItemPage({ params }: Props) {
 
           {item.notes && (
             <div className="mt-6">
-              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-fg/40">{t.fields.notes}</h2>
+              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-fg/55">{t.fields.notes}</h2>
               <p className="whitespace-pre-line rounded-3xl surface p-5 text-sm leading-relaxed text-fg/80">{item.notes}</p>
             </div>
           )}

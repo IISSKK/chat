@@ -57,7 +57,7 @@ export function LanguageSwitcher({ variant = "menu" }: { variant?: "menu" | "row
             aria-checked={l === locale}
             onClick={() => choose(l)}
             className={`flex flex-col items-center gap-0.5 rounded-xl py-2 text-xs font-semibold ${
-              l === locale ? "bg-white text-brand shadow-[0_1px_4px_rgba(15,40,90,.12)]" : "text-fg/60"
+              l === locale ? "bg-white text-brand shadow-[0_1px_4px_rgba(15,40,90,.12)]" : "text-fg/70"
             }`}
           >
             <span className="text-base leading-none">{LOCALE_INFO[l].flag}</span>
