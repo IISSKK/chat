@@ -188,7 +188,7 @@ export function ItemForm({
                 addFiles(e.dataTransfer.files);
               }
             }}
-            className={`grid grid-cols-3 gap-2 rounded-xl p-1 transition ${dropActive ? "bg-ember/10 ring-2 ring-ember" : ""}`}
+            className={`grid grid-cols-2 gap-2 rounded-xl p-1 transition min-[420px]:grid-cols-3 ${dropActive ? "bg-ember/10 ring-2 ring-ember" : ""}`}
           >
             {photos.map((p, i) => (
               <div
@@ -208,13 +208,13 @@ export function ItemForm({
                 {i === 0 && <span className="absolute left-1 top-1 rounded bg-brand px-1.5 text-[10px] font-bold text-ink">Обложка</span>}
                 {p.kind === "new" && <span className="absolute right-1 top-1 rounded bg-ember px-1.5 text-[10px] font-bold text-white">new</span>}
                 <div className="absolute inset-x-0 bottom-0 flex justify-between bg-gradient-to-t from-black/70 to-transparent p-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
-                  <button type="button" onClick={() => move(i, i - 1)} disabled={i === 0} className="grid h-7 w-7 place-items-center rounded-md bg-white/90 text-slate-800 disabled:opacity-30" aria-label="Левее">
+                  <button type="button" onClick={() => move(i, i - 1)} disabled={i === 0} className="grid h-10 w-10 place-items-center rounded-md sm:h-7 sm:w-7 bg-white/90 text-slate-800 disabled:opacity-30" aria-label="Левее">
                     <ChevronLeft className="h-4 w-4" />
                   </button>
-                  <button type="button" onClick={() => remove(p.key)} className="grid h-7 w-7 place-items-center rounded-md bg-red-600 text-white" aria-label="Удалить фото">
+                  <button type="button" onClick={() => remove(p.key)} className="grid h-10 w-10 place-items-center rounded-md sm:h-7 sm:w-7 bg-red-600 text-white" aria-label="Удалить фото">
                     <TrashIcon className="h-4 w-4" />
                   </button>
-                  <button type="button" onClick={() => move(i, i + 1)} disabled={i === photos.length - 1} className="grid h-7 w-7 place-items-center rounded-md bg-white/90 text-slate-800 disabled:opacity-30" aria-label="Правее">
+                  <button type="button" onClick={() => move(i, i + 1)} disabled={i === photos.length - 1} className="grid h-10 w-10 place-items-center rounded-md sm:h-7 sm:w-7 bg-white/90 text-slate-800 disabled:opacity-30" aria-label="Правее">
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>

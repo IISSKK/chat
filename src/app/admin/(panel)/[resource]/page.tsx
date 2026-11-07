@@ -67,9 +67,34 @@ export default async function ResourceList({ params, searchParams }: Props) {
         </div>
       </form>
 
-      <div className="a-card overflow-hidden">
+      {/* Телефон: карточки */}
+      <div className="space-y-3 md:hidden">
+        {items.map((i) => (
+          <div key={i.id} className="a-card space-y-3 p-3">
+            <Link href={`${mod.href}/${i.id}`} className="flex items-center gap-3">
+              <span className="h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                {i.photos[0] && <img src={photoUrl(i.photos[0].filename, "sm")} alt="" loading="lazy" className="h-full w-full object-cover" />}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="line-clamp-2 font-semibold leading-snug">{i.title}</span>
+                <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">{t.categories[i.category]}</span>
+                  {i.year && <span>{i.year}</span>}
+                  <span className="inline-flex items-center gap-1"><EyeIcon className="h-3.5 w-3.5" />{formatNumber(i.views)}</span>
+                </span>
+                {(i.vin || i.serial) && <span className="mt-0.5 block truncate font-mono text-[11px] text-slate-400">{i.vin || i.serial}</span>}
+              </span>
+            </Link>
+            <RowActions variant="card" id={i.id} status={i.status} editHref={`${mod.href}/${i.id}`} viewHref={itemPath(i)} title={i.title} canDelete={canDelete} />
+          </div>
+        ))}
+        {!items.length && <div className="a-card px-4 py-12 text-center text-slate-400">Ничего не найдено</div>}
+      </div>
+
+      {/* Компьютер: таблица */}
+      <div className="a-card hidden overflow-hidden md:block">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] text-sm">
+          <table className="w-full min-w-[820px] text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
               <tr>
                 <th className="px-4 py-3">Товар</th>
@@ -115,9 +140,9 @@ export default async function ResourceList({ params, searchParams }: Props) {
       </div>
 
       {pages > 1 && (
-        <div className="flex items-center justify-center gap-1">
+        <div className="flex flex-wrap items-center justify-center gap-1">
           {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
-            <Link key={p} href={pageHref(p)} className={`grid h-9 min-w-9 place-items-center rounded-lg px-2 text-sm font-semibold ${p === current ? "bg-slate-900 text-white" : "hover:bg-white"}`}>
+            <Link key={p} href={pageHref(p)} className={`grid h-11 min-w-11 place-items-center rounded-lg px-2 text-sm font-semibold md:h-9 md:min-w-9 ${p === current ? "bg-slate-900 text-white" : "hover:bg-white"}`}>
               {p}
             </Link>
           ))}
