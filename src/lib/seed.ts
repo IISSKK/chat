@@ -1,3 +1,5 @@
+import { DEMO_NOTES } from "./seed-translations";
+import { sourceHash } from "./item-i18n";
 import { transaction, type DB } from "./db";
 import { slugify } from "./utils";
 
@@ -67,6 +69,8 @@ export function seedDemoData(db: DB) {
     VALUES (@type, @category, @slug, @title, @brand, @model, @year, @first_registration, @vin, @serial, @engine_code,
      @displacement, @transmission, @mileage, @fuel, @notes, @status, @ts, @ts)`);
   const photo = db.prepare("INSERT INTO photos (item_id, filename, position) VALUES (?, ?, ?)");
+  const insertTr = db.prepare("INSERT INTO item_translations (item_id, lang, title, notes, src_hash) VALUES (?, ?, ?, ?, ?)");
+  const insertState = db.prepare("INSERT INTO translation_state (item_id, status, error, src_hash) VALUES (?, 'ok', '', ?)");
   const categories = ["standby", "listing", "running"] as const;
   let minutes = 0;
 
@@ -86,6 +90,12 @@ export function seedDemoData(db: DB) {
       ts,
     });
     const id = Number(res.lastInsertRowid);
+    const tr = DEMO_NOTES[s.notes];
+    if (tr) {
+      const hash = sourceHash({ title: s.title, notes: s.notes });
+      for (const lang of ["en", "ko", "zh"] as const) insertTr.run(id, lang, s.title, tr[lang], hash);
+      insertState.run(id, hash);
+    }
     const n = IMG[type];
     for (let k = 0; k < 3; k++) photo.run(id, `demo/${type}-${((index + k * 5) % n) + 1}.jpg`, k);
   };
