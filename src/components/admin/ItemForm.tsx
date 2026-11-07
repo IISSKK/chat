@@ -8,7 +8,8 @@ import { CATEGORIES, FUELS, MAX_PHOTOS, TRANSMISSIONS, type Item, type ItemType 
 import { photoUrl } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, PlusIcon, TrashIcon } from "@/components/icons";
 
-type RefModel = { id: number; name: string };
+type RefGen = { id: number; name: string; year_from: number; year_to: number };
+type RefModel = { id: number; name: string; generations?: RefGen[] };
 type RefBrand = { id: number; name: string; models: RefModel[] };
 export type TranslationInfo = {
   enabled: boolean;
@@ -47,6 +48,7 @@ export function ItemForm({
   const [brand, setBrand] = useState(item?.brand ?? "");
   const [model, setModel] = useState(item?.model ?? "");
   const [status, setStatus] = useState<string>(item?.status ?? "draft");
+  const [year, setYear] = useState(item?.year ? String(item.year) : "");
   const intent = useRef<"draft" | "publish" | "save">("save");
   const [trBusy, setTrBusy] = useState(false);
   const [trMsg, setTrMsg] = useState("");
@@ -71,6 +73,30 @@ export function ItemForm({
       setBrand(data.brand.name);
       setModel("");
     } else if (data.model) setModel(data.model.name);
+  };
+
+  const modelObj = brandObj?.models.find((m) => m.name.toLowerCase() === model.toLowerCase());
+  const yearNum = Number(year);
+  const autoGen = (modelObj?.generations ?? [])
+    .filter((g) => yearNum >= g.year_from && yearNum <= g.year_to)
+    .sort((a, b) => a.year_to - a.year_from - (b.year_to - b.year_from))[0];
+
+  /** Новое поколение прямо в карточке: название и годы выпуска; в справочник попадает сразу */
+  const addGeneration = async () => {
+    if (!modelObj) return;
+    const v = prompt(`Новое поколение ${brand} ${modelObj.name}: название и годы выпуска, например DN8 2019-2023`);
+    if (!v || !v.trim()) return;
+    const m = /^(.+?)\s+(\d{4})\s*[-–—]\s*(\d{4})$/.exec(v.trim());
+    if (!m) return setError("Формат: название и годы, например DN8 2019-2023");
+    const res = await fetch("/api/admin/catalog-refs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "addGeneration", modelId: modelObj.id, name: m[1], yearFrom: Number(m[2]), yearTo: Number(m[3]) }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return setError(data.error || "Не удалось добавить поколение");
+    setError("");
+    setBrands(data.brands);
   };
 
   const retranslate = async () => {
@@ -207,7 +233,28 @@ export function ItemForm({
         <section className="a-card space-y-4 p-5">
           <h2 className="font-semibold">Характеристики</h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            {field("year", "Год выпуска", { type: "number", min: 1950, max: 2100, inputMode: "numeric" })}
+            <label className="block">
+              <span className="a-label">Год выпуска</span>
+              <input name="year" type="number" min={1950} max={2100} inputMode="numeric" value={year} onChange={(e) => setYear(e.target.value)} className="a-input" />
+            </label>
+            {itemType === "car" && (
+              <div>
+                <span className="a-label">Поколение</span>
+                <div className="flex items-center gap-2">
+                  <div className="a-input flex min-h-[44px] flex-1 items-center text-sm">
+                    {!modelObj ? (
+                      <span className="text-slate-400">Выберите модель</span>
+                    ) : autoGen ? (
+                      <span className="font-semibold text-brand">{autoGen.name} <span className="font-normal text-slate-400">({autoGen.year_from}–{autoGen.year_to})</span></span>
+                    ) : (
+                      <span className="text-slate-400">{yearNum ? "Для этого года поколения нет" : "Определится по году"}</span>
+                    )}
+                  </div>
+                  <button type="button" onClick={addGeneration} disabled={!modelObj} className="a-btn-ghost shrink-0 px-3" title="Добавить поколение этой модели" aria-label="Добавить поколение"><PlusIcon className="h-4 w-4" /></button>
+                </div>
+                <p className="mt-1 text-xs text-slate-400">Определяется по году выпуска. Нет нужного — добавьте кнопкой «+».</p>
+              </div>
+            )}
             {field("first_registration", "Год / дата первой регистрации", { placeholder: "2021-03" })}
             {field("vin", "VIN", { placeholder: "KMHL341DBLA012345", className: "a-input font-mono uppercase" })}
             {field("serial", "Серийный номер", { className: "a-input font-mono uppercase" })}
