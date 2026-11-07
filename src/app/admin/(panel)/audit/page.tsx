@@ -9,7 +9,7 @@ const ACTION: Record<string, string> = {
   admin_create: "Добавлен админ", admin_update: "Изменён админ", admin_delete: "Удалён админ", admin_reset_2fa: "Сброс 2FA админа",
   contacts_update: "Изменены номера WhatsApp", lead_update: "Заявка изменена", lead_delete: "Заявка удалена",
   brand_add: "Добавлена марка", model_add: "Добавлена модель", renameBrand: "Марка переименована", renameModel: "Модель переименована", deleteBrand: "Марка удалена", deleteModel: "Модель удалена",
-  task_create: "Новая задача по сайту", task_update: "Задача обновлена", task_delete: "Задача удалена",
+  block_unlock: "Снята блокировка входа",
   backup_download: "Скачана резервная копия", translate: "Перевод объявления", translate_all: "Перевод всех объявлений",
 };
 const danger = (a: string) => /failed|purge|delete|reset|disabled|trash/.test(a);
