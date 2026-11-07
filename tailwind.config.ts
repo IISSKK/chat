@@ -16,9 +16,8 @@ export default {
         sun: { DEFAULT: "rgb(var(--c-sun) / <alpha-value>)" },
       },
       fontFamily: {
-        // На Apple-устройствах — родной SF Pro (как в iOS), на остальных — Inter
-        display: ["-apple-system", "BlinkMacSystemFont", "var(--font-inter)", "system-ui", "sans-serif"],
-        sans: ["-apple-system", "BlinkMacSystemFont", "var(--font-inter)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-inter)", "Apple SD Gothic Neo", "Malgun Gothic", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans KR", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "Apple SD Gothic Neo", "Malgun Gothic", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans KR", "system-ui", "sans-serif"],
       },
       borderRadius: { "4xl": "2rem" },
       keyframes: {

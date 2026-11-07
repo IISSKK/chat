@@ -1,4 +1,3 @@
-import { FlagText } from "@/components/site/FlagText";
 import Link from "@/components/site/LocLink";
 import { getLocale, getT } from "@/i18n/server";
 import type { Metadata } from "next";
@@ -90,7 +89,7 @@ export default async function HomePage() {
             </span>
             <h1 className="h-display mt-5 text-[2.5rem] leading-[1.03] sm:text-6xl lg:text-[4.3rem]">
               <span className="block animate-fade-up [animation-delay:60ms]">{t.home.heroTitle1}</span>
-              <span className="block animate-fade-up [animation-delay:120ms]"><FlagText>{t.home.heroTitle2}</FlagText></span>
+              <span className="block animate-fade-up text-gradient [animation-delay:120ms]">{t.home.heroTitle2}</span>
               <span className="block animate-fade-up [animation-delay:180ms]">{t.home.heroTitle3}</span>
             </h1>
             <p className="mx-auto mt-5 max-w-xl animate-fade-up text-[17px] leading-relaxed text-fg/60 [animation-delay:240ms] lg:mx-0">{t.home.heroText}</p>

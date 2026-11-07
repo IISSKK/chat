@@ -13,14 +13,14 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..")
 const out = (p) => path.join(root, p);
 
 const palettes = [
-  ["#7FB8FF", "#FFC46B", "#E8F1FF"],
-  ["#5AA2FF", "#FFE08A", "#F3F7FF"],
-  ["#9CC9FF", "#FFB25C", "#EEF4FF"],
-  ["#6FB0FF", "#FFD36B", "#FFFFFF"],
-  ["#8EC2FF", "#FFA94D", "#F5F9FF"],
-  ["#A9D0FF", "#FFCF70", "#EAF2FF"],
+  ["#7FB8FF", "#8FD9F7", "#E8F1FF"],
+  ["#5AA2FF", "#A9E4FA", "#F3F7FF"],
+  ["#9CC9FF", "#9AB7FF", "#EEF4FF"],
+  ["#6FB0FF", "#86DCEB", "#FFFFFF"],
+  ["#8EC2FF", "#8CA9F5", "#F5F9FF"],
+  ["#A9D0FF", "#A3DFF5", "#EAF2FF"],
 ];
-const bodyColors = ["#FFFFFF", "#1C2A44", "#007AFF", "#FF9500", "#2D55D7", "#B8C2D3", "#F4F6FA", "#0B1220", "#FF6B2C", "#5AC8FA", "#3A4A66", "#FFCC00"];
+const bodyColors = ["#FFFFFF", "#1C2A44", "#007AFF", "#5856D6", "#2D55D7", "#B8C2D3", "#F4F6FA", "#0B1220", "#30B0C7", "#5AC8FA", "#3A4A66", "#8E9AAF"];
 
 const car = (style, color) => {
   const bodies = {
@@ -38,7 +38,7 @@ const car = (style, color) => {
   const wheel = (cx) => `<circle cx="${cx}" cy="400" r="62" fill="#0b0b12"/><circle cx="${cx}" cy="400" r="36" fill="#cfd3dc"/><circle cx="${cx}" cy="400" r="12" fill="#6b7280"/>`;
   return `<svg viewBox="0 0 1000 500" width="78%"><ellipse cx="500" cy="465" rx="430" ry="22" fill="rgba(11,18,32,.18)"/>
     <path d="${bodies[style]}" fill="${color}" stroke="rgba(0,0,0,.25)" stroke-width="3"/>${windows[style]}
-    <rect x="860" y="320" width="45" height="18" rx="6" fill="#FFE27A"/><rect x="95" y="320" width="35" height="16" rx="6" fill="#ff5f6d"/>
+    <rect x="860" y="320" width="45" height="18" rx="6" fill="#BFE6FF"/><rect x="95" y="320" width="35" height="16" rx="6" fill="#ff5f6d"/>
     ${wheel(250)}${wheel(750)}</svg>`;
 };
 
@@ -92,11 +92,11 @@ for (let i = 0; i < 6; i++) await shot(page(engine(bodyColors[(i * 3 + 2) % 12])
 
 // OG image по умолчанию
 await shot(`<!doctype html><html><body style="margin:0"><div style="width:1200px;height:630px;display:flex;flex-direction:column;justify-content:center;padding:0 80px;box-sizing:border-box;
-background:radial-gradient(circle at 0% 0%,rgba(0,122,255,.30) 0,transparent 50%),radial-gradient(circle at 100% 10%,rgba(255,149,0,.28) 0,transparent 45%),radial-gradient(circle at 70% 120%,rgba(255,204,0,.25) 0,transparent 50%),#F0F4FA;color:#0B1220;font-family:DejaVu Sans,sans-serif">
-<div style="display:flex;align-items:center;gap:22px"><div style="width:96px;height:96px;border-radius:24px;background:linear-gradient(135deg,#409CFF,#007AFF 55%,#2D55D7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:60px;font-weight:800;position:relative">B<span style="position:absolute;right:14px;bottom:14px;width:12px;height:12px;border-radius:50%;background:#FF9500"></span></div>
+background:radial-gradient(circle at 0% 0%,rgba(0,122,255,.30) 0,transparent 50%),radial-gradient(circle at 100% 10%,rgba(88,86,214,.28) 0,transparent 45%),radial-gradient(circle at 70% 120%,rgba(90,200,250,.25) 0,transparent 50%),#F0F4FA;color:#0B1220;font-family:DejaVu Sans,sans-serif">
+<div style="display:flex;align-items:center;gap:22px"><div style="width:96px;height:96px;border-radius:24px;background:linear-gradient(135deg,#409CFF,#007AFF 55%,#2D55D7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:60px;font-weight:800;position:relative">B<span style="position:absolute;right:14px;bottom:14px;width:12px;height:12px;border-radius:50%;background:#5856D6"></span></div>
 <div style="font-size:84px;font-weight:800;letter-spacing:-2px">Barakat <span style="color:#007AFF">Auto</span></div></div>
 <div style="font-size:40px;margin-top:34px;max-width:980px;color:#334155">Автомобили и двигатели из Южной Кореи — B2B экспорт под ключ</div>
-<div style="margin-top:30px;display:flex;gap:14px;font-size:24px;font-weight:700"><span style="background:#007AFF;color:#fff;padding:10px 22px;border-radius:99px">WhatsApp</span><span style="background:rgba(255,149,0,.15);color:#C25E00;padding:10px 22px;border-radius:99px">VIN · документы · таможня</span></div></div></body></html>`, "public/og-default.jpg", 1200, 630);
+<div style="margin-top:30px;display:flex;gap:14px;font-size:24px;font-weight:700"><span style="background:#007AFF;color:#fff;padding:10px 22px;border-radius:99px">WhatsApp</span><span style="background:rgba(88,86,214,.15);color:#C25E00;padding:10px 22px;border-radius:99px">VIN · документы · таможня</span></div></div></body></html>`, "public/og-default.jpg", 1200, 630);
 
 // PDF-руководства
 const guides = {
@@ -142,7 +142,7 @@ for (const [code, g] of Object.entries(guides)) {
   body{font-family:"DejaVu Sans","Noto Sans CJK KR","Noto Sans Arabic",sans-serif;margin:0;color:#111}
   .hero{background:linear-gradient(120deg,#007AFF,#2D55D7);color:#fff;padding:48px 56px}
   h1{font-size:40px;margin:0 0 8px} .sub{font-size:18px;opacity:.9} .brand{font-weight:800;letter-spacing:3px;margin-bottom:24px}
-  .step{display:flex;gap:18px;padding:18px 56px;border-bottom:1px solid #eee} .n{flex:none;width:44px;height:44px;border-radius:50%;background:#FF9500;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .step{display:flex;gap:18px;padding:18px 56px;border-bottom:1px solid #eee} .n{flex:none;width:44px;height:44px;border-radius:50%;background:#5856D6;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:20px}
   h3{margin:4px 0 6px;font-size:20px} p{margin:0;line-height:1.5;color:#333} .foot{padding:28px 56px;color:#555;font-size:14px}</style></head><body>
   <div class="hero"><div class="brand">BARAKAT AUTO</div><h1>${g.title}</h1><div class="sub">${g.sub}</div></div>
   ${g.steps.map(([h, t], i) => `<div class="step"><div class="n">${i + 1}</div><div><h3>${h}</h3><p>${t}</p></div></div>`).join("")}

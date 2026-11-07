@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { getLocale, getT } from "@/i18n/server";
 import { I18nProvider } from "@/i18n/client";
@@ -13,6 +13,8 @@ function clientDictionary(t: Dictionary): Dictionary {
 
 // Один вариативный шрифт вместо двух — меньше загрузки. На iPhone/Mac используется системный SF Pro.
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter", display: "swap" });
+// Заголовки — Manrope: аккуратная геометрия, хорошо смотрится крупно, есть кириллица.
+const manrope = Manrope({ subsets: ["latin", "cyrillic"], variable: "--font-display", display: "swap" });
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -39,7 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = await getLocale();
   const t = await getT();
   return (
-    <html lang={locale === "zh" ? "zh-CN" : locale} className={inter.variable} suppressHydrationWarning>
+    <html lang={locale === "zh" ? "zh-CN" : locale} className={`${inter.variable} ${manrope.variable}`} suppressHydrationWarning>
       <head>
         {/* Включает анимации появления только при работающем JS */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
