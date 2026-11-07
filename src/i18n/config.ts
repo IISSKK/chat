@@ -32,3 +32,22 @@ export function matchAcceptLanguage(header: string | null | undefined): Locale |
   }
   return null;
 }
+
+/** Заголовок, в котором middleware передаёт язык страницы (определён по префиксу URL) */
+export const LOCALE_HEADER = "x-bk-locale";
+
+/** Язык по умолчанию живёт без префикса (/…), остальные — с префиксом (/en/…, /ko/…, /zh/…) */
+export function stripLocale(pathname: string): { locale: Locale; path: string } {
+  const m = /^\/(en|ko|zh|ru)(?=\/|$)/.exec(pathname);
+  if (!m) return { locale: DEFAULT_LOCALE, path: pathname || "/" };
+  return { locale: m[1] as Locale, path: pathname.slice(m[0].length) || "/" };
+}
+
+/** Добавляет префикс языка к внутренней ссылке. Внешние, якорные, mailto и служебные (/api, /media…) не трогает. */
+export function localePath(locale: Locale, href: string): string {
+  if (!href.startsWith("/") || href.startsWith("//")) return href;
+  if (/^\/(api|media|demo|guides|_next|admin|icons)(\/|$)/.test(href) || /^\/(en|ko|zh)(\/|$|\?|#)/.test(href)) return href;
+  if (locale === DEFAULT_LOCALE) return href;
+  if (href === "/") return `/${locale}`;
+  return `/${locale}${href}`;
+}

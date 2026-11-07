@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getAdminModules, groupTitles } from "@/admin/registry";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { getCurrentAdmin } from "@/lib/admins";
+import { countNewLeads } from "@/lib/leads";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
       modules={getAdminModules(admin.permissions)}
       groups={groupTitles}
       user={admin.isOwner ? `${admin.username} · владелец` : admin.username}
+      badges={{ leads: admin.permissions.has("leads") ? countNewLeads() : 0 }}
     >
       {children}
     </AdminShell>

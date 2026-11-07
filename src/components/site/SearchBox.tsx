@@ -4,7 +4,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SearchIcon } from "@/components/icons";
 import { photoUrl } from "@/lib/utils";
-import { useT } from "@/i18n/client";
+import { useLocale, useT } from "@/i18n/client";
+import { localePath } from "@/i18n/config";
 import { fmt } from "@/i18n/format";
 
 type Suggestion = {
@@ -44,6 +45,7 @@ export function SearchBox({
 }) {
   const router = useRouter();
   const ru = useT();
+  const locale = useLocale();
   const fieldLabel: Record<Suggestion["field"], string> = {
     vin: ru.search.fieldVin,
     serial: ru.search.fieldSerial,
@@ -95,7 +97,7 @@ export function SearchBox({
   const go = (href: string) => {
     setOpen(false);
     onDone?.();
-    router.push(href);
+    router.push(localePath(locale, href));
   };
   const submit = (e: React.FormEvent) => {
     e.preventDefault();

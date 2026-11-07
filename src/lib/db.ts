@@ -3,6 +3,7 @@ import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
 import { seedDemoData } from "./seed";
+import { importFromItems } from "./catalog-refs";
 
 const DB_PATH = path.resolve(process.env.DATABASE_PATH || "./data/app.db");
 export const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || "./data/uploads");
@@ -83,6 +84,98 @@ function migrate(db: DB) {
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    -- Справочник марок и моделей (в форме объявления выбирается из списка — без опечаток)
+    CREATE TABLE IF NOT EXISTS brands (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      slug TEXT NOT NULL UNIQUE
+    );
+    CREATE TABLE IF NOT EXISTS models (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      brand_id INTEGER NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
+      name TEXT NOT NULL COLLATE NOCASE,
+      slug TEXT NOT NULL,
+      UNIQUE (brand_id, name),
+      UNIQUE (brand_id, slug)
+    );
+
+    -- Автоперевод объявлений
+    CREATE TABLE IF NOT EXISTS item_translations (
+      item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+      lang TEXT NOT NULL,
+      title TEXT NOT NULL,
+      notes TEXT NOT NULL DEFAULT '',
+      src_hash TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (item_id, lang)
+    );
+    CREATE TABLE IF NOT EXISTS translation_state (
+      item_id INTEGER PRIMARY KEY REFERENCES items(id) ON DELETE CASCADE,
+      status TEXT NOT NULL,            -- pending | ok | error | off
+      error TEXT NOT NULL DEFAULT '',
+      src_hash TEXT NOT NULL DEFAULT '',
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- Заявки с сайта
+    CREATE TABLE IF NOT EXISTS leads (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      name TEXT NOT NULL,
+      contact TEXT NOT NULL,
+      country TEXT NOT NULL DEFAULT '',
+      message TEXT NOT NULL DEFAULT '',
+      item_id INTEGER REFERENCES items(id) ON DELETE SET NULL,
+      item_title TEXT NOT NULL DEFAULT '',
+      lang TEXT NOT NULL DEFAULT '',
+      source TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'new',   -- new | in_progress | deal | closed
+      note TEXT NOT NULL DEFAULT '',
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status, created_at);
+
+    -- События для аналитики (без IP и персональных данных)
+    CREATE TABLE IF NOT EXISTS events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ts TEXT NOT NULL DEFAULT (datetime('now')),
+      day TEXT NOT NULL,
+      type TEXT NOT NULL,              -- visit | item_view | wa_click | lead | favorite
+      item_id INTEGER,
+      detail TEXT NOT NULL DEFAULT '', -- например kind=price
+      country TEXT NOT NULL DEFAULT '',
+      source TEXT NOT NULL DEFAULT '',
+      device TEXT NOT NULL DEFAULT '',
+      lang TEXT NOT NULL DEFAULT ''
+    );
+    CREATE INDEX IF NOT EXISTS idx_events_day ON events(day, type);
+    CREATE INDEX IF NOT EXISTS idx_events_item ON events(item_id, type);
+
+    -- Журнал действий администраторов
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ts TEXT NOT NULL DEFAULT (datetime('now')),
+      actor TEXT NOT NULL,
+      action TEXT NOT NULL,
+      entity TEXT NOT NULL DEFAULT '',
+      entity_id TEXT NOT NULL DEFAULT '',
+      details TEXT NOT NULL DEFAULT ''
+    );
+    CREATE INDEX IF NOT EXISTS idx_audit_ts ON audit_log(ts);
+
+    -- «Кто онлайн» и ограничения частоты — в общей БД, чтобы работали при нескольких процессах (PM2 cluster)
+    CREATE TABLE IF NOT EXISTS presence (
+      visitor TEXT PRIMARY KEY,
+      seen_at INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS rate_limits (
+      key TEXT PRIMARY KEY,
+      window_start INTEGER NOT NULL,
+      count INTEGER NOT NULL DEFAULT 0,
+      locked_until INTEGER NOT NULL DEFAULT 0,
+      locks INTEGER NOT NULL DEFAULT 0
+    );
+
     CREATE TABLE IF NOT EXISTS visits (
       day TEXT NOT NULL,
       visitor TEXT NOT NULL,
@@ -93,6 +186,13 @@ function migrate(db: DB) {
   // Миграции для существующих баз
   const cols = (db.prepare("PRAGMA table_info(items)").all() as { name: string }[]).map((c) => c.name);
   if (!cols.includes("views")) db.exec("ALTER TABLE items ADD COLUMN views INTEGER NOT NULL DEFAULT 0");
+  if (!cols.includes("video_url")) db.exec("ALTER TABLE items ADD COLUMN video_url TEXT NOT NULL DEFAULT ''");
+  if (!cols.includes("deleted_at")) db.exec("ALTER TABLE items ADD COLUMN deleted_at TEXT");
+  const acols = (db.prepare("PRAGMA table_info(admins)").all() as { name: string }[]).map((c) => c.name);
+  if (!acols.includes("totp_secret")) db.exec("ALTER TABLE admins ADD COLUMN totp_secret TEXT NOT NULL DEFAULT ''");
+  if (!acols.includes("totp_enabled")) db.exec("ALTER TABLE admins ADD COLUMN totp_enabled INTEGER NOT NULL DEFAULT 0");
+  if (!acols.includes("recovery_codes")) db.exec("ALTER TABLE admins ADD COLUMN recovery_codes TEXT NOT NULL DEFAULT '[]'");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_items_deleted ON items(deleted_at, status)");
   // Раздел «Запчасти» удалён — убираем его позиции
   db.exec("DELETE FROM items WHERE type NOT IN ('car', 'engine')");
 }
@@ -107,5 +207,9 @@ export function getDb(): DB {
   const { n } = db.prepare("SELECT COUNT(*) AS n FROM items").get() as { n: number };
   if (n === 0 && process.env.SEED_DEMO !== "false") seedDemoData(db);
   globalForDb.__db = db;
+  try {
+    // подтягиваем марки и модели существующих объявлений в справочник
+    importFromItems();
+  } catch {}
   return db;
 }

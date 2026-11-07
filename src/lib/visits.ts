@@ -6,12 +6,13 @@ function day(offsetDays = 0) {
   return d.toISOString().slice(0, 10);
 }
 
-export function recordVisit(visitor: string) {
-  getDb()
-    .prepare(
-      "INSERT INTO visits (day, visitor, hits) VALUES (?, ?, 1) ON CONFLICT(day, visitor) DO UPDATE SET hits = hits + 1",
-    )
-    .run(day(), visitor);
+/** Возвращает true, если это первый визит этого человека за сегодня */
+export function recordVisit(visitor: string): boolean {
+  const db = getDb();
+  const d = day();
+  const existed = !!db.prepare("SELECT 1 FROM visits WHERE day = ? AND visitor = ?").get(d, visitor);
+  db.prepare("INSERT INTO visits (day, visitor, hits) VALUES (?, ?, 1) ON CONFLICT(day, visitor) DO UPDATE SET hits = hits + 1").run(d, visitor);
+  return !existed;
 }
 
 export interface VisitStats {

@@ -1,16 +1,16 @@
 import "server-only";
+import { getDb } from "./db";
 
-/** Кто сейчас на сайте: посетители, приславшие «пульс» за последние 70 секунд (хранится в памяти процесса). */
+/** Кто сейчас на сайте: посетители, приславшие «пульс» за последние 70 секунд. Хранится в БД — верно и при нескольких процессах. */
 const WINDOW_MS = 70_000;
-const g = globalThis as unknown as { __presence?: Map<string, number> };
-const seen = (g.__presence ??= new Map());
 
 export function touchPresence(visitor: string) {
-  seen.set(visitor, Date.now());
+  const now = Date.now();
+  const db = getDb();
+  db.prepare("INSERT INTO presence (visitor, seen_at) VALUES (?, ?) ON CONFLICT(visitor) DO UPDATE SET seen_at = excluded.seen_at").run(visitor, now);
+  if (Math.random() < 0.02) db.prepare("DELETE FROM presence WHERE seen_at < ?").run(now - 10 * 60_000);
 }
 
 export function onlineCount() {
-  const cutoff = Date.now() - WINDOW_MS;
-  for (const [k, t] of seen) if (t < cutoff) seen.delete(k);
-  return Math.max(seen.size, 0);
+  return (getDb().prepare("SELECT COUNT(*) AS n FROM presence WHERE seen_at >= ?").get(Date.now() - WINDOW_MS) as { n: number }).n;
 }

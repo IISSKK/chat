@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/LocLink";
 import { siteConfig } from "@/config/site";
 import { getT } from "@/i18n/server";
 import { waOptions } from "@/lib/contacts";
@@ -90,7 +90,7 @@ export async function ContactCards() {
   const t = await getT();
   type Card = { icon: typeof WhatsAppIcon; label: string; value: string; href?: string; color: string };
   const cards: Card[] = [
-    ...waOptions("generic").map((o) => ({
+    ...waOptions("generic", undefined, t.meta.code).map((o) => ({
       icon: WhatsAppIcon,
       label: o.name ? `WhatsApp · ${o.name}` : "WhatsApp",
       value: o.langs ? `${o.phone} · ${o.langs}` : o.phone,

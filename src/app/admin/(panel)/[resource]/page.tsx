@@ -5,7 +5,7 @@ import { RowActions } from "@/components/admin/RowActions";
 import { getDictionary } from "@/i18n";
 
 const t = getDictionary("ru"); // админка на русском
-import { listItems } from "@/lib/items";
+import { countBy, listItems } from "@/lib/items";
 import { CATEGORIES, STATUSES, type Category, type Status } from "@/lib/types";
 import { formatNumber, itemPath, photoUrl } from "@/lib/utils";
 import { EyeIcon, PlusIcon, SearchIcon } from "@/components/icons";
@@ -21,16 +21,20 @@ export default async function ResourceList({ params, searchParams }: Props) {
   const canDelete = can(admin, "delete");
   const sp = await searchParams;
   const category = CATEGORIES.includes(sp.category as Category) ? (sp.category as Category) : undefined;
+  const view = sp.view === "trash" ? "trash" : "all";
   const status = STATUSES.includes(sp.status as Status) ? (sp.status as Status) : undefined;
   const q = sp.q?.slice(0, 80) || undefined;
   const page = Math.max(1, Number(sp.page) || 1);
-  const { items, total, pages, page: current } = listItems({ type: mod.itemType, category, status, q }, page, 20);
+  const { items, total, pages, page: current } = listItems({ type: mod.itemType, category, status, q, includeDrafts: true, trash: view === "trash" }, page, 20);
+  const drafts = countBy({ type: mod.itemType, status: "draft", includeDrafts: true });
+  const trashed = countBy({ type: mod.itemType, includeDrafts: true, trash: true });
 
   const pageHref = (p: number) => {
     const s = new URLSearchParams();
     if (q) s.set("q", q);
     if (category) s.set("category", category);
     if (status) s.set("status", status);
+    if (view === "trash") s.set("view", "trash");
     if (p > 1) s.set("page", String(p));
     return `${mod.href}?${s}`;
   };
@@ -47,6 +51,17 @@ export default async function ResourceList({ params, searchParams }: Props) {
         </Link>
       </div>
 
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+        {[
+          { href: mod.href, label: "Все", on: view === "all" && !status },
+          { href: `${mod.href}?status=draft`, label: `Черновики${drafts ? ` · ${drafts}` : ""}`, on: view === "all" && status === "draft" },
+          { href: `${mod.href}?view=trash`, label: `Корзина${trashed ? ` · ${trashed}` : ""}`, on: view === "trash" },
+        ].map((t) => (
+          <Link key={t.label} href={t.href} className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${t.on ? "bg-slate-900 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"}`}>{t.label}</Link>
+        ))}
+      </div>
+      {view === "trash" && <p className="rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-600">В корзине объявления лежат 30 дней, потом удаляются автоматически. Отсюда их можно вернуть.</p>}
+
       <form className="a-card grid gap-3 p-3 sm:grid-cols-[1fr_180px_160px_auto]" action={mod.href}>
         <label className="relative">
           <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -60,6 +75,7 @@ export default async function ResourceList({ params, searchParams }: Props) {
           <option value="">Любой статус</option>
           <option value="available">В наличии</option>
           <option value="sold">Продано</option>
+          <option value="draft">Черновик</option>
         </select>
         <div className="flex gap-2">
           <button className="a-btn-primary flex-1">Найти</button>
@@ -85,7 +101,7 @@ export default async function ResourceList({ params, searchParams }: Props) {
                 {(i.vin || i.serial) && <span className="mt-0.5 block truncate font-mono text-[11px] text-slate-400">{i.vin || i.serial}</span>}
               </span>
             </Link>
-            <RowActions variant="card" id={i.id} status={i.status} editHref={`${mod.href}/${i.id}`} viewHref={itemPath(i)} title={i.title} canDelete={canDelete} />
+            <RowActions variant="card" id={i.id} status={i.status} editHref={`${mod.href}/${i.id}`} viewHref={itemPath(i)} title={i.title} canDelete={canDelete} trash={view === "trash"} />
           </div>
         ))}
         {!items.length && <div className="a-card px-4 py-12 text-center text-slate-400">Ничего не найдено</div>}
@@ -128,7 +144,7 @@ export default async function ResourceList({ params, searchParams }: Props) {
                   <td className="px-4 py-3 text-slate-500">
                     <span className="inline-flex items-center gap-1 tabular-nums"><EyeIcon className="h-4 w-4" />{formatNumber(i.views)}</span>
                   </td>
-                  <RowActions id={i.id} status={i.status} editHref={`${mod.href}/${i.id}`} viewHref={itemPath(i)} title={i.title} canDelete={canDelete} />
+                  <RowActions id={i.id} status={i.status} editHref={`${mod.href}/${i.id}`} viewHref={itemPath(i)} title={i.title} canDelete={canDelete} trash={view === "trash"} />
                 </tr>
               ))}
               {!items.length && (

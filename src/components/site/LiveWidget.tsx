@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useT } from "@/i18n/client";
+import { useLocale, useT } from "@/i18n/client";
+import { getAttribution } from "@/lib/attribution";
 
 type Live = { online: number; unique: number; today: number };
 const HEARTBEAT_MS = 30_000;
@@ -12,6 +13,7 @@ const HEARTBEAT_MS = 30_000;
  */
 export function LiveWidget() {
   const ru = useT();
+  const locale = useLocale();
   const fmt = (n: number) => new Intl.NumberFormat(ru.meta.intl).format(n);
   const [data, setData] = useState<Live | null>(null);
   const [open, setOpen] = useState(false);
@@ -30,7 +32,7 @@ export function LiveWidget() {
         sent = sessionStorage.getItem("bk-visit-sent") === "1";
         sessionStorage.setItem("bk-visit-sent", "1");
       } catch {}
-      if (!sent) await fetch("/api/visit", { method: "POST" }).catch(() => {});
+      if (!sent) await fetch("/api/visit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...getAttribution(), lang: locale }) }).catch(() => {});
       beat();
     };
     const beat = async () => {

@@ -1,13 +1,16 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/site/LocLink";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { RatesTicker } from "./RatesTicker";
 import { SearchBox } from "./SearchBox";
-import { CloseIcon, MenuIcon, SearchIcon, WhatsAppIcon } from "@/components/icons";
+import { CloseIcon, HeartIcon, MenuIcon, SearchIcon, WhatsAppIcon } from "@/components/icons";
+import { useFavorites } from "@/lib/favorites-client";
+import { InstallApp } from "./InstallApp";
 import { useT } from "@/i18n/client";
+import { stripLocale } from "@/i18n/config";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { WaButton, type WaOption } from "./WaButton";
 
@@ -19,9 +22,11 @@ export function Header({ wa }: { wa: WaOption[] }) {
     { href: "/about", label: ru.nav.about },
     { href: "/#contacts", label: ru.nav.contacts },
   ];
-  const pathname = usePathname();
+  const rawPathname = usePathname();
+  const pathname = stripLocale(rawPathname).path;
   const [menu, setMenu] = useState(false);
   const [search, setSearch] = useState(false);
+  const { count: favCount } = useFavorites();
 
   useEffect(() => {
     setMenu(false);
@@ -67,6 +72,10 @@ export function Header({ wa }: { wa: WaOption[] }) {
 
         <div className="ml-auto flex items-center gap-2 md:ml-0">
           <LanguageSwitcher />
+          <Link href="/favorites" className="press relative grid h-10 w-10 place-items-center rounded-full bg-fg/[0.06] text-fg/80 hover:bg-fg/10" aria-label={ru.fav.title} title={ru.fav.title}>
+            <HeartIcon className="h-[18px] w-[18px]" fill={favCount ? "currentColor" : "none"} />
+            {favCount > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-flame px-1 text-[11px] font-bold text-white">{favCount}</span>}
+          </Link>
           <button
             onClick={() => setSearch((s) => !s)}
             className="grid h-10 w-10 place-items-center rounded-full bg-fg/[0.06] text-fg/80 hover:bg-fg/10 md:hidden"
@@ -114,7 +123,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
             </button>
           </div>
           <div className="overflow-hidden rounded-2xl bg-white/70">
-            {[{ href: "/", label: ru.nav.home }, ...NAV].map((n) => (
+            {[{ href: "/", label: ru.nav.home }, ...NAV, { href: "/favorites", label: ru.fav.title }].map((n) => (
               <Link
                 key={n.href}
                 href={n.href}
@@ -128,6 +137,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
               </Link>
             ))}
           </div>
+          <InstallApp className="mt-3 w-full" />
           <div className="mt-3">
             <p className="mb-1.5 px-2 text-[11px] font-bold uppercase tracking-wider text-fg/45">{ru.lang.label}</p>
             <LanguageSwitcher variant="row" />

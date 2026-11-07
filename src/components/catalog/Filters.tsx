@@ -3,13 +3,17 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { FilterIcon } from "@/components/icons";
-import { useT } from "@/i18n/client";
+import { useLocale, useT } from "@/i18n/client";
+import { localePath, stripLocale } from "@/i18n/config";
 import { FUELS, TRANSMISSIONS } from "@/lib/types";
 
 export function Filters({ brands, years, showType = false }: { brands: string[]; years: number[]; showType?: boolean }) {
   const router = useRouter();
   const ru = useT();
-  const pathname = usePathname();
+  const rawPathname = usePathname();
+  const locale = useLocale();
+  // usePathname может вернуть как адрес с префиксом языка, так и без — нормализуем
+  const pathname = localePath(locale, stripLocale(rawPathname).path);
   const params = useSearchParams();
   const [pending, start] = useTransition();
   const [open, setOpen] = useState(false);

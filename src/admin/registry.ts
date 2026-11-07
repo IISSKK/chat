@@ -13,10 +13,16 @@ import { dashboardModule } from "./modules/dashboard";
 import { statsModule } from "./modules/stats";
 import { adminsModule } from "./modules/admins";
 import { contactsModule } from "./modules/contacts";
+import { leadsModule } from "./modules/leads";
+import { analyticsModule } from "./modules/analytics";
+import { auditModule } from "./modules/audit";
+import { backupModule } from "./modules/backup";
+import { brandsModule } from "./modules/brands";
+import { accountModule } from "./modules/account";
 import type { Permission } from "./permissions";
 import type { AdminModule, ResourceModule } from "./types";
 
-const modules: AdminModule[] = [dashboardModule, ...catalogModules, statsModule, contactsModule, adminsModule];
+const modules: AdminModule[] = [dashboardModule, leadsModule, ...catalogModules, brandsModule, statsModule, analyticsModule, contactsModule, adminsModule, auditModule, backupModule, accountModule];
 
 /** Модули, доступные администратору с данным набором прав */
 export function getAdminModules(perms?: Set<Permission>): AdminModule[] {

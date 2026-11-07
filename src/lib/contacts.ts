@@ -54,13 +54,13 @@ export function saveWhatsAppContacts(input: unknown): string | null {
 
 export type WaKind = "price" | "docs" | "generic" | "partner";
 
-/** Варианты для кнопки WhatsApp: по одному на каждый номер (короткие ссылки /api/wa). */
-export function waOptions(kind: WaKind, itemId?: number) {
+/** Варианты для кнопки WhatsApp: по одному на каждый номер (короткие ссылки /api/wa, язык передаётся параметром l). */
+export function waOptions(kind: WaKind, itemId?: number, locale = "ru") {
   return getWhatsAppContacts().map((c, n) => ({
     name: c.name,
     phone: c.phone,
     langs: c.langs,
-    href: `/api/wa?kind=${kind}${itemId ? `&id=${itemId}` : ""}&n=${n}`,
+    href: `/api/wa?kind=${kind}${itemId ? `&id=${itemId}` : ""}&n=${n}&l=${locale}`,
   }));
 }
 export type WaOption = ReturnType<typeof waOptions>[number];

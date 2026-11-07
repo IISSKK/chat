@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { LOCALES, LOCALE_COOKIE, LOCALE_INFO, type Locale } from "@/i18n/config";
+import { LOCALES, LOCALE_COOKIE, LOCALE_INFO, localePath, stripLocale, type Locale } from "@/i18n/config";
 import { useLocale, useT } from "@/i18n/client";
 import { GlobeIcon } from "@/components/icons";
 
@@ -17,6 +17,8 @@ function setLocaleCookie(l: Locale) {
  */
 export function LanguageSwitcher({ variant = "menu" }: { variant?: "menu" | "row" }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const search = useSearchParams();
   const locale = useLocale();
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -39,7 +41,10 @@ export function LanguageSwitcher({ variant = "menu" }: { variant?: "menu" | "row
     setOpen(false);
     if (l === locale) return;
     setLocaleCookie(l);
-    start(() => router.refresh()); // сервер перерисует страницу на новом языке
+    // Переходим на ту же страницу на другом языке: /catalog/cars → /en/catalog/cars
+    const qs = search.toString();
+    const target = localePath(l, stripLocale(pathname).path) + (qs ? `?${qs}` : "");
+    start(() => router.push(target));
   };
 
   if (variant === "row") {

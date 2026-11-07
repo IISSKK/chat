@@ -9,7 +9,7 @@ import { getT } from "@/i18n/server";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const t = await getT();
-  const wa = waOptions("generic");
+  const wa = waOptions("generic", undefined, t.meta.code);
   return (
     <>
       <div className="page-bg" aria-hidden />

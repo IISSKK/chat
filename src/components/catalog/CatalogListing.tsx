@@ -1,8 +1,8 @@
-import Link from "next/link";
+import Link from "@/components/site/LocLink";
 import { Suspense } from "react";
-import { getT } from "@/i18n/server";
+import { getLocale, getT } from "@/i18n/server";
 import { facetValues, listItems } from "@/lib/items";
-import { CATEGORIES, FUELS, ITEM_TYPES, STATUSES, TRANSMISSIONS, type Category, type ItemFilters, type ItemType } from "@/lib/types";
+import { CATEGORIES, FUELS, ITEM_TYPES, PUBLIC_STATUSES, TRANSMISSIONS, type Category, type ItemFilters, type ItemType } from "@/lib/types";
 import { Filters } from "./Filters";
 import { ItemGrid } from "./ItemCard";
 import { Pagination } from "./Pagination";
@@ -17,7 +17,7 @@ export function parseFilters(sp: SearchParams, fixed: Partial<ItemFilters> = {})
   const filters: ItemFilters = {
     type: pickOne(one(sp.type), ITEM_TYPES),
     category: pickOne(one(sp.category), CATEGORIES),
-    status: pickOne(one(sp.status), STATUSES),
+    status: pickOne(one(sp.status), PUBLIC_STATUSES),
     brand: one(sp.brand),
     year: Number.isInteger(year) && year > 1900 ? year : undefined,
     fuel: pickOne(one(sp.fuel), FUELS),
@@ -83,7 +83,8 @@ export async function CatalogListing({
 }) {
   const t = await getT();
   const { filters, page, plain } = parseFilters(sp, fixed);
-  const { items, total, pages, page: current } = listItems(filters, page, 12);
+  const locale = await getLocale();
+  const { items, total, pages, page: current } = listItems(filters, page, 12, locale);
   const facets = facetValues(filters);
 
   return (

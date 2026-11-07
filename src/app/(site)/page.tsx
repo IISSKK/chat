@@ -1,5 +1,11 @@
-import Link from "next/link";
-import { getT } from "@/i18n/server";
+import Link from "@/components/site/LocLink";
+import { getLocale, getT } from "@/i18n/server";
+import type { Metadata } from "next";
+import { alternatesFor, safeJsonLd } from "@/lib/seo";
+import { siteConfig } from "@/config/site";
+import { publicBrandIndex } from "@/lib/catalog-refs";
+import { LeadButton } from "@/components/site/LeadModal";
+import { localePath } from "@/i18n/config";
 import { countBy, listItems } from "@/lib/items";
 import type { Category, Item } from "@/lib/types";
 import { itemPath, photoUrl } from "@/lib/utils";
@@ -11,6 +17,10 @@ import { Advantages, ContactCards, Guides, SectionTitle } from "@/components/sit
 import { ArrowRight, CarIcon, EngineIcon, WhatsAppIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { alternates: await alternatesFor("/") };
+}
 
 const QUICK = ["Sonata", "Santa Fe", "Palisade", "D4HB", "2022", "KMH"];
 
@@ -29,9 +39,10 @@ function Rail({ items }: { items: Item[] }) {
 
 export default async function HomePage() {
   const t = await getT();
+  const locale = await getLocale();
   const counts = { car: countBy({ type: "car" }), engine: countBy({ type: "engine" }) };
-  const featured = listItems({ type: "car", status: "available" }, 1, 1).items[0];
-  const engineCover = listItems({ type: "engine", status: "available" }, 1, 1).items[0];
+  const featured = listItems({ type: "car", status: "available" }, 1, 1, locale).items[0];
+  const engineCover = listItems({ type: "engine", status: "available" }, 1, 1, locale).items[0];
 
   const sections: { cat: Category; eyebrow: string }[] = [
     { cat: "standby", eyebrow: t.home.eyebrowStandby },
@@ -44,8 +55,31 @@ export default async function HomePage() {
     { href: "/catalog/engines", title: t.types.engine, text: t.home.categoryEngines, count: counts.engine, Icon: EngineIcon, tint: "from-flame/85 via-flame/40", cover: engineCover },
   ];
 
+  const brandChips = publicBrandIndex().slice(0, 10);
+  const orgLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+      logo: `${siteConfig.url}/icon.svg`,
+      email: siteConfig.email,
+      address: { "@type": "PostalAddress", addressLocality: "Incheon", addressCountry: "KR" },
+      description: t.meta.description,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: siteConfig.name,
+      url: siteConfig.url,
+      inLanguage: locale,
+      potentialAction: { "@type": "SearchAction", target: `${siteConfig.url}${localePath(locale, "/search")}?q={search_term_string}`, "query-input": "required name=search_term_string" },
+    },
+  ];
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(orgLd) }} />
       {/* ПЕРВЫЙ ЭКРАН */}
       <section className="container pb-6 pt-8 sm:pt-14 lg:pt-20">
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-14">
@@ -110,6 +144,19 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {brandChips.length > 0 && (
+        <section className="container mt-10 sm:mt-14">
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-fg/40">{t.brandPage.popular}</p>
+          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:flex-wrap sm:px-0">
+            {brandChips.map(({ brand, count }) => (
+              <Link key={brand.id} href={`/brand/${brand.slug}`} className="press shrink-0 rounded-full bg-white/70 px-4 py-2 text-sm font-semibold ring-1 ring-fg/10 hover:bg-white hover:text-brand">
+                {brand.name} <span className="text-fg/40">{count}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Категории */}
       <section className="container mt-16 sm:mt-24">
         <SectionTitle title={t.home.categoriesTitle} />
@@ -144,7 +191,7 @@ export default async function HomePage() {
 
       {/* Подборки */}
       {sections.map(({ cat, eyebrow }) => {
-        const items = listItems({ type: "car", category: cat }, 1, 8).items;
+        const items = listItems({ type: "car", category: cat }, 1, 8, locale).items;
         if (!items.length) return null;
         return (
           <section key={cat} className="cv-auto container mt-20 sm:mt-24">
@@ -154,7 +201,7 @@ export default async function HomePage() {
         );
       })}
       {(() => {
-        const engines = listItems({ type: "engine" }, 1, 8).items;
+        const engines = listItems({ type: "engine" }, 1, 8, locale).items;
         return engines.length ? (
           <section className="cv-auto container mt-20 sm:mt-24">
             <SectionTitle eyebrow={t.home.eyebrowEngines} title={t.types.engine} href="/catalog/engines" />
@@ -192,9 +239,12 @@ export default async function HomePage() {
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand">{t.home.eyebrowContacts}</p>
             <h2 className="h-display text-4xl sm:text-5xl">{t.home.contactsTitle}</h2>
             <p className="mt-4 max-w-md text-fg/60">{t.home.contactsText}</p>
-            <WaButton options={waOptions("generic")} placement="up" className="btn-wa mt-6 px-7 py-4 text-base" wrapperClassName="inline-block">
+            <div className="mt-6 flex flex-wrap gap-3">
+            <LeadButton className="btn-brand px-7 py-4 text-base" />
+            <WaButton options={waOptions("generic", undefined, t.meta.code)} placement="up" className="btn-wa px-7 py-4 text-base" wrapperClassName="inline-block">
               <WhatsAppIcon /> {t.home.writeWhatsapp}
             </WaButton>
+            </div>
           </div>
           <ContactCards />
         </div>

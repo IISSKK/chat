@@ -2,6 +2,7 @@ import { siteConfig } from "@/config/site";
 import type { Dictionary } from "@/i18n";
 import type { Item } from "./types";
 import { itemUrl } from "./utils";
+import type { Locale } from "@/i18n/config";
 
 export function waLink(text: string, phone = siteConfig.whatsapp) {
   return `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
@@ -13,7 +14,7 @@ function itemLines(item: Item, t: Dictionary) {
     `${w.model}: ${item.title}${item.year ? ` (${item.year})` : ""}`,
     item.vin && `${w.vin}: ${item.vin}`,
     item.serial && `${w.serial}: ${item.serial}`,
-    `${w.link}: ${itemUrl(item)}`,
+    `${w.link}: ${itemUrl(item, t.meta.code as Locale)}`,
   ].filter(Boolean) as string[];
 }
 

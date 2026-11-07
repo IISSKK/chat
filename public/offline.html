@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Barakat Auto</title>
+<style>
+  body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#F0F4FA;color:#0B1220;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-align:center;padding:24px}
+  .logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#409CFF,#007AFF 55%,#2D55D7);color:#fff;font-weight:800;font-size:34px;display:grid;place-items:center;margin:0 auto 20px}
+  h1{font-size:22px;margin:0 0 8px}p{margin:0 auto 24px;max-width:320px;color:#556}button{background:#007AFF;color:#fff;border:0;border-radius:999px;padding:14px 28px;font-size:16px;font-weight:600}
+</style>
+</head>
+<body>
+<div>
+  <div class="logo">B</div>
+  <h1 id="t"></h1><p id="p"></p><button id="b"></button>
+</div>
+<script>
+  var L={ru:["Нет соединения","Проверьте интернет и попробуйте снова.","Повторить"],en:["You are offline","Check your connection and try again.","Retry"],ko:["연결되지 않았습니다","인터넷 연결을 확인하고 다시 시도하세요.","다시 시도"],zh:["无网络连接","请检查网络后重试。","重试"]};
+  var l=(navigator.language||"en").slice(0,2);var x=L[l]||L.en;
+  document.documentElement.lang=L[l]?l:"en";
+  document.getElementById("t").textContent=x[0];document.getElementById("p").textContent=x[1];
+  var b=document.getElementById("b");b.textContent=x[2];b.onclick=function(){location.reload()};
+</script>
+</body>
+</html>

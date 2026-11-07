@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { sanitizePermissions } from "@/admin/permissions";
 import { createAdmin, listAdmins, validatePassword, validateUsername } from "@/lib/admins";
 import { requireApiPermission } from "@/lib/admin-guard";
+import { logAudit } from "@/lib/audit";
 
 export async function GET() {
   const admin = await requireApiPermission("admins");
@@ -20,5 +21,6 @@ export async function POST(req: NextRequest) {
   if (listAdmins().some((a) => a.username.toLowerCase() === username.toLowerCase()))
     return NextResponse.json({ error: "Такой логин уже есть" }, { status: 400 });
   const id = createAdmin(username, password, sanitizePermissions(body.permissions));
+  logAudit(admin.username, "admin_create", "admin", id, `${username}: ${sanitizePermissions(body.permissions).join(", ")}`);
   return NextResponse.json({ id });
 }

@@ -4,7 +4,9 @@ export type ItemType = (typeof ITEM_TYPES)[number];
 export const CATEGORIES = ["standby", "listing", "running"] as const;
 export type Category = (typeof CATEGORIES)[number];
 
-export const STATUSES = ["available", "sold"] as const;
+export const STATUSES = ["available", "sold", "draft"] as const;
+/** Статусы, которые видны на сайте */
+export const PUBLIC_STATUSES = ["available", "sold"] as const;
 export type Status = (typeof STATUSES)[number];
 
 export const FUELS = ["gasoline", "diesel", "hybrid", "lpg", "electric"] as const;
@@ -41,19 +43,27 @@ export interface Item {
   fuel: string;
   notes: string;
   status: Status;
+  /** Ссылка на видео (YouTube / Vimeo), необязательно */
+  video_url: string;
   views: number;
+  deleted_at: string | null;
   created_at: string;
   updated_at: string;
   photos: Photo[];
 }
 
-export type ItemInput = Omit<Item, "id" | "slug" | "created_at" | "updated_at" | "photos" | "views">;
+export type ItemInput = Omit<Item, "id" | "slug" | "created_at" | "updated_at" | "photos" | "views" | "deleted_at">;
 
 export interface ItemFilters {
   type?: ItemType;
   category?: Category;
   status?: Status;
   brand?: string;
+  model?: string;
+  /** Только для админки: показывать черновики */
+  includeDrafts?: boolean;
+  /** Только для админки: корзина */
+  trash?: boolean;
   year?: number;
   yearFrom?: number;
   yearTo?: number;

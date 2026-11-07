@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/LocLink";
 import { siteConfig } from "@/config/site";
 
 export function Logo({ className = "" }: { className?: string }) {

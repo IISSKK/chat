@@ -16,9 +16,11 @@ export async function saveUpload(file: File): Promise<string> {
   const buf = Buffer.from(await file.arrayBuffer());
   const id = crypto.randomBytes(12).toString("hex");
   await fs.mkdir(UPLOAD_DIR, { recursive: true });
+  // Файл должен реально быть картинкой (sharp проверяет содержимое, а не только заявленный тип).
+  // Если разобрать не удалось — отклоняем: сырые байты на диск не пишем.
+  const sharp = (await import("sharp")).default;
   try {
-    const sharp = (await import("sharp")).default;
-    const base = sharp(buf).rotate().flatten({ background: "#ffffff" });
+    const base = sharp(buf, { limitInputPixels: 100_000_000 }).rotate().flatten({ background: "#ffffff" });
     const [full, small] = await Promise.all([
       base.clone().resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 82, mozjpeg: true }).toBuffer(),
       base.clone().resize({ width: 640, height: 640, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 76, mozjpeg: true }).toBuffer(),
@@ -28,10 +30,7 @@ export async function saveUpload(file: File): Promise<string> {
     await fs.writeFile(path.join(UPLOAD_DIR, `${id}_sm.jpg`), small); // уменьшенная копия для списков
     return name;
   } catch {
-    const ext = file.type.split("/")[1].replace("jpeg", "jpg");
-    const name = `${id}.${ext}`;
-    await fs.writeFile(path.join(UPLOAD_DIR, name), buf);
-    return name;
+    throw new Error(`Не удалось обработать «${file.name}»: файл повреждён или это не изображение`);
   }
 }
 

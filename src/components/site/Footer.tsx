@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/LocLink";
 import { siteConfig } from "@/config/site";
 import { getT } from "@/i18n/server";
 import { waOptions } from "@/lib/contacts";
@@ -16,7 +16,7 @@ export async function Footer() {
           <Logo />
           <p className="max-w-xs text-sm leading-relaxed text-fg/55">{t.meta.tagline}. {t.footer.worldwide}</p>
           <div className="flex flex-col items-start gap-2">
-            {waOptions("generic").map((o) => (
+            {waOptions("generic", undefined, t.meta.code).map((o) => (
               <a key={o.href} href={o.href} target="_blank" rel="noopener nofollow" className="btn-wa justify-start py-2.5 text-left">
                 <WhatsAppIcon className="h-4 w-4 shrink-0" />
                 <span className="flex flex-col leading-tight">
@@ -35,6 +35,8 @@ export async function Footer() {
             <li><Link className="hover:text-brand" href="/catalog/cars/standby">{t.categoriesLong.standby}</Link></li>
             <li><Link className="hover:text-brand" href="/catalog/cars/running">{t.categoriesLong.running}</Link></li>
             <li><Link className="hover:text-brand" href="/catalog/engines">{t.nav.engines}</Link></li>
+            <li><Link className="hover:text-brand" href="/brand">{t.brandPage.brands}</Link></li>
+            <li><Link className="hover:text-brand" href="/favorites">{t.fav.title}</Link></li>
           </ul>
         </div>
 

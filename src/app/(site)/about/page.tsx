@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 import { getT } from "@/i18n/server";
+import { alternatesFor } from "@/lib/seo";
 import { fmt } from "@/i18n/format";
 import { waOptions } from "@/lib/contacts";
 import { WaButton } from "@/components/site/WaButton";
@@ -11,7 +12,7 @@ import { WhatsAppIcon } from "@/components/icons";
 export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
-  return { title: t.about.title, description: t.about.lead };
+  return { title: t.about.title, description: t.about.lead, alternates: await alternatesFor("/about") };
 }
 
 export default async function AboutPage() {
@@ -55,7 +56,7 @@ export default async function AboutPage() {
                 <h2 className="h-display text-2xl sm:text-4xl">{t.about.partnershipTitle}</h2>
                 <p className="mt-3 max-w-2xl text-fg/65">{t.about.partnershipText}</p>
               </div>
-              <WaButton options={waOptions("partner")} placement="up" align="right" className="btn-brand px-7 py-4 text-base">
+              <WaButton options={waOptions("partner", undefined, t.meta.code)} placement="up" align="right" className="btn-brand px-7 py-4 text-base">
                 <WhatsAppIcon /> {t.about.partnershipCta}
               </WaButton>
             </div>

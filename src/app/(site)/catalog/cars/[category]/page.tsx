@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getT } from "@/i18n/server";
+import { alternatesFor } from "@/lib/seo";
 import { CatalogHeader, CatalogListing, CategoryTabs, type SearchParams } from "@/components/catalog/CatalogListing";
 import { CATEGORIES, type Category } from "@/lib/types";
 import { countBy } from "@/lib/items";
@@ -12,7 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params;
   if (!CATEGORIES.includes(category as Category)) return {};
   const t = await getT();
-  return { title: t.categoriesLong[category as Category] };
+  return { title: t.categoriesLong[category as Category], alternates: await alternatesFor(`/catalog/cars/${category}`) };
 }
 
 export default async function CarsCategoryPage({ params, searchParams }: Props) {

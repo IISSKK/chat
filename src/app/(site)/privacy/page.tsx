@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 import { getT } from "@/i18n/server";
+import { alternatesFor } from "@/lib/seo";
 import { fmt } from "@/i18n/format";
 import { LegalPage } from "@/components/site/LegalPage";
 import { getWhatsAppContacts } from "@/lib/contacts";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
-  return { title: t.legal.privacyTitle };
+  return { title: t.legal.privacyTitle, alternates: await alternatesFor("/privacy") };
 }
 
 export default async function PrivacyPage() {

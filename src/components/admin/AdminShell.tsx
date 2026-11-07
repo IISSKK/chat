@@ -4,22 +4,25 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { AdminIcon, AdminModule } from "@/admin/types";
-import { CarIcon, ChartIcon, CloseIcon, EngineIcon, EyeIcon, GridIcon, LogoutIcon, MailIcon, MenuIcon, UsersIcon, WhatsAppIcon } from "@/components/icons";
+import { CarIcon, ChartIcon, CloseIcon, EngineIcon, EyeIcon, GridIcon, LogoutIcon, MailIcon, MenuIcon, UsersIcon, WhatsAppIcon, ListIcon, TagIcon, DownloadIcon } from "@/components/icons";
+import { ShieldIcon } from "@/components/icons";
 
 const ICONS: Record<AdminIcon, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   dashboard: GridIcon, car: CarIcon, engine: EngineIcon, chart: ChartIcon,
-  inbox: MailIcon, image: EyeIcon, text: GridIcon, users: UsersIcon, phone: WhatsAppIcon,
+  inbox: MailIcon, image: EyeIcon, text: GridIcon, users: UsersIcon, phone: WhatsAppIcon, leads: MailIcon, shield: ShieldIcon, list: ListIcon, download: DownloadIcon, tag: TagIcon,
 };
 
 export function AdminShell({
   modules,
   groups,
   user,
+  badges = {},
   children,
 }: {
   modules: AdminModule[];
   groups: Record<string, string>;
   user: string;
+  badges?: Record<string, number>;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -66,6 +69,7 @@ export function AdminShell({
                     >
                       <Icon className="h-[18px] w-[18px]" />
                       {m.title}
+                      {badges[m.id] > 0 && <span className="ml-auto rounded-full bg-brand px-2 py-0.5 text-[11px] font-bold text-white">{badges[m.id]}</span>}
                     </Link>
                   </li>
                 );

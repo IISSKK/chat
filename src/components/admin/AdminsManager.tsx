@@ -6,7 +6,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { PlusIcon, TrashIcon } from "@/components/icons";
 
 type Perm = { id: string; label: string; hint: string };
-type Admin = { id: number; username: string; permissions: string[]; active: boolean; created_at: string; last_login: string | null };
+type Admin = { id: number; username: string; permissions: string[]; active: boolean; created_at: string; last_login: string | null; twoFactor?: boolean };
 
 async function api(url: string, method: string, body?: unknown) {
   const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
@@ -103,6 +103,7 @@ export function AdminsManager({ initial, owner, meId, permissions }: { initial: 
                   {a.username}
                   {a.id === meId && <span className="ml-2 text-xs font-normal text-slate-400">(это вы)</span>}
                   {!a.active && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-500">Отключён</span>}
+                  {a.twoFactor && <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700">2FA</span>}
                 </p>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {a.permissions.length ? (
@@ -127,6 +128,11 @@ export function AdminsManager({ initial, owner, meId, permissions }: { initial: 
                 </button>
                 {a.id !== meId && (
                   <>
+                    {a.twoFactor && (
+                      <button onClick={() => run(() => api(`/api/admin/admins/${a.id}`, "PUT", { reset2fa: true }))} disabled={busy} className="a-btn-ghost px-3 py-2 text-xs" title="Если человек потерял телефон">
+                        Сбросить 2FA
+                      </button>
+                    )}
                     <button onClick={() => run(() => api(`/api/admin/admins/${a.id}`, "PUT", { active: !a.active }))} disabled={busy} className="a-btn-ghost px-3 py-2 text-xs">
                       {a.active ? "Отключить" : "Включить"}
                     </button>

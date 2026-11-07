@@ -1,42 +1,48 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/site/LocLink";
 import { notFound, permanentRedirect } from "next/navigation";
 import { siteConfig } from "@/config/site";
-import { getT } from "@/i18n/server";
-import { getItem, listItems } from "@/lib/items";
+import { localePath } from "@/i18n/config";
+import { getLocale, getT } from "@/i18n/server";
+import { getItem, getItemAny, listItems } from "@/lib/items";
+import { getCurrentAdmin } from "@/lib/admins";
+import { brandModelSlugs } from "@/lib/catalog-refs";
 import { formatNumber, itemPath, itemUrl, parseIdFromParam, photoUrl, typePath } from "@/lib/utils";
 import { waOptions } from "@/lib/contacts";
-import { WaButton } from "@/components/site/WaButton";
+import { parseVideoUrl } from "@/lib/video";
+import { alternatesFor, absoluteUrl, safeJsonLd, OG_ALTERNATE_LOCALES } from "@/lib/seo";
 import { Gallery } from "@/components/catalog/Gallery";
 import { ItemGrid, SoldBadge, specChips } from "@/components/catalog/ItemCard";
 import { ShareMenu } from "@/components/catalog/ShareMenu";
 import { ItemViews } from "@/components/catalog/ItemViews";
+import { FavoriteButton } from "@/components/catalog/FavoriteButton";
+import { VideoPlayer } from "@/components/catalog/VideoPlayer";
+import { LeadButton } from "@/components/site/LeadModal";
+import { WaButton } from "@/components/site/WaButton";
 import { ArrowLeft, DocIcon, WhatsAppIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
-
-/** JSON для <script type="application/ld+json">: экранируем <, >, & и U+2028/2029, иначе "</script>" в названии ломает страницу (XSS). */
-function safeJsonLd(data: unknown) {
-  return JSON.stringify(data)
-    .replace(/</g, "\\u003c")
-    .replace(/>/g, "\\u003e")
-    .replace(/&/g, "\\u0026")
-    .replace(/\u2028/g, "\\u2028")
-    .replace(/\u2029/g, "\\u2029");
-}
 type Props = { params: Promise<{ slug: string }> };
 
+/** Объявление для страницы. Черновик и корзину видит только вошедший администратор (предпросмотр). */
 async function load(params: Props["params"]) {
   const { slug } = await params;
   const id = parseIdFromParam(slug);
-  const item = id ? getItem(id) : null;
-  return { item, slug };
+  const locale = await getLocale();
+  let item = id ? getItem(id, locale) : null;
+  let preview: "draft" | "trash" | null = null;
+  if (!item && id && (await getCurrentAdmin())) {
+    item = getItemAny(id, locale);
+    preview = item ? (item.deleted_at ? "trash" : item.status === "draft" ? "draft" : null) : null;
+  }
+  return { item, slug, preview };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { item } = await load(params);
+  const { item, preview } = await load(params);
   const t = await getT();
-  if (!item) return { title: t.item.notFound };
+  const locale = await getLocale();
+  if (!item) return { title: t.item.notFound, robots: { index: false } };
   const desc = [
     item.status === "sold" ? "SOLDOUT" : t.status.available,
     ...specChips(item, t),
@@ -49,24 +55,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: item.title,
     description: desc,
-    alternates: { canonical: itemPath(item) },
-    openGraph: { type: "article", title: `${item.title} — ${siteConfig.name}`, description: desc, url: itemUrl(item), images, locale: t.meta.ogLocale },
+    robots: preview ? { index: false, follow: false } : undefined,
+    alternates: await alternatesFor(itemPath(item)),
+    openGraph: { type: "article", title: `${item.title} — ${siteConfig.name}`, description: desc, url: itemUrl(item, locale), images, locale: t.meta.ogLocale, alternateLocale: OG_ALTERNATE_LOCALES(locale) },
     twitter: { card: "summary_large_image", title: item.title, description: desc, images: images.map((i) => i.url) },
   };
 }
 
 export default async function ItemPage({ params }: Props) {
-  const { item, slug } = await load(params);
+  const { item, slug, preview } = await load(params);
   if (!item) notFound();
-  if (slug !== `${item.id}-${item.slug}`) permanentRedirect(itemPath(item));
+  const locale = await getLocale();
+  if (slug !== `${item.id}-${item.slug}`) permanentRedirect(localePath(locale, itemPath(item)));
   const t = await getT();
 
   const sold = item.status === "sold";
   const fuel = t.fuel[item.fuel as keyof typeof t.fuel] ?? item.fuel;
   const trans = t.transmission[item.transmission as keyof typeof t.transmission] ?? item.transmission;
-  const specs: [string, string | null][] = [
-    [t.fields.brand, item.brand],
-    [t.fields.model, item.model],
+  const slugs = item.type === "car" ? brandModelSlugs(item.brand, item.model) : brandModelSlugs(item.brand, "");
+  const video = item.video_url ? parseVideoUrl(item.video_url) : null;
+
+  const specs: [string, string | null, string?][] = [
+    [t.fields.brand, item.brand, slugs.brand ? `/brand/${slugs.brand.slug}` : undefined],
+    [t.fields.model, item.model, slugs.brand && slugs.model ? `/brand/${slugs.brand.slug}/${slugs.model.slug}` : undefined],
     [t.fields.year, item.year ? String(item.year) : null],
     [t.fields.firstRegistration, item.first_registration],
     [t.fields.vin, item.vin],
@@ -77,38 +88,82 @@ export default async function ItemPage({ params }: Props) {
     [t.fields.mileage, item.mileage !== null ? `${formatNumber(item.mileage, t.meta.intl)} ${t.units.km}` : null],
     [t.fields.fuel, fuel],
   ];
-  const similar = listItems({ type: item.type, status: "available", brand: item.brand || undefined }, 1, 5).items
+  const similar = listItems({ type: item.type, status: "available", brand: item.brand || undefined }, 1, 5, locale).items
     .filter((i) => i.id !== item.id)
     .slice(0, 4);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": item.type === "car" ? "Car" : "Product",
-    name: item.title,
-    brand: item.brand || undefined,
-    model: item.model || undefined,
-    vehicleIdentificationNumber: item.vin || undefined,
-    productionDate: item.year ? String(item.year) : undefined,
-    image: item.photos.map((p) => `${siteConfig.url}${photoUrl(p.filename)}`),
-    url: itemUrl(item),
-  };
+  const crumbs = [
+    { name: t.nav.home, url: absoluteUrl(locale, "/") },
+    { name: t.types[item.type], url: absoluteUrl(locale, typePath(item.type)) },
+    ...(slugs.brand && item.type === "car" ? [{ name: slugs.brand.name, url: absoluteUrl(locale, `/brand/${slugs.brand.slug}`) }] : []),
+    ...(slugs.brand && slugs.model && item.type === "car" ? [{ name: slugs.model.name, url: absoluteUrl(locale, `/brand/${slugs.brand.slug}/${slugs.model.slug}`) }] : []),
+    { name: item.title, url: itemUrl(item, locale) },
+  ];
+
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": item.type === "car" ? ["Product", "Car"] : "Product",
+      name: item.title,
+      description: item.notes || undefined,
+      brand: item.brand ? { "@type": "Brand", name: item.brand } : undefined,
+      model: item.model || undefined,
+      vehicleIdentificationNumber: item.vin || undefined,
+      productionDate: item.year ? String(item.year) : undefined,
+      vehicleModelDate: item.year ? String(item.year) : undefined,
+      mileageFromOdometer: item.mileage !== null && item.type === "car" ? { "@type": "QuantitativeValue", value: item.mileage, unitCode: "KMT" } : undefined,
+      fuelType: item.fuel || undefined,
+      vehicleTransmission: item.transmission || undefined,
+      image: item.photos.map((p) => `${siteConfig.url}${photoUrl(p.filename)}`),
+      url: itemUrl(item, locale),
+      inLanguage: locale,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: c.url })),
+    },
+  ];
 
   return (
     <div className="container pt-6 sm:pt-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <nav className="mb-5 flex items-center gap-2 text-sm text-fg/50">
+      {preview && (
+        <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-flame/30 bg-flame/10 px-4 py-3 text-sm font-semibold text-[#9A4B00]">
+          <span>👁 {preview === "trash" ? "В корзине — виден только вам" : t.misc.draftBanner}</span>
+          <a href={`/admin/${item.type === "car" ? "cars" : "engines"}/${item.id}`} className="ml-auto underline">{t.misc.draftEdit} →</a>
+        </div>
+      )}
+      <nav className="mb-5 flex flex-wrap items-center gap-2 text-sm text-fg/50" aria-label="breadcrumb">
         <Link href={typePath(item.type)} className="inline-flex items-center gap-1.5 rounded-full bg-fg/[0.06] px-3 py-1.5 font-semibold text-fg/80 transition hover:bg-fg/10">
           <ArrowLeft className="h-4 w-4" /> {t.types[item.type]}
         </Link>
-        {item.type === "car" && (
-          <Link href={`/catalog/cars/${item.category}`} className="hidden hover:text-fg sm:inline">/ {t.categoriesLong[item.category]}</Link>
+        {slugs.brand && item.type === "car" && (
+          <>
+            <span>/</span>
+            <Link href={`/brand/${slugs.brand.slug}`} className="hover:text-fg">{slugs.brand.name}</Link>
+          </>
+        )}
+        {slugs.brand && slugs.model && item.type === "car" && (
+          <>
+            <span className="hidden sm:inline">/</span>
+            <Link href={`/brand/${slugs.brand.slug}/${slugs.model.slug}`} className="hidden hover:text-fg sm:inline">{slugs.model.name}</Link>
+          </>
         )}
       </nav>
 
       <div className="grid gap-8 lg:grid-cols-[1.25fr_1fr] lg:gap-12">
-        <div className="relative">
-          <Gallery photos={item.photos.map((p) => photoUrl(p.filename))} title={item.title} sold={sold} />
-          {sold && <SoldBadge label={t.status.sold} className="pointer-events-none absolute left-4 top-4 z-10 text-lg" />}
+        <div className="space-y-5">
+          <div className="relative">
+            <Gallery photos={item.photos.map((p) => photoUrl(p.filename))} title={item.title} sold={sold} />
+            {sold && <SoldBadge label={t.status.sold} className="pointer-events-none absolute left-4 top-4 z-10 text-lg" />}
+          </div>
+          {video && (
+            <section>
+              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-fg/40">{t.video.title}</h2>
+              <VideoPlayer embed={video.embed} title={item.title} poster={item.photos[0] ? photoUrl(item.photos[0].filename, "sm") : undefined} />
+            </section>
+          )}
         </div>
 
         <div className="lg:sticky lg:top-28 lg:self-start">
@@ -126,14 +181,18 @@ export default async function ItemPage({ params }: Props) {
           <div className="mt-6 rounded-3xl surface p-4 sm:p-5">
             <p className="mb-4 text-sm text-fg/60">{sold ? t.item.soldNote : t.item.contactNote}</p>
             <div className="grid gap-2">
-              <WaButton options={waOptions("price", item.id)} className="btn-wa w-full py-4 text-base">
+              <WaButton options={waOptions("price", item.id, t.meta.code)} className="btn-wa w-full py-4 text-base">
                 <WhatsAppIcon /> {t.actions.askPrice}
               </WaButton>
               <div className="grid grid-cols-[1fr_auto] gap-2">
-                <WaButton options={waOptions("docs", item.id)} className="btn-ghost w-full py-3" wrapperClassName="min-w-0">
+                <WaButton options={waOptions("docs", item.id, t.meta.code)} className="btn-ghost w-full py-3" wrapperClassName="min-w-0">
                   <DocIcon className="h-4 w-4" /> {t.actions.docs}
                 </WaButton>
-                <ShareMenu url={itemUrl(item)} title={item.title} />
+                <ShareMenu url={itemUrl(item, locale)} title={item.title} />
+              </div>
+              <div className="grid grid-cols-[1fr_auto] gap-2">
+                <LeadButton itemId={item.id} itemTitle={item.title} className="btn-brand w-full py-3" />
+                <FavoriteButton id={item.id} withLabel className="!h-auto !w-auto !rounded-full px-4" />
               </div>
             </div>
           </div>
@@ -141,10 +200,12 @@ export default async function ItemPage({ params }: Props) {
           <div className="mt-6">
             <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-fg/40">{t.item.specs}</h2>
             <dl className="divide-y divide-fg/[0.06] overflow-hidden rounded-3xl surface">
-              {specs.filter(([, v]) => v).map(([k, v]) => (
+              {specs.filter(([, v]) => v).map(([k, v, href]) => (
                 <div key={k} className="grid grid-cols-[minmax(110px,40%)_1fr] gap-3 px-4 py-3 text-sm sm:px-5">
                   <dt className="text-fg/50">{k}</dt>
-                  <dd className={`font-semibold ${k === t.fields.vin || k === t.fields.serial ? "break-all font-mono" : ""}`}>{v}</dd>
+                  <dd className={`font-semibold ${k === t.fields.vin || k === t.fields.serial ? "break-all font-mono" : ""}`}>
+                    {href ? <Link href={href} className="text-brand hover:underline">{v}</Link> : v}
+                  </dd>
                 </div>
               ))}
             </dl>

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getWhatsAppContacts, saveWhatsAppContacts } from "@/lib/contacts";
 import { requireApiPermission } from "@/lib/admin-guard";
+import { logAudit } from "@/lib/audit";
 
 export async function GET() {
   const admin = await requireApiPermission("contacts");
@@ -15,6 +16,7 @@ export async function PUT(req: NextRequest) {
   const body = (await req.json().catch(() => ({}))) as { contacts?: unknown };
   const error = saveWhatsAppContacts(body.contacts);
   if (error) return NextResponse.json({ error }, { status: 400 });
+  logAudit(admin.username, "contacts_update", "settings", "whatsapp", getWhatsAppContacts().map((c) => c.phone).join(", "));
   revalidatePath("/", "layout");
   return NextResponse.json({ contacts: getWhatsAppContacts() });
 }

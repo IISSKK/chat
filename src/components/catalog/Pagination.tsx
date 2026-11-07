@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/LocLink";
 import { ChevronLeft, ChevronRight } from "@/components/icons";
 import { getT } from "@/i18n/server";
 

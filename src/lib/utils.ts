@@ -1,4 +1,5 @@
 import { siteConfig } from "@/config/site";
+import { localePath, type Locale } from "@/i18n/config";
 import type { Item, ItemType } from "./types";
 
 const translit: Record<string, string> = {
@@ -26,8 +27,9 @@ export function itemPath(item: Pick<Item, "id" | "slug">) {
   return `/item/${item.id}-${item.slug}`;
 }
 
-export function itemUrl(item: Pick<Item, "id" | "slug">) {
-  return `${siteConfig.url}${itemPath(item)}`;
+/** Полная ссылка на объявление в языке посетителя (для WhatsApp, «Поделиться», SEO) */
+export function itemUrl(item: Pick<Item, "id" | "slug">, locale: Locale = "ru") {
+  return `${siteConfig.url}${localePath(locale, itemPath(item))}`;
 }
 
 /** URL фото. size "sm" — уменьшенная копия (~640px) для списков и карточек: быстрее грузится на телефоне. */

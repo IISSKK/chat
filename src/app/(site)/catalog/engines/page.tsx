@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getT } from "@/i18n/server";
+import { alternatesFor } from "@/lib/seo";
 import { CatalogHeader, CatalogListing, type SearchParams } from "@/components/catalog/CatalogListing";
 import { countBy } from "@/lib/items";
 
@@ -7,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
-  return { title: t.catalog.titleEngines, description: t.catalog.metaEngines };
+  return { title: t.catalog.titleEngines, description: t.catalog.metaEngines, alternates: await alternatesFor("/catalog/engines") };
 }
 
 export default async function Page({ searchParams }: { searchParams: Promise<SearchParams> }) {

@@ -4,6 +4,8 @@ import { createItem } from "@/lib/items";
 import { parseItemInput, resolvePhotos } from "@/lib/item-form";
 import { requireApiPermission } from "@/lib/admin-guard";
 import { permissionForType } from "@/admin/permissions";
+import { logAudit } from "@/lib/audit";
+import { queueTranslation } from "@/lib/translate";
 
 export async function POST(req: NextRequest) {
   const fd = await req.formData();
@@ -14,6 +16,8 @@ export async function POST(req: NextRequest) {
   try {
     const photos = await resolvePhotos(fd, []);
     const id = createItem(data, photos);
+    logAudit(admin.username, "item_create", data.type, id, `${data.title} (${data.status})`);
+    queueTranslation(id);
     revalidatePath("/", "layout");
     return NextResponse.json({ id });
   } catch (e) {
