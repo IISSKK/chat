@@ -9,7 +9,8 @@
     "db:reset": "node scripts/reset-db.mjs",
     "assets": "node scripts/generate-assets.mjs",
     "typecheck": "tsc --noEmit",
-    "admin:reset-2fa": "node --disable-warning=ExperimentalWarning scripts/reset-2fa.mjs"
+    "admin:reset-2fa": "node --disable-warning=ExperimentalWarning scripts/reset-2fa.mjs",
+    "admin:unlock": "node --disable-warning=ExperimentalWarning scripts/unlock.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
