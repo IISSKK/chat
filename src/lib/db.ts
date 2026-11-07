@@ -152,6 +152,14 @@ function migrate(db: DB) {
     CREATE INDEX IF NOT EXISTS idx_events_item ON events(item_id, type);
 
     -- Журнал действий администраторов
+    CREATE TABLE IF NOT EXISTS dev_tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ts TEXT NOT NULL DEFAULT (datetime('now')),
+      author TEXT NOT NULL,
+      text TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'new',
+      reply TEXT NOT NULL DEFAULT ''
+    );
     CREATE TABLE IF NOT EXISTS audit_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       ts TEXT NOT NULL DEFAULT (datetime('now')),
