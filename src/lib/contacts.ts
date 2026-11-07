@@ -52,7 +52,7 @@ export function saveWhatsAppContacts(input: unknown): string | null {
   return null;
 }
 
-export type WaKind = "price" | "docs" | "generic" | "partner";
+export type WaKind = "price" | "docs" | "generic" | "partner" | "body" | "chassis";
 
 /** Варианты для кнопки WhatsApp: по одному на каждый номер (короткие ссылки /api/wa, язык передаётся параметром l). */
 export function waOptions(kind: WaKind, itemId?: number, locale = "ru") {

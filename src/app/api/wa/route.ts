@@ -13,11 +13,11 @@ export const dynamic = "force-dynamic";
 
 /**
  * Короткая ссылка на WhatsApp → 302 на wa.me с готовым текстом на языке посетителя. Заодно считает клик (аналитика).
- *   kind = price | docs | generic | partner,  id = объявление,  n = номер из списка («Контакты» в админке),  l = язык
+ *   kind = price | docs | generic | partner | body | chassis,  id = объявление,  n = номер из списка («Контакты» в админке),  l = язык
  */
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
-  const kind = ["price", "docs", "partner"].includes(sp.get("kind") || "") ? sp.get("kind")! : "generic";
+  const kind = ["price", "docs", "partner", "body", "chassis"].includes(sp.get("kind") || "") ? sp.get("kind")! : "generic";
   const id = Number(sp.get("id"));
   const n = Math.max(0, Math.min(20, Number(sp.get("n")) || 0));
   const l = sp.get("l");
@@ -30,6 +30,8 @@ export async function GET(req: NextRequest) {
   let text = t.whatsapp.generic;
   if (item && kind === "docs") text = docsMessage(item, t);
   else if (item && kind === "price") text = priceMessage(item, t);
+  else if (kind === "body") text = t.parts.waBody;
+  else if (kind === "chassis") text = t.parts.waChassis;
   else if (kind === "partner") text = fmt(t.whatsapp.partnership, { name: siteConfig.name });
 
   if (!getVisitor(req).isBot && !(await isAdminRequest(req))) recordEvent(req, { type: "wa_click", itemId: item?.id ?? null, detail: kind, lang: locale });

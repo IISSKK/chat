@@ -8,7 +8,7 @@ import "./globals.css";
 
 /** В браузер отправляем словарь без длинных текстов, которые рендерятся только на сервере (юр. страницы, «О нас» и т. п.) */
 function clientDictionary(t: Dictionary): Dictionary {
-  return { ...t, legal: { ...t.legal, terms: [], privacy: [] }, advantages: [], about: { ...t.about, lead: "", partnershipText: "" } };
+  return { ...t, legal: { ...t.legal, terms: [], privacy: [] }, advantages: [], parts: { ...t.parts, bodyItems: [], chassisItems: [], steps: [] }, about: { ...t.about, lead: "", partnershipText: "" } };
 }
 
 // Один вариативный шрифт вместо двух — меньше загрузки. На iPhone/Mac используется системный SF Pro.

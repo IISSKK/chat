@@ -35,6 +35,7 @@ export async function Footer() {
             <li><Link className="hover:text-brand" href="/catalog/cars/standby">{t.categoriesLong.standby}</Link></li>
             <li><Link className="hover:text-brand" href="/catalog/cars/running">{t.categoriesLong.running}</Link></li>
             <li><Link className="hover:text-brand" href="/catalog/engines">{t.nav.engines}</Link></li>
+            <li><Link className="hover:text-brand" href="/parts">{t.nav.parts}</Link></li>
             <li><Link className="hover:text-brand" href="/brand">{t.brandPage.brands}</Link></li>
             <li><Link className="hover:text-brand" href="/favorites">{t.fav.title}</Link></li>
           </ul>

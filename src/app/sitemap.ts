@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const fixed: [string, number, "daily" | "weekly" | "monthly"][] = [
     ["/", 1, "daily"], ["/catalog/cars", 0.9, "daily"], ["/catalog/cars/standby", 0.8, "daily"], ["/catalog/cars/listing", 0.8, "daily"],
-    ["/catalog/cars/running", 0.8, "daily"], ["/catalog/engines", 0.9, "daily"], ["/brand", 0.7, "weekly"], ["/about", 0.5, "monthly"],
+    ["/catalog/cars/running", 0.8, "daily"], ["/catalog/engines", 0.9, "daily"], ["/brand", 0.7, "weekly"], ["/parts", 0.7, "monthly"], ["/about", 0.5, "monthly"],
     ["/terms", 0.2, "monthly"], ["/privacy", 0.2, "monthly"],
   ];
   for (const [p, priority, changeFrequency] of fixed) add(p, { priority, changeFrequency });

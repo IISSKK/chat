@@ -19,6 +19,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
   const NAV = [
     { href: "/catalog/cars", label: ru.nav.cars },
     { href: "/catalog/engines", label: ru.nav.engines },
+    { href: "/parts", label: ru.nav.parts },
     { href: "/about", label: ru.nav.about },
     { href: "/#contacts", label: ru.nav.contacts },
   ];
