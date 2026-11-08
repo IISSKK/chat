@@ -61,7 +61,12 @@ export async function middleware(req: NextRequest) {
     headers.set(LOCALE_HEADER, m[1]);
     const url = req.nextUrl.clone();
     url.pathname = rest;
-    return NextResponse.rewrite(url, { request: { headers } });
+    const res = NextResponse.rewrite(url, { request: { headers } });
+    // Запоминаем выбранный язык и при заходе по прямой ссылке /en/..., чтобы новая вкладка не возвращала русский
+    if (req.method === "GET" && req.cookies.get(LOCALE_COOKIE)?.value !== m[1] && !BOT.test(req.headers.get("user-agent") || "")) {
+      res.cookies.set(LOCALE_COOKIE, m[1], { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+    }
+    return res;
   }
 
   // Главная без префикса: человека с другим языком браузера или выбранным ранее языком отправляем на его версию.

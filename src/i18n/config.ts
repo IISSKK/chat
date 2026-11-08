@@ -64,5 +64,6 @@ export function localePath(locale: Locale, href: string): string {
   if (/^\/(api|media|demo|guides|_next|admin|icons)(\/|$)/.test(href) || /^\/(en|ko|zh)(\/|$|\?|#)/.test(href)) return href;
   if (locale === DEFAULT_LOCALE) return href;
   if (href === "/") return `/${locale}`;
+  if (href.startsWith("/#") || href.startsWith("/?")) return `/${locale}${href.slice(1)}`; // /#contacts → /en#contacts
   return `/${locale}${href}`;
 }
