@@ -2,7 +2,7 @@ import Link from "@/components/site/LocLink";
 import { Suspense } from "react";
 import { getLocale, getT } from "@/i18n/server";
 import { facetValues, listItems } from "@/lib/items";
-import { generationsOf, getGeneration } from "@/lib/catalog-refs";
+import { brandOfModel, generationsOf, getGeneration } from "@/lib/catalog-refs";
 import { CATEGORIES, FUELS, ITEM_TYPES, PUBLIC_STATUSES, TRANSMISSIONS, type Category, type ItemFilters } from "@/lib/types";
 import { Filters } from "./Filters";
 import { ItemGrid } from "./ItemCard";
@@ -106,7 +106,7 @@ export async function CatalogListing({
           brands={facets.brands}
           years={facets.years}
           models={facets.models}
-          generations={filters.brand && filters.model ? generationsOf(filters.brand, filters.model) : []}
+          generations={filters.model ? (() => { const b = filters.brand ?? brandOfModel(filters.model); return b ? generationsOf(b, filters.model) : []; })() : []}
           lockBrand={!!fixed.brand}
           lockModel={!!fixed.model}
           showType={showType}

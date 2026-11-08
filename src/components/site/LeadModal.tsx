@@ -2,6 +2,7 @@
 
 import { Select } from "@/components/ui/Select";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { CloseIcon } from "@/components/icons";
 import { useLocale, useT } from "@/i18n/client";
 import { getAttribution } from "@/lib/attribution";
@@ -78,8 +79,9 @@ export function LeadButton({ itemId, itemTitle, className = "btn-brand", childre
       <button type="button" onClick={() => { setStatus("idle"); setError(""); setOpen(true); }} className={className}>
         {children ?? t.lead.button}
       </button>
-      {open && (
-        <div className="fixed inset-0 z-[70] grid place-items-end bg-fg/30 sm:place-items-center sm:p-4" onClick={() => setOpen(false)}>
+      {open &&
+        createPortal(
+        <div className="fixed inset-0 z-[70] grid h-dvh place-items-end bg-fg/40 sm:place-items-center sm:p-4" onClick={() => setOpen(false)}>
           <div
             role="dialog"
             aria-modal
@@ -134,7 +136,8 @@ export function LeadButton({ itemId, itemTitle, className = "btn-brand", childre
               </form>
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

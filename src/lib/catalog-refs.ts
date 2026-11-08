@@ -273,3 +273,9 @@ export function generationFor(brand: string, model: string, year: number | null)
   const hit = generationsOf(brand, model).filter((g) => year >= g.year_from && year <= g.year_to);
   return hit.sort((a, b) => a.year_to - a.year_from - (b.year_to - b.year_from))[0] ?? null;
 }
+
+/** Марка модели, если название модели в справочнике встречается у одной марки (нужна, чтобы показать поколения без выбора марки) */
+export function brandOfModel(model: string): string | null {
+  const rows = getDb().prepare("SELECT DISTINCT b.name FROM models m JOIN brands b ON b.id = m.brand_id WHERE m.name = ? COLLATE NOCASE").all(model) as { name: string }[];
+  return rows.length === 1 ? rows[0].name : null;
+}

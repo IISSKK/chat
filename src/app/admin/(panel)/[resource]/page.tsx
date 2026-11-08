@@ -7,6 +7,7 @@ import { getDictionary } from "@/i18n";
 
 const t = getDictionary("ru"); // админка на русском
 import { countBy, listItems } from "@/lib/items";
+import { generationFor, getGeneration, listBrands } from "@/lib/catalog-refs";
 import { CATEGORIES, STATUSES, type Category, type Status } from "@/lib/types";
 import { formatNumber, itemPath, photoUrl } from "@/lib/utils";
 import { EyeIcon, PlusIcon, SearchIcon } from "@/components/icons";
@@ -26,7 +27,18 @@ export default async function ResourceList({ params, searchParams }: Props) {
   const status = STATUSES.includes(sp.status as Status) ? (sp.status as Status) : undefined;
   const q = sp.q?.slice(0, 80) || undefined;
   const page = Math.max(1, Number(sp.page) || 1);
-  const { items, total, pages, page: current } = listItems({ type: mod.itemType, category, status, q, includeDrafts: true, trash: view === "trash" }, page, 20);
+  // Модель и поколение (только автомобили: у двигателей модель вводится свободным текстом)
+  const refs = mod.itemType === "car" ? listBrands() : [];
+  const genId = Number(sp.gen);
+  const gen = Number.isInteger(genId) && genId > 0 ? getGeneration(genId) : null;
+  const model = gen?.model ?? (sp.model?.slice(0, 60) || undefined);
+  const modelOptions = refs.flatMap((b) => b.models.map((m) => ({ value: m.name, label: `${b.name} ${m.name}` })));
+  const genOptions = refs.flatMap((b) => b.models.flatMap((m) => (m.generations ?? []).map((g) => ({ value: String(g.id), label: `${b.name} ${m.name} · ${g.name} (${g.year_from}–${g.year_to})` }))));
+  const { items, total, pages, page: current } = listItems(
+    { type: mod.itemType, category, status, q, model, brand: gen?.brand, yearFrom: gen?.year_from, yearTo: gen?.year_to, includeDrafts: true, trash: view === "trash" },
+    page,
+    20,
+  );
   const drafts = countBy({ type: mod.itemType, status: "draft", includeDrafts: true });
   const trashed = countBy({ type: mod.itemType, includeDrafts: true, trash: true });
 
@@ -35,6 +47,8 @@ export default async function ResourceList({ params, searchParams }: Props) {
     if (q) s.set("q", q);
     if (category) s.set("category", category);
     if (status) s.set("status", status);
+    if (gen) s.set("gen", String(gen.id));
+    else if (model) s.set("model", model);
     if (view === "trash") s.set("view", "trash");
     if (p > 1) s.set("page", String(p));
     return `${mod.href}?${s}`;
@@ -63,16 +77,22 @@ export default async function ResourceList({ params, searchParams }: Props) {
       </div>
       {view === "trash" && <p className="rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-600">В корзине объявления лежат 30 дней, потом удаляются автоматически. Отсюда их можно вернуть.</p>}
 
-      <form className="a-card grid gap-3 p-3 sm:grid-cols-[1fr_180px_160px_auto]" action={mod.href}>
-        <label className="relative">
-          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input name="q" defaultValue={q} placeholder="Поиск: название, VIN, серийный номер, год…" className="a-input pl-9" />
-        </label>
-        <Select variant="admin" name="category" defaultValue={category ?? ""} aria-label="Категория" options={[{ value: "", label: "Все категории" }, ...CATEGORIES.map((c) => ({ value: c, label: t.categoriesLong[c] }))]} />
-        <Select variant="admin" name="status" defaultValue={status ?? ""} aria-label="Статус" options={[{ value: "", label: "Любой статус" }, { value: "available", label: "В наличии" }, { value: "sold", label: "Продано" }, { value: "draft", label: "Черновик" }]} />
-        <div className="flex gap-2">
-          <button className="a-btn-primary flex-1">Найти</button>
-          {(q || category || status) && <Link href={mod.href} className="a-btn-ghost">Сброс</Link>}
+      <form className="a-card space-y-3 p-3" action={mod.href}>
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+          <label className="relative">
+            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input name="q" defaultValue={q} placeholder="Поиск: название, модель, поколение, VIN, серийный номер, год…" className="a-input pl-9" />
+          </label>
+          <div className="flex gap-2">
+            <button className="a-btn-primary flex-1">Найти</button>
+            {(q || category || status || model || gen) && <Link href={mod.href} className="a-btn-ghost">Сброс</Link>}
+          </div>
+        </div>
+        <div className={`grid gap-3 sm:grid-cols-2 ${refs.length ? "lg:grid-cols-4" : "lg:grid-cols-2"}`}>
+          <Select variant="admin" name="category" defaultValue={category ?? ""} aria-label="Категория" options={[{ value: "", label: "Все категории" }, ...CATEGORIES.map((c) => ({ value: c, label: t.categoriesLong[c] }))]} />
+          <Select variant="admin" name="status" defaultValue={status ?? ""} aria-label="Статус" options={[{ value: "", label: "Любой статус" }, { value: "available", label: "В наличии" }, { value: "sold", label: "Продано" }, { value: "draft", label: "Черновик" }]} />
+          {refs.length > 0 && <Select variant="admin" name="model" defaultValue={gen ? "" : model ?? ""} aria-label="Модель" searchPlaceholder="Найти модель…" options={[{ value: "", label: "Любая модель" }, ...modelOptions]} />}
+          {refs.length > 0 && <Select variant="admin" name="gen" defaultValue={gen ? String(gen.id) : ""} aria-label="Поколение" searchPlaceholder="Найти поколение…" options={[{ value: "", label: "Любое поколение" }, ...genOptions]} />}
         </div>
       </form>
 
@@ -89,6 +109,7 @@ export default async function ResourceList({ params, searchParams }: Props) {
                 <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
                   <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">{t.categories[i.category]}</span>
                   {i.year && <span>{i.year}</span>}
+                  {(() => { const g = i.type === "car" ? generationFor(i.brand, i.model, i.year) : null; return g ? <span className="rounded-full bg-brand/10 px-2 py-0.5 font-semibold text-brand">{g.name}</span> : null; })()}
                   <span className="inline-flex items-center gap-1"><EyeIcon className="h-3.5 w-3.5" />{formatNumber(i.views)}</span>
                 </span>
                 {(i.vin || i.serial) && <span className="mt-0.5 block truncate font-mono text-[11px] text-slate-400">{i.vin || i.serial}</span>}
@@ -132,7 +153,10 @@ export default async function ResourceList({ params, searchParams }: Props) {
                     </div>
                   </td>
                   <td className="px-4 py-3"><span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold">{t.categories[i.category]}</span></td>
-                  <td className="px-4 py-3">{i.year ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    {i.year ?? "—"}
+                    {(() => { const g = i.type === "car" ? generationFor(i.brand, i.model, i.year) : null; return g ? <span className="mt-0.5 block text-xs font-semibold text-brand">{g.name}</span> : null; })()}
+                  </td>
                   <td className="px-4 py-3 font-mono text-xs text-slate-500">{i.vin || i.serial || "—"}</td>
                   <td className="px-4 py-3 text-slate-500">
                     <span className="inline-flex items-center gap-1 tabular-nums"><EyeIcon className="h-4 w-4" />{formatNumber(i.views)}</span>

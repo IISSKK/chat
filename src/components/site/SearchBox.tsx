@@ -14,7 +14,7 @@ type Suggestion = {
   title: string;
   type: "car" | "engine";
   match: string;
-  field: "vin" | "serial" | "model" | "year" | "engine_code";
+  field: "vin" | "serial" | "model" | "year" | "engine_code" | "generation";
   photo?: string;
   status: string;
 };
@@ -51,6 +51,7 @@ export function SearchBox({
     model: ru.search.fieldModel,
     year: ru.search.fieldYear,
     engine_code: ru.search.fieldEngine,
+    generation: ru.fields.generation,
   };
   const [q, setQ] = useState(defaultValue);
   const [items, setItems] = useState<Suggestion[]>([]);

@@ -3,6 +3,7 @@ import { getDb, transaction } from "./db";
 import { slugify } from "./utils";
 import type { Item, ItemFilters, ItemInput, Photo } from "./types";
 import { applyTranslations } from "./item-i18n";
+import { generationFor } from "./catalog-refs";
 import type { Locale } from "@/i18n/config";
 
 type Row = Omit<Item, "photos">;
@@ -48,9 +49,10 @@ function buildWhere(f: ItemFilters) {
       const like = `%${likeEsc(term)}%`;
       where.push(
         `(title LIKE ? ESCAPE '\\' OR brand LIKE ? ESCAPE '\\' OR model LIKE ? ESCAPE '\\' OR vin LIKE ? ESCAPE '\\' OR serial LIKE ? ESCAPE '\\' OR engine_code LIKE ? ESCAPE '\\' OR CAST(year AS TEXT) = ?
-          OR EXISTS (SELECT 1 FROM item_translations tr WHERE tr.item_id = items.id AND tr.title LIKE ? ESCAPE '\\'))`,
+          OR EXISTS (SELECT 1 FROM item_translations tr WHERE tr.item_id = items.id AND tr.title LIKE ? ESCAPE '\\')
+          OR EXISTS (SELECT 1 FROM generations g JOIN models gm ON gm.id = g.model_id JOIN brands gb ON gb.id = gm.brand_id WHERE g.name LIKE ? ESCAPE '\\' AND gb.name = items.brand COLLATE NOCASE AND gm.name = items.model COLLATE NOCASE AND items.year BETWEEN g.year_from AND g.year_to))`,
       );
-      params.push(like, like, like, like, like, like, term, like);
+      params.push(like, like, like, like, like, like, term, like, like);
     }
   }
   return { sql: where.length ? `WHERE ${where.join(" AND ")}` : "", params };
@@ -112,9 +114,11 @@ export function facetValues(f: ItemFilters) {
       year: number;
     }[]
   ).map((r) => r.year);
-  const models = f.brand
-    ? (db.prepare(`SELECT DISTINCT model FROM items ${and} brand = ? COLLATE NOCASE AND model <> '' ORDER BY model COLLATE NOCASE`).all(...params, f.brand) as { model: string }[]).map((r) => r.model)
-    : [];
+  const models = (
+    f.brand
+      ? db.prepare(`SELECT DISTINCT model FROM items ${and} brand = ? COLLATE NOCASE AND model <> '' ORDER BY model COLLATE NOCASE`).all(...params, f.brand)
+      : db.prepare(`SELECT DISTINCT model FROM items ${and} model <> '' ${f.type === "engine" ? "AND 0" : ""} ORDER BY model COLLATE NOCASE`).all(...params)
+  ).map((r) => (r as { model: string }).model);
   return { brands, years, models };
 }
 
@@ -124,7 +128,7 @@ export interface Suggestion {
   title: string;
   type: Item["type"];
   match: string;
-  field: "vin" | "serial" | "model" | "year" | "engine_code";
+  field: "vin" | "serial" | "model" | "year" | "engine_code" | "generation";
   photo?: string;
   status: Item["status"];
 }
@@ -140,7 +144,8 @@ export function suggest(q: string, limit = 8): Suggestion[] {
        WHERE deleted_at IS NULL AND status <> 'draft' AND (
          vin LIKE ?1 ESCAPE '\\' OR serial LIKE ?1 ESCAPE '\\' OR title LIKE ?1 ESCAPE '\\' OR model LIKE ?1 ESCAPE '\\'
          OR brand LIKE ?1 ESCAPE '\\' OR engine_code LIKE ?1 ESCAPE '\\' OR CAST(year AS TEXT) LIKE ?2 ESCAPE '\\'
-         OR EXISTS (SELECT 1 FROM item_translations tr WHERE tr.item_id = i.id AND tr.title LIKE ?1 ESCAPE '\\'))
+         OR EXISTS (SELECT 1 FROM item_translations tr WHERE tr.item_id = i.id AND tr.title LIKE ?1 ESCAPE '\\')
+         OR EXISTS (SELECT 1 FROM generations g JOIN models gm ON gm.id = g.model_id JOIN brands gb ON gb.id = gm.brand_id WHERE g.name LIKE ?1 ESCAPE '\\' AND gb.name = i.brand COLLATE NOCASE AND gm.name = i.model COLLATE NOCASE AND i.year BETWEEN g.year_from AND g.year_to))
        ORDER BY (status = 'sold'), id DESC LIMIT ?3`,
     )
     .all(like, `${likeEsc(term)}%`, limit) as (Row & { photo: string | null })[];
@@ -152,6 +157,10 @@ export function suggest(q: string, limit = 8): Suggestion[] {
     else if (r.serial && r.serial.toLowerCase().includes(lower)) (field = "serial"), (match = r.serial);
     else if (r.engine_code && r.engine_code.toLowerCase().includes(lower)) (field = "engine_code"), (match = r.engine_code);
     else if (r.year && String(r.year).startsWith(term)) (field = "year"), (match = String(r.year));
+    else if (![r.title, r.brand, r.model].some((v) => v?.toLowerCase().includes(lower))) {
+      const g = generationFor(r.brand, r.model, r.year);
+      if (g && g.name.toLowerCase().includes(lower)) (field = "generation"), (match = `${r.brand} ${r.model} ${g.name}`);
+    }
     return { id: r.id, slug: r.slug, title: r.title, type: r.type, match, field, photo: r.photo ?? undefined, status: r.status };
   });
 }
