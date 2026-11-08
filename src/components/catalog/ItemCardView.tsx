@@ -41,7 +41,7 @@ export function ViewsBadge({ views, t, className = "" }: { views: number; t: Dic
   );
 }
 
-export function ItemCardView({ item, t, price, docs, index = 0, origin }: { item: Item; t: Dictionary; price: WaOption[]; docs: WaOption[]; index?: number; origin?: string }) {
+export function ItemCardView({ item, t, price, docs, index = 0, origin, priority = false }: { item: Item; t: Dictionary; price: WaOption[]; docs: WaOption[]; index?: number; origin?: string; priority?: boolean }) {
   const href = itemPath(item);
   const cover = item.photos[0];
   const sold = item.status === "sold";
@@ -49,16 +49,18 @@ export function ItemCardView({ item, t, price, docs, index = 0, origin }: { item
 
   return (
     <article
-      data-reveal
+      // Первые карточки видны сразу: анимация появления ждёт JavaScript и задержала бы первую картинку
+      {...(index >= 4 ? { "data-reveal": true } : {})}
       style={{ "--d": `${(index % 4) * 60}ms` } as React.CSSProperties}
       className="surface group relative flex flex-col rounded-[26px] transition-[transform,box-shadow] duration-300 focus-within:z-20 hover:z-10 hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_rgba(15,40,90,.35)]"
     >
-      <Link href={href} className="card-press relative m-1.5 block aspect-[4/3] overflow-hidden rounded-[20px] bg-ink-600" aria-label={item.title}>
+      <Link href={href} className="card-press relative m-1.5 block aspect-[4/3] overflow-hidden rounded-[20px] bg-ink-600" aria-hidden tabIndex={-1}>
         {cover ? (
           <img
             src={photoUrl(cover.filename, "sm")}
-            alt={item.title}
-            loading="lazy"
+            alt=""
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
             decoding="async"
             width={600}
             height={450}
@@ -90,7 +92,7 @@ export function ItemCardView({ item, t, price, docs, index = 0, origin }: { item
 
       <div className="flex flex-1 flex-col gap-3 px-4 pb-4 pt-2">
         <div>
-          <Link href={href} className="line-clamp-2 text-[16px] font-bold leading-snug tracking-tight transition-colors hover:text-brand">
+          <Link href={href} className="-my-1.5 line-clamp-2 py-1.5 text-[16px] font-bold leading-snug tracking-tight transition-colors hover:text-brand">
             {item.title}
           </Link>
           {(item.vin || item.serial) && (
@@ -104,11 +106,11 @@ export function ItemCardView({ item, t, price, docs, index = 0, origin }: { item
         </div>
 
         <div className="mt-auto grid gap-2 pt-1">
-          <WaButton options={price} className="btn-wa w-full py-2.5">
+          <WaButton chooseLabel={t.whatsapp.choose} options={price} className="btn-wa w-full py-2.5">
             <WhatsAppIcon className="h-4 w-4" /> {t.actions.askPrice}
           </WaButton>
           <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-            <WaButton options={docs} className="btn-ghost w-full min-w-0 px-3 py-2.5 text-xs" wrapperClassName="min-w-0" ariaLabel={t.actions.docs}>
+            <WaButton chooseLabel={t.whatsapp.choose} options={docs} className="btn-ghost w-full min-w-0 px-3 py-2.5 text-xs" wrapperClassName="min-w-0" ariaLabel={t.actions.docs}>
               <DocIcon className="h-4 w-4 shrink-0 text-brand" /> <span className="truncate">{t.actions.docs}</span>
             </WaButton>
             <ShareMenu url={origin ? `${origin}${localePath(t.meta.code as Locale, itemPath(item))}` : itemUrl(item, t.meta.code as Locale)} title={item.title} compact />

@@ -46,7 +46,7 @@ export function ShareMenu({ url, title, className = "", compact = false }: { url
         aria-expanded={open}
         aria-label={ru.actions.share}
         title={ru.actions.share}
-        className={`btn-ghost h-full w-full px-3 py-2.5 ${open ? "border-brand/50 text-brand" : ""}`}
+        className={`btn-ghost h-full min-h-[44px] w-full px-3.5 py-2.5 ${open ? "border-brand/50 text-brand" : ""}`}
       >
         <ShareIcon className={`h-4 w-4 transition-transform duration-300 ${open ? "rotate-12 scale-110" : ""}`} />
         {!compact && <span className="hidden sm:inline">{ru.actions.share}</span>}

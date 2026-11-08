@@ -39,6 +39,8 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["sharp"],
   poweredByHeader: false,
   compress: true,
+  // Метаданные (description, Open Graph) всегда в <head> для всех посетителей, а не догружаются потоком в тело страницы
+  htmlLimitedBots: /.*/,
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
@@ -46,6 +48,11 @@ const nextConfig: NextConfig = {
       { source: "/sw.js", headers: [{ key: "Cache-Control", value: "public, max-age=0, must-revalidate" }, { key: "Service-Worker-Allowed", value: "/" }] },
       { source: "/icons/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=2592000, immutable" }] },
       { source: "/api/admin/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
+      // Публичные страницы и их служебные запросы: без `no-store`, иначе телефон не может мгновенно вернуться кнопкой «Назад» (кеш прошлых страниц)
+      { source: "/:path((?!admin|api|_next|media|demo|guides|icons).*)", headers: [{ key: "Cache-Control", value: "private, no-cache, max-age=0, must-revalidate" }] },
+      { source: "/api/(visit|presence|rates|favorites)", headers: [{ key: "Cache-Control", value: "private, no-cache" }] },
+      { source: "/api/search/suggest", headers: [{ key: "Cache-Control", value: "private, no-cache" }] },
+      { source: "/api/items/:id/view", headers: [{ key: "Cache-Control", value: "private, no-cache" }] },
     ];
   },
 };

@@ -34,7 +34,7 @@ export default async function AboutPage() {
         </div>
         <div className="grid grid-cols-2 gap-3">
           {stats.map(([n, l], i) => (
-            <div key={l} data-reveal style={{ "--d": `${i * 80}ms` } as React.CSSProperties} className="rounded-3xl surface p-5">
+            <div key={l} className="rounded-3xl surface p-5">
               <div className="font-display text-3xl font-bold text-brand">{n}</div>
               <div className="mt-1 text-sm text-fg/76">{l}</div>
             </div>
@@ -55,7 +55,7 @@ export default async function AboutPage() {
                 <h2 className="h-display text-2xl sm:text-4xl">{t.about.partnershipTitle}</h2>
                 <p className="mt-3 max-w-2xl text-fg/84">{t.about.partnershipText}</p>
               </div>
-              <WaButton options={waOptions("partner", undefined, t.meta.code)} placement="up" align="right" className="btn-brand px-7 py-4 text-base">
+              <WaButton chooseLabel={t.whatsapp.choose} options={waOptions("partner", undefined, t.meta.code)} placement="up" align="right" className="btn-brand px-7 py-4 text-base">
                 <WhatsAppIcon /> {t.about.partnershipCta}
               </WaButton>
             </div>

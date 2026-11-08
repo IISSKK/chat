@@ -105,7 +105,7 @@ export function RatesTicker({ className = "" }: { className?: string }) {
             role="radio"
             aria-checked={base === b}
             onClick={() => choose(b)}
-            className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${base === b ? "bg-white text-brand shadow-sm" : "text-fg/72 hover:text-fg"}`}
+            className={`min-h-[28px] min-w-[32px] rounded-full px-2.5 py-1 text-xs font-bold ${base === b ? "bg-white text-brand shadow-sm" : "text-fg/72 hover:text-fg"}`}
           >
             {SYMBOL[b]}
           </button>

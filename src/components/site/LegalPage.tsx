@@ -9,7 +9,7 @@ export async function LegalPage({ title, updated, sections }: { title: string; u
       <p className="mt-3 text-sm text-fg/72">{fmt(t.legal.edition, { date: updated })}</p>
       <div className="mt-10 space-y-4">
         {sections.map(({ h, p: body }, i) => (
-          <section key={h} data-reveal className="rounded-3xl surface p-5 sm:p-7">
+          <section key={h} {...(i >= 2 ? { "data-reveal": true } : {})} className="rounded-3xl surface p-5 sm:p-7">
             <h2 className="font-display text-lg font-bold">
               <span className="mr-2 text-brand">{String(i + 1).padStart(2, "0")}</span>
               {h}

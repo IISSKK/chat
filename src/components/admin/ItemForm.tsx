@@ -295,7 +295,7 @@ export function ItemForm({
             {translation.status === "error" && <p className="text-xs text-red-600">{translation.error}</p>}
             {Object.entries(translation.translations).map(([l, tr]) => (
               <div key={l} className="rounded-xl bg-slate-50 p-3 text-sm">
-                <p className="mb-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">{LANG_NAMES[l] ?? l}</p>
+                <p className="mb-0.5 text-xs font-bold uppercase tracking-wider text-slate-400">{LANG_NAMES[l] ?? l}</p>
                 <p className="font-semibold">{tr.title}</p>
                 {tr.notes && <p className="mt-1 whitespace-pre-line text-slate-600">{tr.notes}</p>}
               </div>
@@ -349,8 +349,8 @@ export function ItemForm({
                 } ${i === 0 ? "ring-2 ring-brand-600" : ""}`}
               >
                 <img src={p.url} alt="" className="h-full w-full object-cover" draggable={false} />
-                {i === 0 && <span className="absolute left-1 top-1 rounded bg-brand px-1.5 text-[10px] font-bold text-ink">Обложка</span>}
-                {p.kind === "new" && <span className="absolute right-1 top-1 rounded bg-ember px-1.5 text-[10px] font-bold text-white">new</span>}
+                {i === 0 && <span className="absolute left-1 top-1 rounded bg-brand px-1.5 text-xs font-bold text-ink">Обложка</span>}
+                {p.kind === "new" && <span className="absolute right-1 top-1 rounded bg-ember px-1.5 text-xs font-bold text-white">new</span>}
                 <div className="absolute inset-x-0 bottom-0 flex justify-between bg-gradient-to-t from-black/70 to-transparent p-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
                   <button type="button" onClick={() => move(i, i - 1)} disabled={i === 0} className="grid h-10 w-10 place-items-center rounded-md sm:h-7 sm:w-7 bg-white/90 text-slate-800 disabled:opacity-30" aria-label="Левее">
                     <ChevronLeft className="h-4 w-4" />

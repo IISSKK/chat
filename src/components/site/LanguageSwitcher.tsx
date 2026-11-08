@@ -75,8 +75,8 @@ export function LanguageSwitcher({ variant = "menu" }: { variant?: "menu" | "row
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-haspopup="listbox"
-        aria-label={t.lang.label}
-        className="flex h-10 items-center gap-1.5 rounded-full bg-fg/[0.09] px-3 text-sm font-bold text-fg/80 hover:bg-fg/10"
+        aria-label={`${LOCALE_INFO[locale].short} · ${t.lang.label}`}
+        className="flex h-11 items-center gap-1.5 rounded-full bg-fg/[0.09] px-3 text-sm font-bold text-fg/80 hover:bg-fg/10"
       >
         {pending ? (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand/30 border-t-brand" />

@@ -79,7 +79,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
           <div key={l} className="a-card p-4">
             <p className="text-xs font-semibold text-slate-500">{l}</p>
             <p className="mt-1 font-display text-2xl font-bold tabular-nums">{v}</p>
-            <p className="text-[11px] text-slate-400">{h}</p>
+            <p className="text-xs text-slate-400">{h}</p>
           </div>
         ))}
       </div>

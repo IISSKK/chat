@@ -54,7 +54,7 @@ export function ContactsEditor({ initial, max }: { initial: Contact[]; max: numb
                 </span>
                 <span className="text-sm font-semibold">
                   Номер {i + 1}
-                  {i === 0 && <span className="ml-2 rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-bold text-brand">Основной</span>}
+                  {i === 0 && <span className="ml-2 rounded-full bg-brand/10 px-2 py-0.5 text-xs font-bold text-brand">Основной</span>}
                 </span>
                 <div className="ml-auto flex gap-1">
                   <button onClick={() => move(i, -1)} disabled={i === 0} className="a-btn-ghost px-2 py-1.5" aria-label="Выше">

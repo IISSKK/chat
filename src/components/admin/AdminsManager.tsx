@@ -86,7 +86,7 @@ export function AdminsManager({ initial, owner, meId, permissions }: { initial: 
           <span className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-brand to-ember font-bold text-white">{owner[0]?.toUpperCase()}</span>
           <div className="min-w-0 flex-1">
             <p className="font-semibold">
-              {owner} <span className="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700">Владелец</span>
+              {owner} <span className="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">Владелец</span>
             </p>
             <p className="text-xs text-slate-500">Все права. Логин и пароль задаются в настройках сервера (ADMIN_USER / ADMIN_PASSWORD).</p>
           </div>
@@ -102,19 +102,19 @@ export function AdminsManager({ initial, owner, meId, permissions }: { initial: 
                 <p className="font-semibold">
                   {a.username}
                   {a.id === meId && <span className="ml-2 text-xs font-normal text-slate-400">(это вы)</span>}
-                  {!a.active && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-500">Отключён</span>}
-                  {a.twoFactor && <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700">2FA</span>}
+                  {!a.active && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-500">Отключён</span>}
+                  {a.twoFactor && <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">2FA</span>}
                 </p>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {a.permissions.length ? (
                     a.permissions.map((p) => (
-                      <span key={p} className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">{label(p)}</span>
+                      <span key={p} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">{label(p)}</span>
                     ))
                   ) : (
                     <span className="text-xs text-slate-400">нет доступа ни к одному разделу</span>
                   )}
                 </div>
-                <p className="mt-1 text-[11px] text-slate-400">Последний вход: {a.last_login ? a.last_login.slice(0, 16) : "ещё не входил"}</p>
+                <p className="mt-1 text-xs text-slate-400">Последний вход: {a.last_login ? a.last_login.slice(0, 16) : "ещё не входил"}</p>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 <button

@@ -24,12 +24,12 @@ export function BrandHeader({
 }) {
   return (
     <div className="mb-8 pt-8 sm:pt-12">
-      <nav className="mb-4 flex flex-wrap items-center gap-2 text-sm text-fg/72" aria-label="breadcrumb">
-        <Link href="/catalog/cars" className="hover:text-fg">{t.types.car}</Link>
+      <nav className="mb-4 flex flex-wrap items-center gap-x-1 text-sm text-fg/72" aria-label="breadcrumb">
+        <Link href="/catalog/cars" className="inline-flex min-h-[40px] items-center px-1.5 hover:text-fg">{t.types.car}</Link>
         <span>/</span>
-        <Link href="/brand" className="hover:text-fg">{t.brandPage.brands}</Link>
+        <Link href="/brand" className="inline-flex min-h-[40px] items-center px-1.5 hover:text-fg">{t.brandPage.brands}</Link>
         <span>/</span>
-        {activeModel ? <Link href={`/brand/${brandSlug}`} className="hover:text-fg">{brandName}</Link> : <span className="font-semibold text-fg">{brandName}</span>}
+        {activeModel ? <Link href={`/brand/${brandSlug}`} className="inline-flex min-h-[40px] items-center px-1.5 hover:text-fg">{brandName}</Link> : <span className="font-semibold text-fg">{brandName}</span>}
       </nav>
       <h1 className="h-display text-3xl sm:text-5xl">
         {h1}

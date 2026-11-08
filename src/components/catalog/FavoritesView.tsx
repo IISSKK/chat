@@ -97,7 +97,7 @@ export function FavoritesView() {
         <span className="text-sm text-fg/72">{t.fav.count}: <b className="text-fg">{items.length}</b></span>
         <div className="ml-auto flex flex-wrap gap-2">
           {sendOptions.length > 0 && (
-            <WaButton options={sendOptions} placement="down" align="right" className="btn-wa px-5 py-2.5" wrapperClassName="inline-block">
+            <WaButton chooseLabel={t.whatsapp.choose} options={sendOptions} placement="down" align="right" className="btn-wa px-5 py-2.5" wrapperClassName="inline-block">
               <WhatsAppIcon className="h-4 w-4" /> {t.fav.sendWhatsapp}
             </WaButton>
           )}

@@ -48,13 +48,13 @@ export function AdminShell({
         <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-ember font-display font-extrabold text-white">B</span>
         <span>
           <span className="block font-display text-sm font-bold text-slate-900">Barakat Auto</span>
-          <span className="block text-[11px] text-slate-500">Панель управления</span>
+          <span className="block text-xs text-slate-500">Панель управления</span>
         </span>
       </Link>
       <div className="flex-1 space-y-5 overflow-y-auto">
         {Object.entries(grouped).map(([group, list]) => (
           <div key={group}>
-            {groups[group] && <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">{groups[group]}</p>}
+            {groups[group] && <p className="mb-1.5 px-3 text-xs font-bold uppercase tracking-widest text-slate-400">{groups[group]}</p>}
             <ul className="space-y-0.5">
               {list.map((m) => {
                 const Icon = ICONS[m.icon] ?? GridIcon;
@@ -69,7 +69,7 @@ export function AdminShell({
                     >
                       <Icon className="h-[18px] w-[18px]" />
                       {m.title}
-                      {badges[m.id] > 0 && <span className="ml-auto rounded-full bg-brand px-2 py-0.5 text-[11px] font-bold text-white">{badges[m.id]}</span>}
+                      {badges[m.id] > 0 && <span className="ml-auto rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-white">{badges[m.id]}</span>}
                     </Link>
                   </li>
                 );

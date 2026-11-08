@@ -6,7 +6,9 @@ import { useT } from "@/i18n/client";
 import { fmt } from "@/i18n/format";
 
 /** Галерея до 8 фото: свайп на телефоне, стрелки, миниатюры, полноэкранный просмотр. */
-export function Gallery({ photos, title, sold }: { photos: string[]; title: string; sold?: boolean }) {
+type Photo = { full: string; sm: string; srcSet?: string };
+
+export function Gallery({ photos, title, sold }: { photos: Photo[]; title: string; sold?: boolean }) {
   const t = useT();
   const [index, setIndex] = useState(0);
   const [zoom, setZoom] = useState(false);
@@ -59,16 +61,18 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
           onScroll={onScroll}
           className="flex aspect-[4/3] snap-x snap-mandatory overflow-x-auto no-scrollbar"
         >
-          {photos.map((src, i) => (
+          {photos.map((ph, i) => (
             <button
-              key={src + i}
+              key={ph.full + i}
               type="button"
               onClick={() => setZoom(true)}
               className="img-skeleton relative h-full w-full shrink-0 snap-center cursor-zoom-in"
               aria-label={fmt(t.gallery.photo, { n: i + 1 })}
             >
               <img
-                src={src}
+                src={ph.sm}
+                srcSet={ph.srcSet}
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 alt={`${title} — ${fmt(t.gallery.photo, { n: i + 1 })}`}
                 loading={i === 0 ? "eager" : "lazy"}
                 fetchPriority={i === 0 ? "high" : "auto"}
@@ -100,9 +104,9 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
 
       {n > 1 && (
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
-          {photos.map((src, i) => (
+          {photos.map((ph, i) => (
             <button
-              key={src + i}
+              key={ph.full + i}
               type="button"
               onClick={() => go(i)}
               className={`aspect-square overflow-hidden rounded-xl border-2 transition-all duration-200 ${
@@ -110,7 +114,7 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
               }`}
               aria-label={fmt(t.gallery.showPhoto, { n: i + 1 })}
             >
-              <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
+              <img src={ph.sm} alt="" loading="lazy" decoding="async" width={120} height={90} className="h-full w-full object-cover" />
             </button>
           ))}
         </div>
@@ -125,7 +129,7 @@ export function Gallery({ photos, title, sold }: { photos: string[]; title: stri
             </button>
           </div>
           <div className="relative flex flex-1 items-center justify-center px-2 pb-8" onClick={(e) => e.stopPropagation()}>
-            <img key={index} src={photos[index]} alt={title} className="max-h-full max-w-full animate-fade-in rounded-2xl object-contain" />
+            <img key={index} src={photos[index].full} alt={title} className="max-h-full max-w-full animate-fade-in rounded-2xl object-contain" />
             {n > 1 && (
               <>
                 <button onClick={() => go(index - 1)} className={`${arrow} left-3`} aria-label={t.gallery.prev}><ChevronLeft /></button>

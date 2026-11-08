@@ -1,4 +1,5 @@
 import Link from "@/components/site/LocLink";
+import { headers } from "next/headers";
 import { getLocale, getT } from "@/i18n/server";
 import type { Metadata } from "next";
 import { alternatesFor, safeJsonLd } from "@/lib/seo";
@@ -9,7 +10,7 @@ import { localePath } from "@/i18n/config";
 import { countBy, latestItem, listItems } from "@/lib/items";
 import { Band } from "@/components/site/Band";
 import type { Category, Item } from "@/lib/types";
-import { itemPath, photoUrl } from "@/lib/utils";
+import { itemPath, photoUrl, photoSet } from "@/lib/utils";
 import { waOptions } from "@/lib/contacts";
 import { WaButton } from "@/components/site/WaButton";
 import { ItemCard, ViewsBadge, specChips } from "@/components/catalog/ItemCard";
@@ -41,6 +42,9 @@ function Rail({ items }: { items: Item[] }) {
 export default async function HomePage() {
   const t = await getT();
   const locale = await getLocale();
+  // На телефонах подборки — горизонтальные ленты, видно 1–2 карточки: меньше карточек — быстрее загрузка и отрисовка
+  const phone = /Mobi|Android|iPhone|iPad/i.test((await headers()).get("user-agent") || "");
+  const perRail = phone ? 4 : 6;
   const counts = { car: countBy({ type: "car" }), engine: countBy({ type: "engine" }) };
   const featured = latestItem("car", locale);
   const engineCover = latestItem("engine", locale);
@@ -98,7 +102,7 @@ export default async function HomePage() {
               <SearchBox size="lg" />
               <div className="mt-3.5 flex flex-wrap justify-center gap-2 lg:justify-start">
                 {QUICK.map((q) => (
-                  <Link key={q} href={`/search?q=${encodeURIComponent(q)}`} className="press rounded-full bg-white/60 px-3 py-1.5 text-xs font-semibold text-fg/80 ring-1 ring-fg/[0.06] hover:bg-white hover:text-brand">
+                  <Link key={q} href={`/search?q=${encodeURIComponent(q)}`} className="press inline-flex min-h-[40px] items-center rounded-full bg-white px-3.5 text-xs font-semibold text-fg/80 ring-1 ring-fg/[0.12] hover:text-brand">
                     {q}
                   </Link>
                 ))}
@@ -112,7 +116,7 @@ export default async function HomePage() {
               <Link href={itemPath(featured)} className="card-press surface group relative block overflow-hidden rounded-[32px] p-2">
                 <div className="relative aspect-[16/11] overflow-hidden rounded-[26px] bg-ink-600">
                   {featured.photos[0] && (
-                    <img src={photoUrl(featured.photos[0].filename)} alt={featured.title} fetchPriority="high" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+                    <img src={photoSet(featured.photos[0].filename).sm} srcSet={photoSet(featured.photos[0].filename).srcSet} sizes="(min-width: 1024px) 520px, 92vw" alt={featured.title} fetchPriority="high" decoding="async" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
                   )}
                   <span className="absolute left-3 top-3 rounded-full bg-brand/90 px-3 py-1 text-xs font-bold text-white shadow-sm">{t.categories[featured.category]}</span>
                   <ViewsBadge views={featured.views} t={t} className="absolute right-3 top-3" />
@@ -194,7 +198,7 @@ export default async function HomePage() {
       {/* Подборки машин: одна голубая полоса */}
       {(() => {
         const rails = sections
-          .map(({ cat, eyebrow }) => ({ cat, eyebrow, items: listItems({ type: "car", category: cat }, 1, 8, locale).items }))
+          .map(({ cat, eyebrow }) => ({ cat, eyebrow, items: listItems({ type: "car", category: cat }, 1, perRail, locale).items }))
           .filter((r) => r.items.length);
         return rails.length ? (
           <Band tone="blue">
@@ -210,7 +214,7 @@ export default async function HomePage() {
         ) : null;
       })()}
       {(() => {
-        const engines = listItems({ type: "engine" }, 1, 8, locale).items;
+        const engines = listItems({ type: "engine" }, 1, perRail, locale).items;
         return engines.length ? (
           <Band tone="white">
             <SectionTitle eyebrow={t.home.eyebrowEngines} title={t.types.engine} href="/catalog/engines" />
@@ -250,7 +254,7 @@ export default async function HomePage() {
             <p className="mt-4 max-w-md text-fg/80">{t.home.contactsText}</p>
             <div className="mt-6 flex flex-wrap gap-3">
             <LeadButton className="btn-brand px-7 py-4 text-base" />
-            <WaButton options={waOptions("generic", undefined, t.meta.code)} placement="up" className="btn-wa px-7 py-4 text-base" wrapperClassName="inline-block">
+            <WaButton chooseLabel={t.whatsapp.choose} options={waOptions("generic", undefined, t.meta.code)} placement="up" className="btn-wa px-7 py-4 text-base" wrapperClassName="inline-block">
               <WhatsAppIcon /> {t.home.writeWhatsapp}
             </WaButton>
             </div>

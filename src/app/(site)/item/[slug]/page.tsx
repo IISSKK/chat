@@ -7,7 +7,7 @@ import { getLocale, getT } from "@/i18n/server";
 import { getItem, getItemAny, listItems } from "@/lib/items";
 import { getCurrentAdmin } from "@/lib/admins";
 import { brandModelSlugs } from "@/lib/catalog-refs";
-import { formatNumber, itemPath, itemUrl, parseIdFromParam, photoUrl, typePath } from "@/lib/utils";
+import { formatNumber, itemPath, itemUrl, parseIdFromParam, photoUrl, photoSet, typePath } from "@/lib/utils";
 import { waOptions } from "@/lib/contacts";
 import { parseVideoUrl } from "@/lib/video";
 import { alternatesFor, absoluteUrl, safeJsonLd, OG_ALTERNATE_LOCALES } from "@/lib/seo";
@@ -137,14 +137,14 @@ export default async function ItemPage({ params }: Props) {
           <a href={`/admin/${item.type === "car" ? "cars" : "engines"}/${item.id}`} className="ml-auto underline">{t.misc.draftEdit} →</a>
         </div>
       )}
-      <nav className="mb-5 flex flex-wrap items-center gap-2 text-sm text-fg/72" aria-label="breadcrumb">
-        <Link href={typePath(item.type)} className="inline-flex items-center gap-1.5 rounded-full bg-fg/[0.09] px-3 py-1.5 font-semibold text-fg/80 transition hover:bg-fg/10">
+      <nav className="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-fg/72" aria-label="breadcrumb">
+        <Link href={typePath(item.type)} className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-fg/[0.09] px-3.5 py-2 font-semibold text-fg/80 transition hover:bg-fg/10">
           <ArrowLeft className="h-4 w-4" /> {t.types[item.type]}
         </Link>
         {slugs.brand && item.type === "car" && (
           <>
             <span>/</span>
-            <Link href={`/brand/${slugs.brand.slug}`} className="hover:text-fg">{slugs.brand.name}</Link>
+            <Link href={`/brand/${slugs.brand.slug}`} className="inline-flex min-h-[40px] items-center px-1 hover:text-fg">{slugs.brand.name}</Link>
           </>
         )}
         {slugs.brand && slugs.model && item.type === "car" && (
@@ -158,7 +158,7 @@ export default async function ItemPage({ params }: Props) {
       <div className="grid gap-8 lg:grid-cols-[1.25fr_1fr] lg:gap-12">
         <div className="space-y-5">
           <div className="relative">
-            <Gallery photos={item.photos.map((p) => photoUrl(p.filename))} title={item.title} sold={sold} />
+            <Gallery photos={item.photos.map((p) => photoSet(p.filename))} title={item.title} sold={sold} />
             {sold && <SoldBadge label={t.status.sold} className="pointer-events-none absolute left-4 top-4 z-10 text-lg" />}
           </div>
           {video && (
@@ -184,11 +184,11 @@ export default async function ItemPage({ params }: Props) {
           <div className="mt-6 rounded-3xl surface p-4 sm:p-5">
             <p className="mb-4 text-sm text-fg/80">{sold ? t.item.soldNote : t.item.contactNote}</p>
             <div className="grid gap-2">
-              <WaButton options={waOptions("price", item.id, t.meta.code)} className="btn-wa w-full py-4 text-base">
+              <WaButton chooseLabel={t.whatsapp.choose} options={waOptions("price", item.id, t.meta.code)} className="btn-wa w-full py-4 text-base">
                 <WhatsAppIcon /> {t.actions.askPrice}
               </WaButton>
               <div className="grid grid-cols-[1fr_auto] gap-2">
-                <WaButton options={waOptions("docs", item.id, t.meta.code)} className="btn-ghost w-full py-3" wrapperClassName="min-w-0">
+                <WaButton chooseLabel={t.whatsapp.choose} options={waOptions("docs", item.id, t.meta.code)} className="btn-ghost w-full py-3" wrapperClassName="min-w-0">
                   <DocIcon className="h-4 w-4" /> {t.actions.docs}
                 </WaButton>
                 <ShareMenu url={itemUrl(item, locale)} title={item.title} />
@@ -207,7 +207,7 @@ export default async function ItemPage({ params }: Props) {
                 <div key={k} className="grid grid-cols-[minmax(110px,40%)_1fr] gap-3 px-4 py-3 text-sm sm:px-5">
                   <dt className="text-fg/72">{k}</dt>
                   <dd className={`font-semibold ${k === t.fields.vin || k === t.fields.serial ? "break-all font-mono" : ""}`}>
-                    {href ? <Link href={href} className="text-brand hover:underline">{v}</Link> : v}
+                    {href ? <Link href={href} className="-my-2 inline-block py-2 text-brand-600 hover:underline">{v}</Link> : v}
                   </dd>
                 </div>
               ))}

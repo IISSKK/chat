@@ -48,10 +48,12 @@ export function LiveWidget() {
         beat();
       }
     };
-    first();
+    // Не мешаем отрисовке первого экрана: запросы статистики стартуют, когда браузер освободился
+    const start = setTimeout(first, 1500);
     document.addEventListener("visibilitychange", onVis);
     return () => {
       alive = false;
+      clearTimeout(start);
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", onVis);
     };
@@ -109,7 +111,7 @@ export function LiveWidget() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="glass flex items-center gap-2.5 rounded-full py-2 pl-3 pr-3.5 text-xs font-semibold"
+        className="glass flex min-h-[44px] items-center gap-2.5 rounded-full py-2 pl-3.5 pr-4 text-xs font-semibold"
       >
         <span className="relative flex h-2.5 w-2.5">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#34C759] opacity-60" />

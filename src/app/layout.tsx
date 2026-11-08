@@ -1,19 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { Manrope } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { getLocale, getT } from "@/i18n/server";
 import { I18nProvider } from "@/i18n/client";
 import type { Dictionary } from "@/i18n";
 import "./globals.css";
 
-/** В браузер отправляем словарь без длинных текстов, которые рендерятся только на сервере (юр. страницы, «О нас» и т. п.) */
+/** Разделы словаря, которые нужны только серверу (страницы, тексты брендов и т. п.): в браузер они не отправляются */
+const SERVER_ONLY = ["typeSingle", "categoriesLong", "advantages", "about", "catalog", "item", "brandPage", "misc", "parts", "legal"] as const;
+
 function clientDictionary(t: Dictionary): Dictionary {
-  return { ...t, legal: { ...t.legal, terms: [], privacy: [] }, advantages: [], parts: { ...t.parts, bodyItems: [], chassisItems: [], steps: [] }, about: { ...t.about, lead: "", partnershipText: "" } };
+  const copy: Record<string, unknown> = { ...t };
+  for (const k of SERVER_ONLY) copy[k] = Array.isArray(copy[k]) ? [] : {};
+  return copy as unknown as Dictionary;
 }
 
-// Один вариативный шрифт вместо двух — меньше загрузки. На iPhone/Mac используется системный SF Pro.
-const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter", display: "swap" });
-// Заголовки — Manrope: аккуратная геометрия, хорошо смотрится крупно, есть кириллица.
+// Заголовки — Manrope (есть кириллица). Основной текст — системный шрифт телефона: он уже на устройстве и не грузится по сети.
 const manrope = Manrope({ subsets: ["latin", "cyrillic"], variable: "--font-display", display: "swap" });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -41,7 +43,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = await getLocale();
   const t = await getT();
   return (
-    <html lang={locale === "zh" ? "zh-CN" : locale} className={`${inter.variable} ${manrope.variable}`} suppressHydrationWarning>
+    <html lang={locale === "zh" ? "zh-CN" : locale} className={manrope.variable} suppressHydrationWarning>
       <head>
         {/* Включает анимации появления только при работающем JS */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />

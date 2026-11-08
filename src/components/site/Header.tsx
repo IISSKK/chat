@@ -45,7 +45,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
     <header className="glass sticky top-0 z-40 rounded-none border-x-0 border-t-0 border-b-white/60 shadow-[0_1px_0_rgba(15,40,90,.06)]">
       {/* Курсы валют онлайн */}
       <div className="border-b border-fg/[0.06]">
-        <div className="container flex h-9 items-center gap-3 overflow-x-auto no-scrollbar">
+        <div className="container flex h-10 items-center gap-3 overflow-x-auto no-scrollbar">
           <span className="hidden shrink-0 text-[11px] font-bold uppercase tracking-wider text-fg/68 lg:inline">{ru.rates.title}</span>
           <RatesTicker />
         </div>
@@ -84,7 +84,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
           >
             {search ? <CloseIcon /> : <SearchIcon />}
           </button>
-          <WaButton options={wa} placement="down" align="right" className="btn-wa px-4 py-2.5" wrapperClassName="hidden sm:block">
+          <WaButton chooseLabel={ru.whatsapp.choose} options={wa} placement="down" align="right" className="btn-wa px-4 py-2.5" wrapperClassName="hidden sm:block">
             <WhatsAppIcon className="h-4 w-4" /> WhatsApp
           </WaButton>
           <button
@@ -106,7 +106,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
     </header>
 
       {/* Мобильное меню (лист снизу, как в iOS) */}
-      <div className={`fixed inset-0 z-50 lg:hidden ${menu ? "" : "pointer-events-none"}`} aria-hidden={!menu}>
+      <div className={`fixed inset-0 z-50 lg:hidden ${menu ? "" : "pointer-events-none"}`} inert={!menu}>
         <div
           onClick={() => setMenu(false)}
           className={`absolute inset-0 bg-fg/25 transition-opacity duration-300 ${menu ? "opacity-100" : "opacity-0"}`}
@@ -119,7 +119,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
           <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-fg/15" />
           <div className="mb-2 flex items-center justify-between px-2">
             <Logo />
-            <button onClick={() => setMenu(false)} className="grid h-9 w-9 place-items-center rounded-full bg-fg/[0.09]" aria-label={ru.nav.close}>
+            <button onClick={() => setMenu(false)} className="grid h-11 w-11 place-items-center rounded-full bg-fg/[0.09]" aria-label={ru.nav.close}>
               <CloseIcon className="h-4 w-4" />
             </button>
           </div>
@@ -143,7 +143,7 @@ export function Header({ wa }: { wa: WaOption[] }) {
             <p className="mb-1.5 px-2 text-[11px] font-bold uppercase tracking-wider text-fg/70">{ru.lang.label}</p>
             <LanguageSwitcher variant="row" />
           </div>
-          <WaButton options={wa} placement="up" className="btn-wa w-full py-4 text-base" wrapperClassName="mt-3">
+          <WaButton chooseLabel={ru.whatsapp.choose} options={wa} placement="up" className="btn-wa w-full py-4 text-base" wrapperClassName="mt-3">
             <WhatsAppIcon /> {ru.home.writeWhatsapp}
           </WaButton>
         </div>

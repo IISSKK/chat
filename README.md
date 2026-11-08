@@ -16,6 +16,7 @@ npm run dev              # http://localhost:3000
 - [docs/DEPLOY.md](docs/DEPLOY.md): VPS + Cloudflare, запуск, обновление, восстановление
 - [docs/ADMIN.md](docs/ADMIN.md): работа с админкой, права, 2FA, блокировки
 - [docs/SECURITY.md](docs/SECURITY.md): защита, чек-лист, нагрузочные тесты (`loadtest/`)
+- [docs/PERFORMANCE.md](docs/PERFORMANCE.md): скорость на телефоне, как перемерить
 
 ## Возможности
 - Каталог (авто, двигатели) с фильтрами, поиск по VIN/модели/году/серийному номеру, избранное и сравнение, PWA.

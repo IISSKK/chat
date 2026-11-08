@@ -112,7 +112,7 @@ export default async function ResourceList({ params, searchParams }: Props) {
                   {(() => { const g = i.type === "car" ? generationFor(i.brand, i.model, i.year) : null; return g ? <span className="rounded-full bg-brand/10 px-2 py-0.5 font-semibold text-brand">{g.name}</span> : null; })()}
                   <span className="inline-flex items-center gap-1"><EyeIcon className="h-3.5 w-3.5" />{formatNumber(i.views)}</span>
                 </span>
-                {(i.vin || i.serial) && <span className="mt-0.5 block truncate font-mono text-[11px] text-slate-400">{i.vin || i.serial}</span>}
+                {(i.vin || i.serial) && <span className="mt-0.5 block truncate font-mono text-xs text-slate-400">{i.vin || i.serial}</span>}
               </span>
             </Link>
             <RowActions variant="card" id={i.id} status={i.status} editHref={`${mod.href}/${i.id}`} viewHref={itemPath(i)} title={i.title} canDelete={canDelete} trash={view === "trash"} />

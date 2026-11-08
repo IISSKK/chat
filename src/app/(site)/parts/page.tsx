@@ -25,7 +25,7 @@ export default async function PartsPage() {
 
       <div className="mt-8 grid gap-5 md:grid-cols-2">
         {groups.map(({ kind, title, text, items, Icon, tint }, i) => (
-          <section key={kind} data-reveal style={{ "--d": `${i * 80}ms` } as React.CSSProperties} className="flex flex-col rounded-4xl surface p-6 sm:p-8">
+          <section key={kind} className="flex flex-col rounded-4xl surface p-6 sm:p-8">
             <span className={`grid h-12 w-12 place-items-center rounded-2xl ${tint}`}>
               <Icon className="h-6 w-6" />
             </span>
@@ -37,7 +37,7 @@ export default async function PartsPage() {
               ))}
             </ul>
             <div className="mt-auto pt-7">
-              <WaButton options={waOptions(kind, undefined, t.meta.code)} placement="up" className="btn-wa w-full justify-center px-6 py-3.5 text-base sm:w-auto">
+              <WaButton chooseLabel={t.whatsapp.choose} options={waOptions(kind, undefined, t.meta.code)} placement="up" className="btn-wa w-full justify-center px-6 py-3.5 text-base sm:w-auto">
                 <WhatsAppIcon /> {t.parts.ask}
               </WaButton>
             </div>

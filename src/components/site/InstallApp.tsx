@@ -15,7 +15,11 @@ export function InstallApp({ className = "" }: { className?: string }) {
 
   useEffect(() => {
     if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
-      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
+      // Регистрируем после загрузки страницы и в простое, чтобы не отнимать ресурсы у первого экрана
+      const reg = () => navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
+      const idle = () => ("requestIdleCallback" in window ? (window as unknown as { requestIdleCallback: (f: () => void, o?: object) => void }).requestIdleCallback(reg, { timeout: 4000 }) : setTimeout(reg, 2000));
+      if (document.readyState === "complete") idle();
+      else window.addEventListener("load", idle, { once: true });
     }
     const standalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as unknown as { standalone?: boolean }).standalone;
     if (standalone) return setInstalled(true);

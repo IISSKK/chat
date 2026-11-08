@@ -10,7 +10,8 @@ html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; text-s
 body {
   @apply bg-ink text-fg font-sans antialiased;
   min-height: 100dvh;
-  font-feature-settings: "cv11", "ss01";
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
 }
 h1, h2, h3 { @apply font-display; letter-spacing: -0.02em; }
 ::selection { background: rgb(var(--c-brand) / 0.2); color: rgb(var(--c-fg)); }
@@ -100,6 +101,12 @@ html.js [data-reveal].is-visible { opacity: 1; transform: none; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   html.js [data-reveal] { opacity: 1; transform: none; }
 }
+
+/* iOS Safari приближает страницу при фокусе на поле с шрифтом меньше 16px */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]), select, textarea { font-size: 16px; }
+}
+html { touch-action: manipulation; }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }

@@ -29,7 +29,7 @@ export async function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-white/55">{t.footer.catalog}</h3>
+          <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-white/60">{t.footer.catalog}</h2>
           <ul className="space-y-2.5 text-sm text-white/75">
             <li><Link className="hover:text-brand-400" href="/catalog/cars">{t.nav.cars}</Link></li>
             <li><Link className="hover:text-brand-400" href="/catalog/cars/standby">{t.categoriesLong.standby}</Link></li>
@@ -42,7 +42,7 @@ export async function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-white/55">{t.footer.about}</h3>
+          <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-white/60">{t.footer.about}</h2>
           <ul className="space-y-3 text-sm text-white/75">
             <li className="flex gap-2"><MailIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand" /><a className="hover:text-brand-400" href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
             <li className="flex gap-2"><ClockIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand" />{t.meta.workHours}</li>
@@ -52,17 +52,17 @@ export async function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-white/55">{t.footer.visits}</h3>
+          <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-white/60">{t.footer.visits}</h2>
           <VisitCounter />
         </div>
       </div>
 
-      <div className="border-t border-white/10">
+      <div className="border-t border-white/10 bg-[#0B1220]">
         <div className="container flex flex-col items-center justify-between gap-3 py-6 text-xs text-white/55 sm:flex-row">
           <span>© {year} {siteConfig.name}. {t.footer.rights}</span>
-          <div className="flex gap-5">
-            <Link href="/terms" className="hover:text-white">{t.footer.terms}</Link>
-            <Link href="/privacy" className="hover:text-white">{t.footer.privacy}</Link>
+          <div className="flex gap-x-5">
+            <Link href="/terms" className="inline-flex min-h-[44px] items-center text-white/70 hover:text-white">{t.footer.terms}</Link>
+            <Link href="/privacy" className="inline-flex min-h-[44px] items-center text-white/70 hover:text-white">{t.footer.privacy}</Link>
           </div>
         </div>
       </div>

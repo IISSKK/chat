@@ -23,13 +23,13 @@ export default async function BrandsIndex() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {brands.map(({ brand, count, models }) => (
           <div key={brand.id} className="surface rounded-3xl p-5">
-            <Link href={`/brand/${brand.slug}`} className="flex items-baseline justify-between gap-2 text-xl font-bold hover:text-brand">
+            <Link href={`/brand/${brand.slug}`} className="-my-1.5 flex items-baseline justify-between gap-2 py-1.5 text-xl font-bold hover:text-brand">
               {brand.name}
               <span className="text-sm font-semibold text-fg/70">{fmt(t.brandPage.count, { n: count })}</span>
             </Link>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {models.slice(0, 10).map(({ model, count: n }) => (
-                <Link key={model.id} href={`/brand/${brand.slug}/${model.slug}`} className="chip hover:bg-brand/10 hover:text-brand">
+                <Link key={model.id} href={`/brand/${brand.slug}/${model.slug}`} className="chip min-h-[36px] px-3 hover:bg-brand/10 hover:text-brand">
                   {model.name} · {n}
                 </Link>
               ))}

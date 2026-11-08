@@ -16,8 +16,8 @@ export default {
         sun: { DEFAULT: "rgb(var(--c-sun) / <alpha-value>)" },
       },
       fontFamily: {
-        display: ["var(--font-display)", "var(--font-inter)", "Apple SD Gothic Neo", "Malgun Gothic", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans KR", "system-ui", "sans-serif"],
-        sans: ["var(--font-inter)", "Apple SD Gothic Neo", "Malgun Gothic", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans KR", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Apple SD Gothic Neo", "Malgun Gothic", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans KR", "system-ui", "sans-serif"],
+        sans: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Apple SD Gothic Neo", "Malgun Gothic", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans KR", "system-ui", "sans-serif"],
       },
       borderRadius: { "4xl": "2rem" },
       keyframes: {

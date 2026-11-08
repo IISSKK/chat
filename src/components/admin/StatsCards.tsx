@@ -37,13 +37,13 @@ export function VisitsChart({ data }: { data: { day: string; visitors: number; h
               className="w-full rounded-t bg-ember/80 transition-colors group-hover:bg-ember"
               style={{ height: `${Math.max(2, (d.visitors / max) * 100)}%` }}
             />
-            <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-900 px-2 py-1 text-[11px] text-white group-hover:block">
+            <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-900 px-2 py-1 text-xs text-white group-hover:block">
               {d.day.slice(5)}: {d.visitors} чел. / {d.hits} визитов
             </div>
           </div>
         ))}
       </div>
-      <div className="mt-2 flex justify-between text-[10px] text-slate-400">
+      <div className="mt-2 flex justify-between text-xs text-slate-400">
         <span>{data[0]?.day.slice(5)}</span>
         <span>{data[data.length - 1]?.day.slice(5)}</span>
       </div>
