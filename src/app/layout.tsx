@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = await getLocale();
   const t = await getT();
   return (
-    <html lang={locale === "zh" ? "zh-CN" : locale} className={manrope.variable} suppressHydrationWarning>
+    <html lang={locale === "zh" ? "zh-CN" : locale} className={manrope.variable} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         {/* Включает анимации появления только при работающем JS */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />

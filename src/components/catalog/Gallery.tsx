@@ -63,7 +63,7 @@ export function Gallery({ photos, title, sold }: { photos: Photo[]; title: strin
         >
           {photos.map((ph, i) => (
             <button
-              key={ph.full + i}
+              key={`${i}:${ph.full}`}
               type="button"
               onClick={() => setZoom(true)}
               className="img-skeleton relative h-full w-full shrink-0 snap-center cursor-zoom-in"
@@ -106,7 +106,7 @@ export function Gallery({ photos, title, sold }: { photos: Photo[]; title: strin
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
           {photos.map((ph, i) => (
             <button
-              key={ph.full + i}
+              key={`${i}:${ph.full}`}
               type="button"
               onClick={() => go(i)}
               className={`aspect-square overflow-hidden rounded-xl border-2 transition-all duration-200 ${

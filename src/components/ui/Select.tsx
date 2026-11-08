@@ -197,7 +197,7 @@ export function Select({
                 const sel = o.value === current;
                 return (
                   <li
-                    key={o.value + i}
+                    key={`${i}:${o.value}`}
                     data-i={i}
                     role="option"
                     aria-selected={sel}
