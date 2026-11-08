@@ -9,7 +9,7 @@ export async function SectionTitle({ title, href, eyebrow, dark = false }: { tit
   return (
     <div data-reveal className="mb-6 flex items-end justify-between gap-3 sm:mb-8 sm:gap-4">
       <div className="min-w-0">
-        {eyebrow && <p className={`mb-2 text-xs font-bold uppercase tracking-[0.2em] ${dark ? "text-brand-400" : "text-brand"}`}>{eyebrow}</p>}
+        {eyebrow && <p className={`mb-2 text-xs font-bold uppercase tracking-[0.2em] ${dark ? "text-brand-400" : "text-brand-600"}`}>{eyebrow}</p>}
         <h2 className={`h-display break-words text-[1.9rem] leading-tight sm:text-4xl lg:text-5xl ${dark ? "text-white" : ""}`}>{title}</h2>
       </div>
       {href && (

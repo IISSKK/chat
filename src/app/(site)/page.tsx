@@ -249,7 +249,7 @@ export default async function HomePage() {
       <Band tone="white" id="contacts">
         <div className="grid gap-8 lg:grid-cols-[1fr_1.3fr] lg:items-center">
           <div data-reveal>
-            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand">{t.home.eyebrowContacts}</p>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-600">{t.home.eyebrowContacts}</p>
             <h2 className="h-display text-4xl sm:text-5xl">{t.home.contactsTitle}</h2>
             <p className="mt-4 max-w-md text-fg/80">{t.home.contactsText}</p>
             <div className="mt-6 flex flex-wrap gap-3">

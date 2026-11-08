@@ -90,16 +90,19 @@ h1, h2, h3 { @apply font-display; letter-spacing: -0.02em; }
     rgb(var(--c-ink-900));
 }
 
-/* Появление блоков при скролле (только opacity/transform — дёшево) */
-html.js [data-reveal] { opacity: 0; transform: translateY(18px); transition: opacity .55s ease, transform .55s cubic-bezier(.2,.7,.2,1); transition-delay: var(--d, 0ms); }
-html.js [data-reveal].is-visible { opacity: 1; transform: none; }
+/* Появление блоков при прокрутке: чистый CSS (scroll-driven animation), без JavaScript.
+   Блоки, уже видимые при загрузке, сразу показаны полностью; в браузерах без поддержки анимации нет вовсе. */
+@keyframes reveal-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@supports (animation-timeline: view()) {
+  [data-reveal] { animation: reveal-in linear both; animation-timeline: view(); animation-range: entry 0% entry 35%; }
+}
 
 /* Длинные страницы: браузер не рисует блоки за экраном */
 .cv-auto { content-visibility: auto; contain-intrinsic-size: auto 900px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  html.js [data-reveal] { opacity: 1; transform: none; }
+  [data-reveal] { animation: none !important; opacity: 1; transform: none; }
 }
 
 /* iOS Safari приближает страницу при фокусе на поле с шрифтом меньше 16px */
