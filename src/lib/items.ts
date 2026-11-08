@@ -4,6 +4,8 @@ import { slugify } from "./utils";
 import type { Item, ItemFilters, ItemInput, Photo } from "./types";
 import { applyTranslations } from "./item-i18n";
 import { generationFor } from "./catalog-refs";
+import { getDictionary } from "@/i18n";
+import { LOCALES } from "@/i18n/config";
 import type { Locale } from "@/i18n/config";
 
 type Row = Omit<Item, "photos">;
@@ -43,19 +45,34 @@ function buildWhere(f: ItemFilters) {
   if (f.yearTo) (where.push("year <= ?"), params.push(f.yearTo));
   if (f.fuel) (where.push("fuel = ?"), params.push(f.fuel));
   if (f.transmission) (where.push("transmission = ?"), params.push(f.transmission));
+  if (f.body) (where.push("body = ?"), params.push(f.body));
   if (f.q && f.q.trim()) {
     const terms = f.q.trim().split(/\s+/).slice(0, 6);
     for (const term of terms) {
       const like = `%${likeEsc(term)}%`;
+      const bodies = bodiesMatching(term);
       where.push(
-        `(title LIKE ? ESCAPE '\\' OR brand LIKE ? ESCAPE '\\' OR model LIKE ? ESCAPE '\\' OR vin LIKE ? ESCAPE '\\' OR serial LIKE ? ESCAPE '\\' OR engine_code LIKE ? ESCAPE '\\' OR CAST(year AS TEXT) = ?
+        `(${bodies.length ? `body IN (${bodies.map(() => "?").join(",")}) OR ` : ""}title LIKE ? ESCAPE '\\' OR brand LIKE ? ESCAPE '\\' OR model LIKE ? ESCAPE '\\' OR vin LIKE ? ESCAPE '\\' OR serial LIKE ? ESCAPE '\\' OR engine_code LIKE ? ESCAPE '\\' OR CAST(year AS TEXT) = ?
           OR EXISTS (SELECT 1 FROM item_translations tr WHERE tr.item_id = items.id AND tr.title LIKE ? ESCAPE '\\')
           OR EXISTS (SELECT 1 FROM generations g JOIN models gm ON gm.id = g.model_id JOIN brands gb ON gb.id = gm.brand_id WHERE g.name LIKE ? ESCAPE '\\' AND gb.name = items.brand COLLATE NOCASE AND gm.name = items.model COLLATE NOCASE AND items.year BETWEEN g.year_from AND g.year_to))`,
       );
-      params.push(like, like, like, like, like, like, term, like, like);
+      params.push(...bodies, like, like, like, like, like, like, term, like, like);
     }
   }
   return { sql: where.length ? `WHERE ${where.join(" AND ")}` : "", params };
+}
+
+/** Коды кузова, название которого (на любом из 4 языков) содержит введённое слово: «седан», «sedan», «세단», «轿车» */
+function bodiesMatching(term: string): string[] {
+  const t = term.trim().toLowerCase();
+  // Для иероглифов хватает двух знаков («세단», «轿车»), для остальных языков три — чтобы «su» не находило всё подряд
+  if (t.length < (/[\u3040-\u9fff\uac00-\ud7af]/.test(t) ? 2 : 3)) return [];
+  const out = new Set<string>();
+  for (const l of LOCALES) {
+    const labels = getDictionary(l).body as Record<string, string>;
+    for (const [code, label] of Object.entries(labels)) if (label.toLowerCase().includes(t)) out.add(code);
+  }
+  return [...out];
 }
 
 export function listItems(f: ItemFilters, page = 1, perPage = 12, locale?: Locale) {
@@ -119,7 +136,8 @@ export function facetValues(f: ItemFilters) {
       ? db.prepare(`SELECT DISTINCT model FROM items ${and} brand = ? COLLATE NOCASE AND model <> '' ORDER BY model COLLATE NOCASE`).all(...params, f.brand)
       : db.prepare(`SELECT DISTINCT model FROM items ${and} model <> '' ${f.type === "engine" ? "AND 0" : ""} ORDER BY model COLLATE NOCASE`).all(...params)
   ).map((r) => (r as { model: string }).model);
-  return { brands, years, models };
+  const bodies = (db.prepare(`SELECT DISTINCT body FROM items ${and} body <> ''`).all(...params) as { body: string }[]).map((r) => r.body);
+  return { brands, years, models, bodies };
 }
 
 export interface Suggestion {
@@ -167,7 +185,7 @@ export function suggest(q: string, limit = 8): Suggestion[] {
 
 const COLUMNS = [
   "type", "category", "title", "brand", "model", "year", "first_registration", "vin", "serial", "engine_code",
-  "displacement", "transmission", "mileage", "fuel", "notes", "status", "video_url",
+  "displacement", "transmission", "mileage", "fuel", "body", "notes", "status", "video_url",
 ] as const;
 
 export function createItem(input: ItemInput, photos: string[] = []): number {

@@ -1,5 +1,5 @@
 import "server-only";
-import { CATEGORIES, FUELS, ITEM_TYPES, MAX_PHOTOS, STATUSES, TRANSMISSIONS, type ItemInput } from "./types";
+import { BODIES, CATEGORIES, FUELS, ITEM_TYPES, MAX_PHOTOS, STATUSES, TRANSMISSIONS, type ItemInput } from "./types";
 import { saveUpload } from "./uploads";
 import { parseVideoUrl } from "./video";
 import { validateBrandModel } from "./catalog-refs";
@@ -43,6 +43,7 @@ export function parseItemInput(fd: FormData): { data?: ItemInput; error?: string
       transmission: oneOf(str(fd, "transmission"), TRANSMISSIONS),
       mileage: int(fd, "mileage"),
       fuel: oneOf(str(fd, "fuel"), FUELS),
+      body: type === "car" ? oneOf(str(fd, "body"), BODIES) : "",
       notes: str(fd, "notes", 5000),
       status: oneOf(str(fd, "status"), STATUSES, "draft") || "draft",
       video_url: video?.url ?? "",

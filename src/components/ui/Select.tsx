@@ -161,7 +161,8 @@ export function Select({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? uid : undefined}
-        aria-label={rest["aria-label"]}
+        // Имя кнопки включает видимый текст («Марка: Hyundai»), как требует доступность
+        aria-label={rest["aria-label"] ? `${rest["aria-label"]}: ${selected ? selected.label : placeholder}` : undefined}
         className={`flex min-h-[44px] items-center justify-between gap-2 text-left outline-none transition disabled:cursor-not-allowed disabled:opacity-50 ${triggerCls}`}
       >
         <span className={`truncate ${selected && selected.value !== "" ? "" : admin ? "text-slate-400" : "text-fg/70"}`}>{selected ? selected.label : placeholder}</span>

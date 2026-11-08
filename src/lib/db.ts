@@ -3,7 +3,8 @@ import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
 import { seedDemoData } from "./seed";
-import { importFromItems } from "./catalog-refs";
+import { BODY_BY_MODEL } from "./seed";
+import { importFromItems, seedKnownGenerations } from "./catalog-refs";
 
 const DB_PATH = path.resolve(process.env.DATABASE_PATH || "./data/app.db");
 export const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || "./data/uploads");
@@ -195,6 +196,12 @@ function migrate(db: DB) {
   // Миграции для существующих баз
   const cols = (db.prepare("PRAGMA table_info(items)").all() as { name: string }[]).map((c) => c.name);
   if (!cols.includes("views")) db.exec("ALTER TABLE items ADD COLUMN views INTEGER NOT NULL DEFAULT 0");
+  if (!cols.includes("body")) {
+    db.exec("ALTER TABLE items ADD COLUMN body TEXT NOT NULL DEFAULT ''");
+    // Один раз заполняем тип кузова у известных моделей: администратор потом поправит вручную
+    const upd = db.prepare("UPDATE items SET body = ? WHERE type = 'car' AND body = '' AND model = ? COLLATE NOCASE");
+    for (const [model, body] of Object.entries(BODY_BY_MODEL)) upd.run(body, model);
+  }
   if (!cols.includes("video_url")) db.exec("ALTER TABLE items ADD COLUMN video_url TEXT NOT NULL DEFAULT ''");
   if (!cols.includes("deleted_at")) db.exec("ALTER TABLE items ADD COLUMN deleted_at TEXT");
   const acols = (db.prepare("PRAGMA table_info(admins)").all() as { name: string }[]).map((c) => c.name);
@@ -220,6 +227,7 @@ export function getDb(): DB {
   try {
     // подтягиваем марки и модели существующих объявлений в справочник
     importFromItems();
+    seedKnownGenerations();
   } catch {}
   return db;
 }

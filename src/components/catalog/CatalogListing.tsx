@@ -2,8 +2,8 @@ import Link from "@/components/site/LocLink";
 import { Suspense } from "react";
 import { getLocale, getT } from "@/i18n/server";
 import { facetValues, listItems } from "@/lib/items";
-import { brandOfModel, generationsOf, getGeneration } from "@/lib/catalog-refs";
-import { CATEGORIES, FUELS, ITEM_TYPES, PUBLIC_STATUSES, TRANSMISSIONS, type Category, type ItemFilters } from "@/lib/types";
+import { getGeneration, listGenerations } from "@/lib/catalog-refs";
+import { BODIES, CATEGORIES, FUELS, ITEM_TYPES, PUBLIC_STATUSES, TRANSMISSIONS, type Category, type ItemFilters } from "@/lib/types";
 import { Filters } from "./Filters";
 import { ItemGrid } from "./ItemCard";
 import { Pagination } from "./Pagination";
@@ -34,6 +34,7 @@ export function parseFilters(sp: SearchParams, fixed: Partial<ItemFilters> = {})
     yearTo: gen?.year_to ?? yearTo,
     year: Number.isInteger(year) && year > 1900 ? year : undefined,
     fuel: pickOne(one(sp.fuel), FUELS),
+    body: pickOne(one(sp.body), BODIES),
     transmission: pickOne(one(sp.transmission), TRANSMISSIONS),
     q: one(sp.q)?.slice(0, 80),
     ...fixed,
@@ -106,7 +107,8 @@ export async function CatalogListing({
           brands={facets.brands}
           years={facets.years}
           models={facets.models}
-          generations={filters.model ? (() => { const b = filters.brand ?? brandOfModel(filters.model); return b ? generationsOf(b, filters.model) : []; })() : []}
+          generations={filters.type === "engine" ? [] : listGenerations({ brand: filters.brand, model: filters.model })}
+          bodies={filters.type === "engine" ? [] : facets.bodies}
           lockBrand={!!fixed.brand}
           lockModel={!!fixed.model}
           showType={showType}

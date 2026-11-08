@@ -80,6 +80,7 @@ export default async function ItemPage({ params }: Props) {
   const specs: [string, string | null, string?][] = [
     [t.fields.brand, item.brand, slugs.brand ? `/brand/${slugs.brand.slug}` : undefined],
     [t.fields.model, item.model, slugs.brand && slugs.model ? `/brand/${slugs.brand.slug}/${slugs.model.slug}` : undefined],
+    [t.fields.body, item.type === "car" && item.body ? t.body[item.body as keyof typeof t.body] ?? item.body : null],
     [t.fields.year, item.year ? String(item.year) : null],
     [t.fields.generation, gen ? `${gen.name} (${gen.year_from}–${gen.year_to})` : null],
     [t.fields.firstRegistration, item.first_registration],

@@ -15,6 +15,10 @@ export type Fuel = (typeof FUELS)[number];
 export const TRANSMISSIONS = ["automatic", "manual", "cvt", "dct"] as const;
 export type Transmission = (typeof TRANSMISSIONS)[number];
 
+/** Тип кузова (только у автомобилей) */
+export const BODIES = ["sedan", "hatchback", "wagon", "suv", "crossover", "minivan", "coupe", "convertible", "pickup", "truck", "van"] as const;
+export type Body = (typeof BODIES)[number];
+
 export const MAX_PHOTOS = 8;
 
 export interface Photo {
@@ -41,6 +45,8 @@ export interface Item {
   transmission: string;
   mileage: number | null;
   fuel: string;
+  /** Тип кузова (из BODIES) или пусто */
+  body: string;
   notes: string;
   status: Status;
   /** Ссылка на видео (YouTube / Vimeo), необязательно */
@@ -69,5 +75,6 @@ export interface ItemFilters {
   yearTo?: number;
   fuel?: string;
   transmission?: string;
+  body?: string;
   q?: string;
 }

@@ -55,6 +55,16 @@ const engines: Seed[] = [
   { title: "G4NA 2.0 MPi Nu", brand: "Hyundai", model: "Elantra / Tucson", year: 2020, engine_code: "G4NA", displacement: 1999, transmission: "automatic", fuel: "gasoline", mileage: 39000, notes: "Низкий пробег, гарантия на запуск." },
 ];
 
+/** Тип кузова известных моделей (для демо-данных и первичного заполнения старых баз) */
+export const BODY_BY_MODEL: Record<string, string> = {
+  Sonata: "sedan", K5: "sedan", K8: "sedan", Grandeur: "sedan", Avante: "sedan", G80: "sedan",
+  "Santa Fe": "suv", Sorento: "suv", Palisade: "suv", Tucson: "suv", Sportage: "suv", Rexton: "suv", QM6: "suv", GV80: "suv", Korando: "suv",
+  Seltos: "crossover", Kona: "crossover", "Ioniq 5": "crossover",
+  Carnival: "minivan", Staria: "minivan",
+  Morning: "hatchback", Ray: "hatchback",
+  Porter: "pickup", Bongo: "truck",
+};
+
 const wmiByBrand: Record<string, string> = {
   Hyundai: "KMH", Kia: "KNA", Genesis: "KMT", SsangYong: "KPT", "Renault Samsung": "KNM",
 };
@@ -64,9 +74,9 @@ const IMG = { car: 12, engine: 6 } as const;
 export function seedDemoData(db: DB) {
   seed = 7;
   const insert = db.prepare(`INSERT INTO items
-    (type, category, slug, title, brand, model, year, first_registration, vin, serial, engine_code, displacement,
+    (type, category, slug, title, brand, model, body, year, first_registration, vin, serial, engine_code, displacement,
      transmission, mileage, fuel, notes, status, created_at, updated_at)
-    VALUES (@type, @category, @slug, @title, @brand, @model, @year, @first_registration, @vin, @serial, @engine_code,
+    VALUES (@type, @category, @slug, @title, @brand, @model, @body, @year, @first_registration, @vin, @serial, @engine_code,
      @displacement, @transmission, @mileage, @fuel, @notes, @status, @ts, @ts)`);
   const photo = db.prepare("INSERT INTO photos (item_id, filename, position) VALUES (?, ?, ?)");
   const insertTr = db.prepare("INSERT INTO item_translations (item_id, lang, title, notes, src_hash) VALUES (?, ?, ?, ?, ?)");
@@ -80,6 +90,7 @@ export function seedDemoData(db: DB) {
     const res = insert.run({
       ...s,
       type,
+      body: type === "car" ? BODY_BY_MODEL[s.model] ?? "" : "",
       category: type === "car" ? categories[index % 3] : index % 3 === 0 ? "standby" : "listing",
       slug: slugify(s.title),
       first_registration: `${s.year}-${String(1 + Math.floor(rnd() * 12)).padStart(2, "0")}`,

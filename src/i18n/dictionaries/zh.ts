@@ -41,6 +41,7 @@ const zh: Dictionary = {
     yearFrom: "起始年份",
     yearTo: "截止年份",
     generation: "代际",
+    body: "车身类型",
     firstRegistration: "首次登记",
     vin: "车架号 (VIN)",
     serial: "序列号",
@@ -54,6 +55,7 @@ const zh: Dictionary = {
     status: "状态",
     section: "分类",
   },
+  body: { sedan: "轿车", hatchback: "两厢车", wagon: "旅行车", suv: "SUV", crossover: "跨界车", minivan: "MPV", coupe: "双门轿跑", convertible: "敞篷车", pickup: "皮卡", truck: "货车", van: "厢式货车" },
   units: { km: "公里", cc: "cc" },
   common: {
     viewAll: "查看全部",

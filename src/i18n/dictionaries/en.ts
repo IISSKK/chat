@@ -42,6 +42,7 @@ const en: Dictionary = {
     yearFrom: "Year from",
     yearTo: "Year to",
     generation: "Generation",
+    body: "Body type",
     firstRegistration: "First registration",
     vin: "VIN",
     serial: "Serial number",
@@ -55,6 +56,7 @@ const en: Dictionary = {
     status: "Status",
     section: "Section",
   },
+  body: { sedan: "Sedan", hatchback: "Hatchback", wagon: "Wagon", suv: "SUV", crossover: "Crossover", minivan: "Minivan", coupe: "Coupe", convertible: "Convertible", pickup: "Pickup", truck: "Truck", van: "Van" },
   units: { km: "km", cc: "cc" },
   common: {
     viewAll: "View all",

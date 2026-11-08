@@ -43,6 +43,7 @@ const ru = {
     yearFrom: "Год от",
     yearTo: "Год до",
     generation: "Поколение",
+    body: "Кузов",
     firstRegistration: "Первая регистрация",
     vin: "VIN",
     serial: "Серийный номер",
@@ -56,6 +57,7 @@ const ru = {
     status: "Статус",
     section: "Раздел",
   },
+  body: { sedan: "Седан", hatchback: "Хэтчбек", wagon: "Универсал", suv: "Внедорожник (SUV)", crossover: "Кроссовер", minivan: "Минивэн", coupe: "Купе", convertible: "Кабриолет", pickup: "Пикап", truck: "Грузовик", van: "Фургон" },
   units: { km: "км", cc: "см³" },
   common: {
     viewAll: "Смотреть все",

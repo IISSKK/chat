@@ -99,11 +99,12 @@ export function RowActions({
       <a href={viewHref} target="_blank" className={`grid place-items-center rounded-lg text-slate-500 hover:bg-slate-100 ${card ? "h-11 w-11" : "h-9 w-9"}`} title="Открыть на сайте" aria-label="Открыть на сайте">
         <EyeIcon className="h-4 w-4" />
       </a>
-      <Link href={editHref} className={`a-btn-ghost ${btn}`}>
-        <EditIcon className="h-4 w-4" /> Изменить
+      {/* В таблице подписи кнопок прячутся на узких экранах: остаются значки (подписи и подсказки сохранены для скринридеров и мыши) */}
+      <Link href={editHref} className={`a-btn-ghost ${btn}`} title="Изменить" aria-label="Изменить">
+        <EditIcon className="h-4 w-4" /> <span className={card ? "" : "hidden 2xl:inline"}>Изменить</span>
       </Link>
-      <button onClick={() => setConfirm("trash")} className={`a-btn text-red-600 hover:bg-red-50 ${btn}`} aria-label="В корзину">
-        <TrashIcon className="h-4 w-4" /> <span className={card ? "sr-only" : ""}>В корзину</span>
+      <button onClick={() => setConfirm("trash")} className={`a-btn text-red-600 hover:bg-red-50 ${btn}`} aria-label="В корзину" title="В корзину">
+        <TrashIcon className="h-4 w-4" /> <span className="sr-only">В корзину</span>
       </button>
     </div>
   );

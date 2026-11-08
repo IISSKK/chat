@@ -8,11 +8,11 @@ import { useLocale, useT } from "@/i18n/client";
 import { localePath, stripLocale } from "@/i18n/config";
 import { FUELS, TRANSMISSIONS } from "@/lib/types";
 
-type Gen = { id: number; name: string; year_from: number; year_to: number };
+type Gen = { id: number; name: string; year_from: number; year_to: number; model?: string };
 
 export function Filters({
-  brands, years, models, generations, lockBrand = false, lockModel = false, showType = false,
-}: { brands: string[]; years: number[]; models: string[]; generations: Gen[]; lockBrand?: boolean; lockModel?: boolean; showType?: boolean }) {
+  brands, years, models, generations, bodies = [], lockBrand = false, lockModel = false, showType = false,
+}: { brands: string[]; years: number[]; models: string[]; generations: Gen[]; bodies?: string[]; lockBrand?: boolean; lockModel?: boolean; showType?: boolean }) {
   const router = useRouter();
   const ru = useT();
   const rawPathname = usePathname();
@@ -34,7 +34,7 @@ export function Filters({
     start(() => router.replace(`${pathname}?${next.toString()}`, { scroll: false }));
   };
 
-  const active = ["brand", "model", "gen", "yearFrom", "yearTo", "fuel", "transmission", "type", "status"].filter((k) => params.get(k)).length;
+  const active = ["brand", "model", "gen", "yearFrom", "yearTo", "fuel", "transmission", "body", "type", "status"].filter((k) => params.get(k)).length;
 
   const reset = () => {
     const next = new URLSearchParams();
@@ -66,7 +66,8 @@ export function Filters({
           ])}
         {!lockBrand && field("brand", ru.fields.brand, brands.map((b) => [b, b]))}
         {!lockModel && models.length > 0 && field("model", ru.fields.model, models.map((m) => [m, m]))}
-        {generations.length > 0 && field("gen", ru.fields.generation, generations.map((g) => [String(g.id), `${g.name} (${g.year_from}–${g.year_to})`]))}
+        {bodies.length > 0 && field("body", ru.fields.body, bodies.map((b) => [b, ru.body[b as keyof typeof ru.body] ?? b]))}
+        {generations.length > 0 && field("gen", ru.fields.generation, generations.map((g) => [String(g.id), `${g.model && !lockModel && !params.get("model") ? `${g.model} · ` : ""}${g.name} (${g.year_from}–${g.year_to})`]))}
         {field("yearFrom", ru.fields.yearFrom, [...years].sort((a, b) => a - b).map((y) => [String(y), String(y)]))}
         {field("yearTo", ru.fields.yearTo, years.map((y) => [String(y), String(y)]))}
         {field("fuel", ru.fields.fuel, FUELS.map((f) => [f, ru.fuel[f]]))}

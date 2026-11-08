@@ -4,7 +4,7 @@ import { Select } from "@/components/ui/Select";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import ru from "@/i18n/dictionaries/ru";
-import { CATEGORIES, FUELS, MAX_PHOTOS, TRANSMISSIONS, type Item, type ItemType } from "@/lib/types";
+import { BODIES, CATEGORIES, FUELS, MAX_PHOTOS, TRANSMISSIONS, type Item, type ItemType } from "@/lib/types";
 import { photoUrl } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, PlusIcon, TrashIcon } from "@/components/icons";
 
@@ -260,6 +260,12 @@ export function ItemForm({
             {field("serial", "Серийный номер", { className: "a-input font-mono uppercase" })}
             {field("engine_code", "Код двигателя", { placeholder: "G4KE", className: "a-input font-mono uppercase" })}
             {field("displacement", "Объём, см³", { type: "number", min: 0, inputMode: "numeric", placeholder: "1999" })}
+            {itemType === "car" && (
+              <label className="block">
+                <span className="a-label">Кузов</span>
+                <Select variant="admin" name="body" defaultValue={v?.body ?? ""} aria-label="Кузов" options={[{ value: "", label: "—" }, ...BODIES.map((x) => ({ value: x, label: ru.body[x] }))]} />
+              </label>
+            )}
             <label className="block">
               <span className="a-label">Коробка</span>
               <Select variant="admin" name="transmission" defaultValue={v?.transmission ?? ""} aria-label="Коробка" options={[{ value: "", label: "—" }, ...TRANSMISSIONS.map((x) => ({ value: x, label: ru.transmission[x] }))]} />

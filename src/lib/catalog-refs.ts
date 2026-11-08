@@ -170,6 +170,48 @@ export function importFromItems() {
   });
 }
 
+/** Известные поколения популярных корейских моделей (марка → модель → [название, с, по]). Заносятся один раз, только для моделей, которые уже есть в справочнике. */
+const KNOWN_GENERATIONS: Record<string, Record<string, [string, number, number][]>> = {
+  Hyundai: {
+    Sonata: [["LF", 2014, 2019], ["DN8", 2019, 2024]],
+    Avante: [["AD", 2015, 2020], ["CN7", 2020, 2023]],
+    "Santa Fe": [["DM", 2012, 2018], ["TM", 2018, 2023], ["MX5", 2023, 2025]],
+    Tucson: [["TL", 2015, 2020], ["NX4", 2020, 2025]],
+    Palisade: [["LX2", 2018, 2025]],
+    Grandeur: [["HG", 2011, 2016], ["IG", 2016, 2022], ["GN7", 2022, 2025]],
+    Staria: [["US4", 2021, 2025]],
+    Kona: [["OS", 2017, 2023], ["SX2", 2023, 2025]],
+    "Ioniq 5": [["NE", 2021, 2025]],
+  },
+  Kia: {
+    K5: [["JF", 2015, 2019], ["DL3", 2019, 2024]],
+    K8: [["GL3", 2021, 2025]],
+    Sorento: [["UM", 2014, 2020], ["MQ4", 2020, 2025]],
+    Sportage: [["QL", 2015, 2021], ["NQ5", 2021, 2025]],
+    Carnival: [["YP", 2014, 2020], ["KA4", 2020, 2025]],
+    Seltos: [["SP2", 2019, 2025]],
+    Morning: [["JA", 2017, 2023]],
+  },
+  Genesis: { G80: [["DH", 2016, 2020], ["RG3", 2020, 2025]], GV80: [["JX1", 2020, 2025]] },
+  SsangYong: { Rexton: [["Y400", 2017, 2024]], Korando: [["C300", 2019, 2025]] },
+};
+
+/** Один раз заполняет справочник поколений известными данными (модели, у которых поколения уже заданы вручную, не трогаются) */
+export function seedKnownGenerations() {
+  const db = getDb();
+  if (db.prepare("SELECT 1 FROM settings WHERE key = 'gens_seeded_v1'").get()) return;
+  transaction(db, () => {
+    for (const [brand, models] of Object.entries(KNOWN_GENERATIONS)) {
+      for (const [model, gens] of Object.entries(models)) {
+        const m = db.prepare("SELECT m.id FROM models m JOIN brands b ON b.id = m.brand_id WHERE b.name = ? COLLATE NOCASE AND m.name = ? COLLATE NOCASE").get(brand, model) as { id: number } | undefined;
+        if (!m || db.prepare("SELECT 1 FROM generations WHERE model_id = ?").get(m.id)) continue;
+        for (const [name, from, to] of gens) db.prepare("INSERT INTO generations (model_id, name, year_from, year_to) VALUES (?, ?, ?, ?)").run(m.id, name, from, to);
+      }
+    }
+    db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('gens_seeded_v1', '1')").run();
+  });
+}
+
 /** Для публичных страниц марок */
 export function getBrandBySlug(slug: string): BrandRef | null {
   const db = getDb();
@@ -278,4 +320,20 @@ export function generationFor(brand: string, model: string, year: number | null)
 export function brandOfModel(model: string): string | null {
   const rows = getDb().prepare("SELECT DISTINCT b.name FROM models m JOIN brands b ON b.id = m.brand_id WHERE m.name = ? COLLATE NOCASE").all(model) as { name: string }[];
   return rows.length === 1 ? rows[0].name : null;
+}
+
+export interface GenerationListItem extends GenerationRef {
+  brand: string;
+  model: string;
+}
+
+/** Поколения для фильтра: все, либо только выбранной марки / модели */
+export function listGenerations(f: { brand?: string; model?: string } = {}): GenerationListItem[] {
+  const where: string[] = [];
+  const params: string[] = [];
+  if (f.brand) (where.push("b.name = ? COLLATE NOCASE"), params.push(f.brand));
+  if (f.model) (where.push("m.name = ? COLLATE NOCASE"), params.push(f.model));
+  return (getDb()
+    .prepare(`SELECT g.*, m.name AS model, b.name AS brand FROM generations g JOIN models m ON m.id = g.model_id JOIN brands b ON b.id = m.brand_id ${where.length ? `WHERE ${where.join(" AND ")}` : ""} ORDER BY b.name COLLATE NOCASE, m.name COLLATE NOCASE, g.year_from, g.name`)
+    .all(...params) as unknown as GenerationListItem[]).map(plain);
 }

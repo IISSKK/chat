@@ -42,6 +42,7 @@ const ko: Dictionary = {
     yearFrom: "연식 (최소)",
     yearTo: "연식 (최대)",
     generation: "세대",
+    body: "차체 형태",
     firstRegistration: "최초 등록",
     vin: "차대번호(VIN)",
     serial: "일련번호",
@@ -55,6 +56,7 @@ const ko: Dictionary = {
     status: "상태",
     section: "분류",
   },
+  body: { sedan: "세단", hatchback: "해치백", wagon: "왜건", suv: "SUV", crossover: "크로스오버", minivan: "미니밴", coupe: "쿠페", convertible: "컨버터블", pickup: "픽업", truck: "트럭", van: "밴" },
   units: { km: "km", cc: "cc" },
   common: {
     viewAll: "전체 보기",
