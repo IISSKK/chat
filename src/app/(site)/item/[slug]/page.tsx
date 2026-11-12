@@ -156,7 +156,7 @@ export default async function ItemPage({ params }: Props) {
         )}
       </nav>
 
-      <div className="grid gap-8 lg:grid-cols-[1.25fr_1fr] lg:gap-12">
+      <div className="grid gap-6 md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] md:items-start lg:grid-cols-[1.25fr_1fr] lg:gap-12">
         <div className="space-y-5">
           <div className="relative">
             <Gallery photos={item.photos.map((p) => photoSet(p.filename))} title={item.title} sold={sold} />
@@ -170,7 +170,7 @@ export default async function ItemPage({ params }: Props) {
           )}
         </div>
 
-        <div className="lg:sticky lg:top-28 lg:self-start">
+        <div className="md:sticky md:top-28 md:self-start">
           <div className="flex flex-wrap items-center gap-2">
             <span className="chip bg-ember/10 text-ember">{t.typeSingle[item.type]}</span>
             {item.type === "car" && <span className="chip">{t.categories[item.category]}</span>}
@@ -188,13 +188,13 @@ export default async function ItemPage({ params }: Props) {
               <WaButton chooseLabel={t.whatsapp.choose} options={waOptions("price", item.id, t.meta.code)} className="btn-wa w-full py-4 text-base">
                 <WhatsAppIcon /> {t.actions.askPrice}
               </WaButton>
-              <div className="grid grid-cols-[1fr_auto] gap-2">
+              <div className="grid grid-cols-[1fr_auto] gap-2 md:grid-cols-1 min-[900px]:grid-cols-[1fr_auto]">
                 <WaButton chooseLabel={t.whatsapp.choose} options={waOptions("docs", item.id, t.meta.code)} className="btn-ghost w-full py-3" wrapperClassName="min-w-0">
                   <DocIcon className="h-4 w-4" /> {t.actions.docs}
                 </WaButton>
                 <ShareMenu url={itemUrl(item, locale)} title={item.title} />
               </div>
-              <div className="grid grid-cols-[1fr_auto] gap-2">
+              <div className="grid grid-cols-[1fr_auto] gap-2 md:grid-cols-1 min-[900px]:grid-cols-[1fr_auto]">
                 <LeadButton itemId={item.id} itemTitle={item.title} className="btn-brand w-full py-3" />
                 <FavoriteButton id={item.id} withLabel className="!h-auto !w-auto !rounded-full px-4" />
               </div>

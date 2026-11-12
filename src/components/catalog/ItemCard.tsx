@@ -13,7 +13,7 @@ export async function ItemCard({ item, index = 0, priority = false }: { item: It
 
 export function ItemGrid({ items }: { items: Item[] }) {
   return (
-    <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 sm:gap-5 min-[900px]:grid-cols-3 xl:grid-cols-4">
       {items.map((it, i) => (
         <ItemCard key={it.id} item={it} index={i} priority={i < 2} />
       ))}

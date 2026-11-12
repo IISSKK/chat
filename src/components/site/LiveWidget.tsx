@@ -23,7 +23,9 @@ export function LiveWidget() {
     let alive = true;
     let timer: ReturnType<typeof setTimeout>;
     try {
-      setHidden(sessionStorage.getItem("bk-live-hidden") === "1");
+      const saved = sessionStorage.getItem("bk-live-hidden");
+      // На экранах уже 1024 px окошко по умолчанию свёрнуто в точку: иначе оно закрывает кнопки в карточках
+      setHidden(saved === null ? window.innerWidth < 1024 : saved === "1");
     } catch {}
 
     const first = async () => {

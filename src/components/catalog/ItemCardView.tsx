@@ -3,7 +3,7 @@ import type { Dictionary } from "@/i18n";
 import { localePath, type Locale } from "@/i18n/config";
 import { plural } from "@/i18n/format";
 import type { Item } from "@/lib/types";
-import { formatNumber, itemPath, itemUrl, photoUrl } from "@/lib/utils";
+import { formatNumber, itemPath, itemUrl, photoSet } from "@/lib/utils";
 import { WaButton, type WaOption } from "@/components/site/WaButton";
 import { FavoriteButton } from "./FavoriteButton";
 import { CarIcon, DocIcon, EngineIcon, EyeIcon, PlayIcon, WhatsAppIcon } from "@/components/icons";
@@ -57,7 +57,9 @@ export function ItemCardView({ item, t, price, docs, index = 0, origin, priority
       <Link href={href} className="card-press relative m-1.5 block aspect-[4/3] overflow-hidden rounded-[20px] bg-ink-600" aria-hidden tabIndex={-1}>
         {cover ? (
           <img
-            src={photoUrl(cover.filename, "sm")}
+            src={photoSet(cover.filename).sm}
+            srcSet={photoSet(cover.filename).srcSet}
+            sizes="(min-width: 1280px) 25vw, (min-width: 900px) 33vw, (min-width: 480px) 50vw, 100vw"
             alt=""
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : "auto"}

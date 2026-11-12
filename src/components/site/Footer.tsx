@@ -58,7 +58,7 @@ export async function Footer() {
       </div>
 
       <div className="border-t border-white/10 bg-[#0B1220]">
-        <div className="container flex flex-col items-center justify-between gap-3 py-6 text-xs text-white/55 sm:flex-row">
+        <div className="container flex flex-col items-center justify-between gap-3 pb-24 pt-6 text-xs lg:pb-6 text-white/55 sm:flex-row">
           <span>© {year} {siteConfig.name}. {t.footer.rights}</span>
           <div className="flex gap-x-5">
             <Link href="/terms" className="inline-flex min-h-[44px] items-center text-white/70 hover:text-white">{t.footer.terms}</Link>

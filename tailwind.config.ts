@@ -1,6 +1,8 @@
 import type { Config } from "tailwindcss";
 
 export default {
+  // hover-стили только там, где есть мышь: на сенсорных экранах после касания карточки не остаются «приподнятыми»
+  future: { hoverOnlyWhenSupported: true },
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     container: { center: true, padding: { DEFAULT: "1rem", sm: "1.5rem", lg: "2rem" }, screens: { "2xl": "1320px" } },

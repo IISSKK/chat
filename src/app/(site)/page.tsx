@@ -29,7 +29,7 @@ const QUICK = ["Sonata", "Santa Fe", "Palisade", "D4HB", "2022", "KMH"];
 /** Горизонтальная лента на телефоне, сетка на компьютере. */
 function Rail({ items }: { items: Item[] }) {
   return (
-    <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 no-scrollbar sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 no-scrollbar sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 min-[900px]:grid-cols-3 xl:grid-cols-4">
       {items.map((it, i) => (
         <div key={it.id} className="w-[80%] shrink-0 snap-start min-[480px]:w-[46%] sm:w-auto">
           <ItemCard item={it} index={i} />
@@ -111,12 +111,12 @@ export default async function HomePage() {
           </div>
 
           {/* Витрина: свежий автомобиль + плитки разделов */}
-          <div className="animate-fade-up [animation-delay:200ms]">
+          <div className="mx-auto w-full max-w-2xl animate-fade-up [animation-delay:200ms] lg:max-w-none">
             {featured && (
               <Link href={itemPath(featured)} className="card-press surface group relative block overflow-hidden rounded-[32px] p-2">
-                <div className="relative aspect-[16/11] overflow-hidden rounded-[26px] bg-ink-600">
+                <div className="relative aspect-[16/11] overflow-hidden rounded-[26px] bg-ink-600 md:aspect-[16/9] lg:aspect-[16/11]">
                   {featured.photos[0] && (
-                    <img src={photoSet(featured.photos[0].filename).sm} srcSet={photoSet(featured.photos[0].filename).srcSet} sizes="(min-width: 1024px) 520px, 92vw" alt={featured.title} fetchPriority="high" decoding="async" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+                    <img src={photoSet(featured.photos[0].filename).sm} srcSet={photoSet(featured.photos[0].filename).srcSet} sizes="(min-width: 1024px) 520px, (min-width: 768px) 672px, 92vw" alt={featured.title} fetchPriority="high" decoding="async" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
                   )}
                   <span className="absolute left-3 top-3 rounded-full bg-brand/90 px-3 py-1 text-xs font-bold text-white shadow-sm">{t.categories[featured.category]}</span>
                   <ViewsBadge views={featured.views} t={t} className="absolute right-3 top-3" />

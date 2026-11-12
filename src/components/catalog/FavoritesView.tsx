@@ -54,7 +54,7 @@ export function FavoritesView() {
   const sendOptions: WaOption[] = contacts.map((c) => ({ name: c.name, phone: c.phone, langs: c.langs, href: `https://wa.me/${c.digits}?text=${encodeURIComponent(listMessage)}` }));
 
   if (items === null) {
-    return <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{[0, 1, 2, 3].map((i) => <div key={i} className="img-skeleton h-72 rounded-[26px]" />)}</div>;
+    return <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 min-[900px]:grid-cols-3 xl:grid-cols-4">{[0, 1, 2, 3].map((i) => <div key={i} className="img-skeleton h-72 rounded-[26px]" />)}</div>;
   }
 
   if (!items.length) {
@@ -106,7 +106,7 @@ export function FavoritesView() {
       </div>
 
       {mode === "list" ? (
-        <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 sm:gap-5 min-[900px]:grid-cols-3 xl:grid-cols-4">
           {items.map((it, i) => (
             <ItemCardView key={it.id} item={it} t={t} index={i} origin={origin} price={waOpts("price", it.id)} docs={waOpts("docs", it.id)} />
           ))}

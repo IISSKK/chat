@@ -29,17 +29,18 @@ export function itemUrl(item: Pick<Item, "id" | "slug">, locale: Locale = "ru") 
 }
 
 /** URL фото. size "sm" — уменьшенная копия (~640px) для списков и карточек: быстрее грузится на телефоне. */
-/** Фото в двух размерах: «sm» (640 px) для телефонов и списков и полное (1600 px); srcSet даёт браузеру выбрать нужное */
+/** Фото в трёх размерах: «sm» (640 px) для списков на телефоне, «md» (1000 px) для планшетов и Retina, полное (1600 px). srcSet даёт браузеру выбрать нужное */
 export function photoSet(filename: string) {
   const full = photoUrl(filename);
   const sm = photoUrl(filename, "sm");
-  return { full, sm, srcSet: full !== sm ? `${sm} 640w, ${full} 1600w` : undefined };
+  const md = photoUrl(filename, "md");
+  return { full, sm, md, srcSet: full !== sm ? `${sm} 640w, ${md} 1000w, ${full} 1600w` : undefined };
 }
 
-export function photoUrl(filename: string, size: "full" | "sm" = "full") {
+export function photoUrl(filename: string, size: "full" | "sm" | "md" = "full") {
   if (/^https?:\/\//.test(filename)) return filename;
   if (filename.startsWith("demo/")) return `/${filename}`;
-  if (size === "sm") return `/media/${filename.replace(/\.(\w+)$/, "_sm.$1")}`;
+  if (size === "sm" || size === "md") return `/media/${filename.replace(/\.(\w+)$/, `_${size}.$1`)}`;
   return `/media/${filename}`;
 }
 
