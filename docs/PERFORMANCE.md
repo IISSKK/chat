@@ -24,3 +24,7 @@
 npx lighthouse https://ваш-домен --only-categories=performance,accessibility,seo --form-factor=mobile --view
 ```
 Или откройте адрес на pagespeed.web.dev. Мерять нужно на боевом домене, а не на `localhost`.
+
+## Поддерживаемые браузеры и планшеты
+
+Сайт и админка рассчитаны на планшеты 2017–2026 годов: iPad (iPadOS 15+, включая iPad 2017 и новее), Android-планшеты (Chrome/WebView 80+, Samsung Internet 13+). Список зафиксирован в `browserslist` в `package.json`. Для старых версий Safari добавлены запасные значения высоты (`vh` вместо `dvh`). Hover-эффекты включаются только на устройствах с мышью.

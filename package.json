@@ -39,5 +39,19 @@
   },
   "overrides": {
     "postcss": "^8.5.32"
+  },
+  "browserslist": {
+    "production": [
+      "chrome >= 80",
+      "edge >= 88",
+      "firefox >= 78",
+      "safari >= 15",
+      "ios_saf >= 15",
+      "samsung >= 13",
+      "not dead"
+    ],
+    "development": [
+      "last 1 chrome version"
+    ]
   }
 }

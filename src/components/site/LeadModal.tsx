@@ -81,13 +81,13 @@ export function LeadButton({ itemId, itemTitle, className = "btn-brand", childre
       </button>
       {open &&
         createPortal(
-        <div className="fixed inset-0 z-[70] grid h-dvh place-items-end bg-fg/40 sm:place-items-center sm:p-4" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 z-[70] grid h-screen [@supports(height:100dvh)]:h-dvh place-items-end bg-fg/40 sm:place-items-center sm:p-4" onClick={() => setOpen(false)}>
           <div
             role="dialog"
             aria-modal
             aria-label={t.lead.title}
             onClick={(e) => e.stopPropagation()}
-            className="glass max-h-[92dvh] w-full max-w-md animate-pop-in overflow-y-auto rounded-t-[28px] !bg-white p-5 pb-[max(20px,env(safe-area-inset-bottom))] sm:rounded-[28px] sm:p-6"
+            className="glass max-h-[92vh] [@supports(height:1dvh)]:max-h-[92dvh] w-full max-w-md animate-pop-in overflow-y-auto rounded-t-[28px] !bg-white p-5 pb-[max(20px,env(safe-area-inset-bottom))] sm:rounded-[28px] sm:p-6"
           >
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>

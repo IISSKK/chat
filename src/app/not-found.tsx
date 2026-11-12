@@ -4,7 +4,7 @@ import { getT } from "@/i18n/server";
 export default async function NotFound() {
   const t = await getT();
   return (
-    <div className="grid min-h-[100dvh] place-items-center px-4 text-center">
+    <div className="grid min-h-screen [@supports(height:1dvh)]:min-h-[100dvh] place-items-center px-4 text-center">
       <div className="page-bg" aria-hidden />
       <div>
         <div className="h-display text-8xl text-gradient">404</div>
